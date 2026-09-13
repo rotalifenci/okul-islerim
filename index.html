@@ -345,118 +345,115 @@
             <!-- ================= TAB: DERS PROGRAMI (7 DERS / GÜN) ================= -->
             <div x-show="currentTab === 'calendar-tasks'" class="space-y-6">
                 
-                <!-- Başlık ve Kontrol Paneli -->
-                <div class="bg-slate-100/95 p-5 rounded-3xl border-2 border-slate-300 shadow-md space-y-4">
-                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                        <div class="flex items-center gap-3">
-                            <div class="p-3 bg-red-600 rounded-2xl text-white shadow-lg shadow-red-600/30">
-                                <i data-lucide="calendar" class="w-6 h-6"></i>
+                <!-- Kompakt Başlık ve Kontrol Paneli (Yer Tasarruflu) -->
+                <div class="bg-slate-100/95 p-3 sm:p-3.5 rounded-2xl border-2 border-slate-300 shadow-sm space-y-2">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-2.5">
+                        <div class="flex items-center gap-2.5">
+                            <div class="p-2 bg-red-600 rounded-xl text-white shadow-md shadow-red-600/30">
+                                <i data-lucide="calendar" class="w-5 h-5"></i>
                             </div>
                             <div>
-                                <h2 class="text-xl font-black text-black brand-font flex items-center gap-2">
-                                    <span>📅 Ders Programı & Nöbet Planlaması</span>
-                                    <span class="text-xs bg-red-600 text-white font-black px-2.5 py-0.5 rounded-lg shadow-sm">Günde 7 Ders</span>
-                                </h2>
-                                <p class="text-xs text-slate-700 font-bold">Günlük 7 derslik ders akışı, MEB Türkiye Yüzyılı Maarif Modeli öğrenme çıktıları & Nöbet rotasyon takibi</p>
+                                <div class="flex items-center gap-2">
+                                    <h2 class="text-base sm:text-lg font-black text-black brand-font">
+                                        📅 Ders Programı & Nöbet
+                                    </h2>
+                                    <span class="text-[10px] bg-red-600 text-white font-black px-2 py-0.5 rounded-md shadow-xs">Günde 7 Ders</span>
+                                </div>
+                                <p class="text-[11px] text-slate-600 font-bold truncate">Haftalık ders akışı, Maarif Modeli çıktıları ve nöbet takibi</p>
                             </div>
                         </div>
 
-                        <!-- Üst Sağ Aksiyonlar & Nöbet Seçicileri -->
-                        <div class="flex flex-wrap items-center gap-2">
+                        <!-- Üst Sağ Kompakt Aksiyonlar & Nöbet Seçicileri -->
+                        <div class="flex flex-wrap items-center gap-1.5 text-xs">
                             
-                            <!-- 🛡️ Nöbet Günü & Yeri Seçimi -->
-                            <div class="flex flex-wrap items-center bg-amber-50 border-2 border-amber-500 rounded-2xl px-3 py-1.5 text-xs gap-2 shadow-sm">
-                                <div class="flex items-center gap-1.5 text-amber-950 font-black">
-                                    <span class="text-base">🛡️</span>
-                                    <span>Nöbet:</span>
-                                    <select :value="data.teacher?.dutyDay || 'Cuma'" @change="setDutyDay($event.target.value)" class="bg-white text-amber-950 font-black text-xs px-2.5 py-1 rounded-xl border-2 border-amber-300 focus:outline-none focus:border-amber-500 cursor-pointer shadow-inner">
-                                        <option value="Pazartesi">Pazartesi</option>
-                                        <option value="Salı">Salı</option>
-                                        <option value="Çarşamba">Çarşamba</option>
-                                        <option value="Perşembe">Perşembe</option>
-                                        <option value="Cuma">Cuma</option>
-                                        <option value="Belirlenmedi">Yok / Seçilmedi</option>
-                                    </select>
-                                </div>
-                                <div class="flex items-center gap-1.5 text-amber-950 font-black border-l border-amber-300 pl-2">
-                                    <span>📍 Yer:</span>
-                                    <select :value="data.teacher?.dutyArea || 'Kat-2'" @change="setDutyArea($event.target.value)" class="bg-white text-amber-950 font-black text-xs px-2.5 py-1 rounded-xl border-2 border-amber-300 focus:outline-none focus:border-amber-500 cursor-pointer shadow-inner">
-                                        <option value="Bahçe">Bahçe (1 Hafta)</option>
-                                        <option value="Zemin">Zemin (1 Hafta)</option>
-                                        <option value="Kat-1">Kat-1 (1 Hafta)</option>
-                                        <option value="Kat-2">Kat-2 (2 Hafta - İlk Nöbet)</option>
-                                        <option value="Kat-3">Kat-3 (2 Hafta)</option>
-                                    </select>
-                                </div>
+                            <!-- 🛡️ Nöbet Günü & Yeri Seçimi (Kompakt) -->
+                            <div class="flex items-center bg-amber-50 border border-amber-400 rounded-xl px-2 py-1 gap-1.5 shadow-xs text-[11px]">
+                                <span class="font-black text-amber-950">🛡️ Nöbet:</span>
+                                <select :value="data.teacher?.dutyDay || 'Cuma'" @change="setDutyDay($event.target.value)" class="bg-white text-amber-950 font-black text-[11px] px-1.5 py-0.5 rounded-lg border border-amber-300 focus:outline-none cursor-pointer">
+                                    <option value="Pazartesi">Pazartesi</option>
+                                    <option value="Salı">Salı</option>
+                                    <option value="Çarşamba">Çarşamba</option>
+                                    <option value="Perşembe">Perşembe</option>
+                                    <option value="Cuma">Cuma</option>
+                                    <option value="Belirlenmedi">Yok</option>
+                                </select>
+                                <span class="border-l border-amber-300 pl-1 font-black text-amber-950">📍</span>
+                                <select :value="data.teacher?.dutyArea || 'Kat-2'" @change="setDutyArea($event.target.value)" class="bg-white text-amber-950 font-black text-[11px] px-1.5 py-0.5 rounded-lg border border-amber-300 focus:outline-none cursor-pointer">
+                                    <option value="Bahçe">Bahçe (1 Hft)</option>
+                                    <option value="Zemin">Zemin (1 Hft)</option>
+                                    <option value="Kat-1">Kat-1 (1 Hft)</option>
+                                    <option value="Kat-2">Kat-2 (2 Hft - İlk)</option>
+                                    <option value="Kat-3">Kat-3 (2 Hft)</option>
+                                </select>
                             </div>
 
-                            <!-- Görünüm Seçici (Günlük Detay Ön Planda) -->
-                            <div class="flex bg-white p-1 rounded-xl border-2 border-slate-300 shadow-sm">
-                                <button @click="scheduleViewMode = 'daily'" :class="scheduleViewMode === 'daily' ? 'bg-red-600 text-white font-black shadow-md' : 'text-slate-700 hover:text-black font-bold'" class="px-3.5 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5">
-                                    <i data-lucide="list" class="w-3.5 h-3.5"></i>
-                                    <span>Günlük Detay</span>
+                            <!-- Görünüm Seçici -->
+                            <div class="flex bg-white p-0.5 rounded-lg border border-slate-300 shadow-xs">
+                                <button @click="scheduleViewMode = 'daily'" :class="scheduleViewMode === 'daily' ? 'bg-red-600 text-white font-black shadow-xs' : 'text-slate-700 hover:text-black font-bold'" class="px-2.5 py-1 rounded-md text-[11px] transition flex items-center gap-1">
+                                    <i data-lucide="list" class="w-3 h-3"></i>
+                                    <span>Günlük</span>
                                 </button>
-                                <button @click="scheduleViewMode = 'weekly'" :class="scheduleViewMode === 'weekly' ? 'bg-red-600 text-white font-black shadow-md' : 'text-slate-700 hover:text-black font-bold'" class="px-3.5 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5">
-                                    <i data-lucide="grid" class="w-3.5 h-3.5"></i>
-                                    <span>Haftalık Matris</span>
+                                <button @click="scheduleViewMode = 'weekly'" :class="scheduleViewMode === 'weekly' ? 'bg-red-600 text-white font-black shadow-xs' : 'text-slate-700 hover:text-black font-bold'" class="px-2.5 py-1 rounded-md text-[11px] transition flex items-center gap-1">
+                                    <i data-lucide="grid" class="w-3 h-3"></i>
+                                    <span>Matris</span>
                                 </button>
                             </div>
 
-                            <!-- 📷 Görsel Yükle Butonu -->
-                            <button @click="openScheduleImageModal()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-500 hover:to-rose-600 text-white font-black text-xs shadow-md transition flex items-center gap-1.5">
-                                <i data-lucide="camera" class="w-4 h-4"></i>
-                                <span>📷 Görselden Yükle</span>
+                            <!-- 📷 Görsel Yükle -->
+                            <button @click="openScheduleImageModal()" title="Program Fotoğrafı Yükle" class="px-2.5 py-1 rounded-lg bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-500 hover:to-rose-600 text-white font-black text-[11px] shadow-xs transition flex items-center gap-1">
+                                <i data-lucide="camera" class="w-3.5 h-3.5"></i>
+                                <span class="hidden sm:inline">Görselden</span>
                             </button>
 
-                            <!-- Sıfırla Butonu -->
-                            <button @click="resetScheduleToEmpty()" title="Tüm programı boşalt" class="px-3 py-2 rounded-xl bg-white hover:bg-rose-50 text-rose-700 font-black text-xs border border-rose-300 shadow-sm transition flex items-center gap-1">
-                                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
-                                <span class="hidden sm:inline">Temizle</span>
+                            <!-- Sıfırla -->
+                            <button @click="resetScheduleToEmpty()" title="Tüm programı boşalt" class="px-2 py-1 rounded-lg bg-white hover:bg-rose-50 text-rose-700 font-black text-[11px] border border-rose-300 shadow-xs transition flex items-center gap-1">
+                                <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                                <span>Temizle</span>
                             </button>
 
-                            <!-- Yazdır Butonu -->
-                            <button @click="printWeeklySchedule()" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-black text-white font-black text-xs shadow-md transition flex items-center gap-1.5">
-                                <i data-lucide="printer" class="w-4 h-4 text-red-400"></i>
-                                <span>🖨️ Yazdır</span>
+                            <!-- Yazdır -->
+                            <button @click="printWeeklySchedule()" title="Ders Programını Yazdır" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-black text-white font-black text-[11px] shadow-xs transition flex items-center gap-1">
+                                <i data-lucide="printer" class="w-3.5 h-3.5 text-red-400"></i>
+                                <span class="hidden sm:inline">Yazdır</span>
                             </button>
                         </div>
                     </div>
 
-                    <!-- 🔄 Kompakt Tek Sıra Nöbet Rotasyon Çubuğu -->
-                    <div class="bg-amber-50/90 px-3 py-1.5 rounded-xl border border-amber-300 shadow-xs flex items-center justify-between gap-2 text-[11px] overflow-x-auto whitespace-nowrap">
-                        <div class="flex items-center gap-1.5 font-bold text-slate-800">
-                            <span class="font-black text-amber-900 flex items-center gap-1">🔄 Nöbet:</span>
+                    <!-- 🔄 Ultra Kompakt Tek Sıra Nöbet Rotasyonu -->
+                    <div class="bg-amber-50/90 px-2.5 py-1 rounded-lg border border-amber-300 shadow-xs flex items-center justify-between gap-2 text-[10px] sm:text-[11px] overflow-x-auto whitespace-nowrap">
+                        <div class="flex items-center gap-1 font-bold text-slate-800">
+                            <span class="font-black text-amber-900">🔄 Nöbet:</span>
                             <span class="bg-white px-1.5 py-0.5 rounded border border-amber-400 text-red-700 font-black">1) Kat-2 (2 hft) ⭐ İlk</span>
                             <span>➔</span>
-                            <span class="bg-white px-1.5 py-0.5 rounded border border-slate-200 text-slate-700">2) Kat-3 (2 hft)</span>
+                            <span class="bg-white px-1 py-0.5 rounded border border-slate-200 text-slate-700">2) Kat-3 (2 hft)</span>
                             <span>➔</span>
-                            <span class="bg-white px-1.5 py-0.5 rounded border border-slate-200 text-slate-700">3) Bahçe (1 hft)</span>
+                            <span class="bg-white px-1 py-0.5 rounded border border-slate-200 text-slate-700">3) Bahçe (1 hft)</span>
                             <span>➔</span>
-                            <span class="bg-white px-1.5 py-0.5 rounded border border-slate-200 text-slate-700">4) Zemin (1 hft)</span>
+                            <span class="bg-white px-1 py-0.5 rounded border border-slate-200 text-slate-700">4) Zemin (1 hft)</span>
                             <span>➔</span>
-                            <span class="bg-white px-1.5 py-0.5 rounded border border-slate-200 text-slate-700">5) Kat-1 (1 hft)</span>
+                            <span class="bg-white px-1 py-0.5 rounded border border-slate-200 text-slate-700">5) Kat-1 (1 hft)</span>
                         </div>
                         <div class="flex items-center gap-1.5 font-black text-[10px] pl-2 border-l border-amber-300">
-                            <span class="px-2 py-0.5 rounded bg-amber-200 text-amber-950">Aktif: <strong class="text-red-700" x-text="data.teacher?.dutyArea || 'Kat-2'"></strong></span>
-                            <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-950">Gün: <strong class="text-emerald-900" x-text="data.teacher?.dutyDay || 'Cuma'"></strong></span>
+                            <span class="px-1.5 py-0.5 rounded bg-amber-200 text-amber-950">Aktif: <strong class="text-red-700" x-text="data.teacher?.dutyArea || 'Kat-2'"></strong></span>
+                            <span class="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-950">Gün: <strong class="text-emerald-900" x-text="data.teacher?.dutyDay || 'Cuma'"></strong></span>
                         </div>
                     </div>
 
-                    <!-- Gün Seçim Butonları (Günlük Detay Modunda) -->
-                    <div x-show="scheduleViewMode === 'daily'" class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-300">
-                        <div class="flex flex-wrap gap-2">
+                    <!-- Gün Seçim Butonları (Kompakt Şerit) -->
+                    <div x-show="scheduleViewMode === 'daily'" class="flex flex-wrap items-center justify-between gap-1.5 pt-1.5 border-t border-slate-200">
+                        <div class="flex flex-wrap gap-1.5">
                             <template x-for="d in ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma']" :key="d">
-                                <button @click="selectedScheduleDay = d" :class="selectedScheduleDay === d ? 'bg-red-600 text-white font-black shadow-md border-2 border-red-700 ring-2 ring-red-300 scale-105' : 'bg-white text-black font-black hover:bg-red-50 border border-slate-300 shadow-sm'" class="px-4 py-2 rounded-xl text-xs transition flex items-center gap-1.5">
+                                <button @click="selectedScheduleDay = d" :class="selectedScheduleDay === d ? 'bg-red-600 text-white font-black shadow-xs border border-red-700 ring-1 ring-red-300' : 'bg-white text-black font-black hover:bg-red-50 border border-slate-300 shadow-2xs'" class="px-3 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5 active:scale-95">
                                     <span x-text="d"></span>
                                     <span class="text-[10px] px-1.5 py-0.2 rounded-md font-bold" :class="selectedScheduleDay === d ? 'bg-red-800 text-white' : 'bg-slate-100 text-slate-700'" x-text="getDailySchedule(d).filter(l => l.classId && l.classId !== 'Boş').length + ' Ders'"></span>
-                                    <span x-show="data.teacher?.dutyDay === d" class="px-2 py-0.5 rounded-lg text-[10px] font-black bg-amber-400 text-amber-950 shadow-sm" title="Nöbet Günü" x-text="'🛡️ Nöbet: ' + (data.teacher?.dutyArea || 'Kat-2')"></span>
+                                    <span x-show="data.teacher?.dutyDay === d" class="px-1.5 py-0.2 rounded-md text-[9px] font-black bg-amber-400 text-amber-950 shadow-xs" title="Nöbet Günü" x-text="'🛡️ ' + (data.teacher?.dutyArea || 'Kat-2')"></span>
                                 </button>
                             </template>
                         </div>
 
-                        <span class="text-xs text-slate-700 font-bold bg-white px-3 py-1.5 rounded-xl border border-slate-300 shadow-sm flex items-center gap-2">
+                        <span class="text-[11px] text-slate-700 font-bold bg-white px-2.5 py-1 rounded-xl border border-slate-300 shadow-2xs flex items-center gap-1.5">
                             <span>Seçili Gün: <strong class="text-red-700" x-text="selectedScheduleDay"></strong></span>
-                            <span x-show="selectedScheduleDay === data.teacher?.dutyDay" class="px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-black" x-text="'🛡️ Nöbet: ' + (data.teacher?.dutyArea || 'Kat-2')"></span>
+                            <span x-show="selectedScheduleDay === data.teacher?.dutyDay" class="px-1.5 py-0.2 rounded bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-black" x-text="'🛡️ ' + (data.teacher?.dutyArea || 'Kat-2')"></span>
                         </span>
                     </div>
                 </div>
@@ -3009,6 +3006,209 @@
                 </button>
             </div>
 
+        </div>
+    </div>
+
+    <!-- ================= MODAL: MENÜ & BÖLÜM YÖNETİCİSİ (SIRALAMA / GİZLEME / CRUD) ================= -->
+    <div x-show="isMenuManagerModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-black/80 backdrop-blur-md overflow-hidden" @click.self="isMenuManagerModalOpen = false">
+        <div class="bg-white text-slate-900 w-full max-w-3xl max-h-[92vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden border-4 border-red-600">
+            
+            <!-- Modal Başlığı -->
+            <div class="p-4 sm:p-5 bg-gradient-to-r from-red-800 via-rose-800 to-slate-900 text-white flex items-center justify-between gap-4 border-b-2 border-red-700">
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 bg-red-600 text-white rounded-2xl shadow-lg shadow-red-900/40">
+                        <i data-lucide="settings" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-base sm:text-lg font-black tracking-tight brand-font">
+                            ⚙️ Menüyü & Bölümleri Düzenle
+                        </h2>
+                        <p class="text-xs text-red-100/90 font-bold">Sol menü ve alt sekme butonlarının sırasını değiştirin, gizleyin, yeni bölüm ekleyin veya silin</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button @click="openAddSection()" class="px-3.5 py-1.5 rounded-xl bg-white hover:bg-red-50 text-red-700 font-black text-xs shadow-md transition flex items-center gap-1.5 active:scale-95">
+                        <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                        <span>+ Yeni Bölüm Ekle</span>
+                    </button>
+                    <button @click="isMenuManagerModalOpen = false" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-black transition">
+                        ✕
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bölüm Listesi -->
+            <div class="p-4 sm:p-6 overflow-y-auto space-y-2.5 flex-1 custom-scrollbar bg-slate-50">
+                <template x-for="(sec, idx) in navSectionsList" :key="sec.id">
+                    <div class="p-3 bg-white rounded-2xl border-2 border-slate-200 shadow-sm flex items-center justify-between gap-3 hover:border-slate-300 transition">
+                        
+                        <!-- Sol: Sıralama Butonları ve İsim -->
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <div class="flex flex-col gap-0.5">
+                                <button @click="moveSection(idx, -1)" :disabled="idx === 0" title="Yukarı Taşı" class="p-1 rounded bg-slate-100 hover:bg-slate-200 disabled:opacity-20 text-slate-700 transition">
+                                    <i data-lucide="chevron-up" class="w-3.5 h-3.5"></i>
+                                </button>
+                                <button @click="moveSection(idx, 1)" :disabled="idx === navSectionsList.length - 1" title="Aşağı Taşı" class="p-1 rounded bg-slate-100 hover:bg-slate-200 disabled:opacity-20 text-slate-700 transition">
+                                    <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </div>
+
+                            <div class="w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm" :class="sec.visible !== false ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-slate-100 text-slate-400 border border-slate-200'">
+                                <i :data-lucide="sec.icon || 'folder'" class="w-4 h-4"></i>
+                            </div>
+
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs sm:text-sm font-black text-slate-900 truncate" :class="sec.visible === false ? 'line-through text-slate-400' : ''" x-text="sec.title"></span>
+                                    <span x-show="sec.badge" class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200" x-text="sec.badge"></span>
+                                    <span x-show="sec.isSystem" class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-blue-50 text-blue-700 border border-blue-200">Sistem</span>
+                                </div>
+                                <p class="text-[11px] text-slate-500 font-medium truncate" x-text="sec.description || (sec.isSystem ? 'Varsayılan Temel Modül' : 'Kullanıcı Özel Bölümü')"></p>
+                            </div>
+                        </div>
+
+                        <!-- Sağ: Gizle/Göster, Düzenle, Sil Butonları -->
+                        <div class="flex items-center gap-1.5 flex-shrink-0">
+                            <!-- Görünürlük Aç/Kapa -->
+                            <button @click="toggleSectionVisibility(sec)" :title="sec.visible !== false ? 'Menüden Gizle' : 'Menüde Göster'" class="p-2 rounded-xl transition font-black text-xs flex items-center gap-1" :class="sec.visible !== false ? 'bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100' : 'bg-slate-100 text-slate-500 border border-slate-300 hover:bg-slate-200'">
+                                <i :data-lucide="sec.visible !== false ? 'eye' : 'eye-off'" class="w-4 h-4"></i>
+                                <span class="hidden sm:inline" x-text="sec.visible !== false ? 'Görünür' : 'Gizli'"></span>
+                            </button>
+
+                            <!-- Düzenle -->
+                            <button @click="openEditSection(sec)" title="Bölüm Bilgilerini Düzenle" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 transition">
+                                <i data-lucide="edit-3" class="w-4 h-4"></i>
+                            </button>
+
+                            <!-- Sil (Sistem olmayanlar için) -->
+                            <button x-show="!sec.isSystem" @click="deleteSection(sec)" title="Bölümü Sil" class="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 transition">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Modal Altı -->
+            <div class="p-4 bg-slate-100 border-t-2 border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <button @click="resetNavSections()" class="px-3.5 py-2 rounded-xl bg-white hover:bg-rose-50 text-rose-700 border border-rose-300 font-black text-xs transition flex items-center gap-1.5 active:scale-95">
+                    <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                    <span>Varsayılan Menü Düzenine Sıfırla</span>
+                </button>
+
+                <button @click="isMenuManagerModalOpen = false" class="px-6 py-2 rounded-xl bg-slate-900 hover:bg-black text-white font-black text-xs shadow-md transition">
+                    Tamamlandı
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: YENİ BÖLÜM / SAYFA EKLE ================= -->
+    <div x-show="isAddSectionModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md" @click.self="isAddSectionModalOpen = false">
+        <div class="bg-white text-slate-900 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden border-4 border-red-600 space-y-4">
+            <div class="p-4 bg-gradient-to-r from-red-800 to-slate-900 text-white flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="plus-circle" class="w-5 h-5 text-red-400"></i>
+                    <h3 class="font-black text-base brand-font">Yeni Bölüm / Sayfa Ekle</h3>
+                </div>
+                <button @click="isAddSectionModalOpen = false" class="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-black">✕</button>
+            </div>
+
+            <div class="p-5 space-y-3.5 text-xs">
+                <div>
+                    <label class="block font-black text-slate-800 mb-1">Bölüm / Sekme Başlığı *</label>
+                    <input type="text" x-model="newSectionForm.title" placeholder="Örn: Kulüp Çalışmaları, Zümre Kararları..." class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-black text-slate-900 focus:border-red-600 focus:outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-black text-slate-800 mb-1">İkon (Lucide)</label>
+                        <select x-model="newSectionForm.icon" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:outline-none">
+                            <option value="folder">📁 Klasör</option>
+                            <option value="book-open">📖 Kitap</option>
+                            <option value="calendar">📅 Takvim</option>
+                            <option value="file-text">📄 Belge</option>
+                            <option value="award">🏆 Ödül / Yarışma</option>
+                            <option value="users">👥 Kulüp / Ekip</option>
+                            <option value="star">⭐ Yıldız</option>
+                            <option value="check-square">✅ Görevler</option>
+                            <option value="flask-conical">🔬 Deney / STEM</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-black text-slate-800 mb-1">Rozet / Etiket (Opsiyonel)</label>
+                        <input type="text" x-model="newSectionForm.badge" placeholder="Örn: Yeni, Aktif, 2026" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-black text-slate-800 mb-1">Açıklama</label>
+                    <textarea x-model="newSectionForm.description" rows="2" placeholder="Bölümün kullanım amacı hakkında kısa bilgi..." class="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none"></textarea>
+                </div>
+            </div>
+
+            <div class="p-4 bg-slate-100 border-t border-slate-200 flex items-center justify-end gap-2">
+                <button @click="isAddSectionModalOpen = false" class="px-4 py-2 rounded-xl bg-slate-200 text-slate-800 font-black text-xs">Vazgeç</button>
+                <button @click="saveNewSection()" class="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-xs shadow-md transition flex items-center gap-1.5">
+                    <i data-lucide="check" class="w-4 h-4"></i>
+                    <span>Bölümü Kaydet & Aç</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: BÖLÜMÜ DÜZENLE ================= -->
+    <div x-show="isEditSectionModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md" @click.self="isEditSectionModalOpen = false">
+        <div class="bg-white text-slate-900 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden border-4 border-slate-700 space-y-4">
+            <div class="p-4 bg-slate-900 text-white flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="edit-3" class="w-5 h-5 text-red-400"></i>
+                    <h3 class="font-black text-base brand-font">Bölümü Düzenle</h3>
+                </div>
+                <button @click="isEditSectionModalOpen = false" class="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-black">✕</button>
+            </div>
+
+            <div class="p-5 space-y-3.5 text-xs">
+                <div>
+                    <label class="block font-black text-slate-800 mb-1">Bölüm Başlığı *</label>
+                    <input type="text" x-model="editingSection.title" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-black text-slate-900 focus:border-red-600 focus:outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-black text-slate-800 mb-1">İkon (Lucide)</label>
+                        <select x-model="editingSection.icon" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:outline-none">
+                            <option value="folder">📁 Klasör</option>
+                            <option value="book-open">📖 Kitap</option>
+                            <option value="calendar">📅 Takvim</option>
+                            <option value="file-text">📄 Belge</option>
+                            <option value="award">🏆 Ödül / Yarışma</option>
+                            <option value="users">👥 Kulüp / Ekip</option>
+                            <option value="star">⭐ Yıldız</option>
+                            <option value="check-square">✅ Görevler</option>
+                            <option value="flask-conical">🔬 Deney / STEM</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-black text-slate-800 mb-1">Rozet / Etiket</label>
+                        <input type="text" x-model="editingSection.badge" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-black text-slate-800 mb-1">Açıklama</label>
+                    <textarea x-model="editingSection.description" rows="2" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none"></textarea>
+                </div>
+            </div>
+
+            <div class="p-4 bg-slate-100 border-t border-slate-200 flex items-center justify-end gap-2">
+                <button @click="isEditSectionModalOpen = false" class="px-4 py-2 rounded-xl bg-slate-200 text-slate-800 font-black text-xs">Vazgeç</button>
+                <button @click="saveEditSection()" class="px-5 py-2 rounded-xl bg-slate-900 hover:bg-black text-white font-black text-xs shadow-md transition flex items-center gap-1.5">
+                    <i data-lucide="check" class="w-4 h-4"></i>
+                    <span>Değişiklikleri Kaydet</span>
+                </button>
+            </div>
         </div>
     </div>
 
