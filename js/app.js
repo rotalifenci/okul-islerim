@@ -195,7 +195,7 @@ document.addEventListener('alpine:init', () => {
         // Güvenlik & 5 Kullanıcılı Giriş Sistemi (1 Yönetici + 4 Öğretmen)
         users: window.AuthUsers || [],
         currentUser: null,
-        isAuthenticated: localStorage.getItem('rotali_auth_state') === 'authenticated',
+        isAuthenticated: false,
         loginSelectedUser: localStorage.getItem('rotali_active_user_id') || 'admin',
         loginUsername: localStorage.getItem('rotali_last_username') || 'admin',
         loginPassword: '',
@@ -310,6 +310,7 @@ document.addEventListener('alpine:init', () => {
                 this.currentUser.name = this.data.teacher.name;
             }
             this.loadAccountForm();
+            this.isAuthenticated = false;
 
             // Menü başlıklarını garantiye al
             if (this.data && this.data.navSections && Array.isArray(this.data.navSections)) {
@@ -463,7 +464,7 @@ document.addEventListener('alpine:init', () => {
                 this.loginPassword = '';
                 localStorage.setItem('rotali_active_user_id', user.id);
                 localStorage.setItem('rotali_last_username', user.username);
-                localStorage.setItem('rotali_auth_state', 'authenticated');
+                // localStorage.setItem('rotali_auth_state', 'authenticated'); // Her ziyarette şifre sorulması için kalıcı oturum tutulmuyor
 
                 // İlgili kullanıcının bağımsız izole verilerini yükle
                 this.data = window.StorageManager.loadData(user.id);
