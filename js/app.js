@@ -3427,15 +3427,21 @@ else {
 </body>
 </html>`;
 
-            const win = window.open('', '_blank', 'width=960,height=760');
+            // Telefondaki "boş sayfa/siyah ekran" hatasını aşmak için Blob URL kullanıyoruz
+            const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            
+            const win = window.open(url, '_blank');
             if (!win) {
                 alert('Popup engelleyiciniz aktif. Lütfen tarayıcınızın adres çubuğunda popup iznini açın ve tekrar deneyin.');
                 return;
             }
-            win.document.write(html);
-            win.document.close();
+            
             this.showToast(`🖨️ ${totalPhotos} fotoğraflı PDF raporu hazırlanıyor...`);
-
+            
+            // Kullanılmayan Blob URL'i temizle
+            setTimeout(() => URL.revokeObjectURL(url), 10000);
+        },
         exportScheduleToExcel() {
             const title = `${this.data.teacher?.name || 'Murat Kundakcı'} - Haftalık Ders Programı (2026-2027)`;
             const headers = ['Ders Saati', 'Zaman', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma'];
