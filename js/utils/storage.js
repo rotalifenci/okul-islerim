@@ -82,10 +82,23 @@ window.StorageManager = {
                         }
                         if (!parsed.lessonPeriods) parsed.lessonPeriods = JSON.parse(JSON.stringify(window.InitialData.lessonPeriods || []));
 
+                        if (parsed.weeklySchedule) {
+                            Object.keys(parsed.weeklySchedule).forEach(day => {
+                                if (Array.isArray(parsed.weeklySchedule[day])) {
+                                    parsed.weeklySchedule[day].forEach(lesson => {
+                                        if (lesson.room && lesson.room.includes('Kendi Sınıfı') && lesson.classId && lesson.classId !== 'Boş') {
+                                            lesson.room = lesson.classId + ' Sınıfı';
+                                        }
+                                    });
+                                }
+                            });
+                        }
+
+
                         if (parsed.navSections && Array.isArray(parsed.navSections)) {
                             const hasAccount = parsed.navSections.some(s => s.id === 'account');
                             if (!hasAccount) {
-                                const accSec = { id: 'account', title: '👤 Hesap & Profil Bilgilerim', icon: 'user-check', color: 'red', visible: true, isSystem: true, badge: 'Kişisel' };
+                                const accSec = { id: 'account', title: '👤 Hesap Bilgilerim', icon: 'user-check', color: 'red', visible: true, isSystem: true, badge: 'Kişisel' };
                                 const setIdx = parsed.navSections.findIndex(s => s.id === 'settings');
                                 if (setIdx !== -1) {
                                     parsed.navSections.splice(setIdx, 0, accSec);
@@ -109,10 +122,23 @@ window.StorageManager = {
                     if (!parsed.navSections) parsed.navSections = JSON.parse(JSON.stringify(window.InitialData.navSections || []));
                     if (!parsed.lessonPeriods) parsed.lessonPeriods = JSON.parse(JSON.stringify(window.InitialData.lessonPeriods || []));
 
+                        if (parsed.weeklySchedule) {
+                            Object.keys(parsed.weeklySchedule).forEach(day => {
+                                if (Array.isArray(parsed.weeklySchedule[day])) {
+                                    parsed.weeklySchedule[day].forEach(lesson => {
+                                        if (lesson.room && lesson.room.includes('Kendi Sınıfı') && lesson.classId && lesson.classId !== 'Boş') {
+                                            lesson.room = lesson.classId + ' Sınıfı';
+                                        }
+                                    });
+                                }
+                            });
+                        }
+
+
                         if (parsed.navSections && Array.isArray(parsed.navSections)) {
                             const hasAccount = parsed.navSections.some(s => s.id === 'account');
                             if (!hasAccount) {
-                                const accSec = { id: 'account', title: '👤 Hesap & Profil Bilgilerim', icon: 'user-check', color: 'red', visible: true, isSystem: true, badge: 'Kişisel' };
+                                const accSec = { id: 'account', title: '👤 Hesap Bilgilerim', icon: 'user-check', color: 'red', visible: true, isSystem: true, badge: 'Kişisel' };
                                 const setIdx = parsed.navSections.findIndex(s => s.id === 'settings');
                                 if (setIdx !== -1) {
                                     parsed.navSections.splice(setIdx, 0, accSec);

@@ -165,7 +165,7 @@ document.addEventListener('alpine:init', () => {
             topic: '',
             outcomeCode: '',
             outcomeDesc: '',
-            room: 'Kendi Sınıfı'
+            room: '5/A Sınıfı'
         },
 
         // Güvenlik & 5 Kullanıcılı Giriş Sistemi (1 Yönetici + 4 Öğretmen)
@@ -1246,7 +1246,7 @@ document.addEventListener('alpine:init', () => {
                 topic: existing?.topic || '',
                 outcomeCode: existing?.outcomeCode || '',
                 outcomeDesc: existing?.outcomeDesc || '',
-                room: existing?.room || (existing?.classId ? existing.classId + ' Sınıfı' : 'Kendi Sınıfı')
+                room: existing?.room || (existing?.classId ? existing.classId + ' Sınıfı' : 'Sınıf')
             };
             this.isEditLessonModalOpen = true;
         },
@@ -1337,8 +1337,8 @@ document.addEventListener('alpine:init', () => {
                 '5/A': { subject: 'Fen Bilimleri', topic: 'Güneş, Dünya ve Ay / Güneşin Yapısı', code: 'FB.5.1.1.1', desc: 'Güneş\'in yapısı, katmanları ve kendi ekseni etrafındaki dönme hareketini gözlem verileriyle modeller ve açıklar.', room: '5/A Sınıfı' },
                 '5/D': { subject: 'Fen Bilimleri', topic: 'Güneş, Dünya ve Ay / Ay\'ın Evreleri', code: 'FB.5.1.1.1', desc: 'Güneş\'in yapısı ve Ay\'ın evrelerinin oluşum sırasını Dünya etrafındaki dolanma hareketiyle modeller.', room: '5/D Sınıfı' },
                 '6/G': { subject: 'Fen Bilimleri', topic: 'Güneş Sistemi, Tutulmalar ve Denetleyici Sistemler', code: 'FB.6.1.1.1', desc: 'Güneş sistemi gezegenlerini, Güneş ve Ay tutulmalarını modeller; denetleyici ve düzenleyici sistemleri açıklar.', room: '6/G Sınıfı' },
-                '7/A': { subject: 'Fen Bilimleri', topic: 'Hücre, Organeller ve Mitoz Bölünme', code: 'FB.7.2.1.1', desc: 'Bitki ve hayvan hücrelerini organelleri bakımından karşılaştırır; hücre-doku-organ-sistem ilişkisini modeller.', room: 'Kendi Sınıfı' },
-                '7/B': { subject: 'Fen Bilimleri', topic: 'Hücre, Organeller ve Mayoz Bölünme', code: 'FB.7.2.1.1', desc: 'Bitki ve hayvan hücrelerini karşılaştırır; mitoz ve mayoz bölünmenin canlılar için önemini açıklar.', room: 'Kendi Sınıfı' },
+                '7/A': { subject: 'Fen Bilimleri', topic: 'Hücre, Organeller ve Mitoz Bölünme', code: 'FB.7.2.1.1', desc: 'Bitki ve hayvan hücrelerini organelleri bakımından karşılaştırır; hücre-doku-organ-sistem ilişkisini modeller.', room: '5/A Sınıfı' },
+                '7/B': { subject: 'Fen Bilimleri', topic: 'Hücre, Organeller ve Mayoz Bölünme', code: 'FB.7.2.1.1', desc: 'Bitki ve hayvan hücrelerini karşılaştırır; mitoz ve mayoz bölünmenin canlılar için önemini açıklar.', room: '5/A Sınıfı' },
                 '5/D Rehberlik': { subject: 'Rehberlik ve Yönlendirme', topic: 'Sınıf Rehberliği ve Uyum', code: 'REHB.5.1', desc: '5/D Şube Rehberliği: Okula uyum, akran iletişimi, zaman yönetimi ve verimli çalışma oturumu.', room: '5/D Sınıfı' },
                 '8/A': { subject: 'Fen Bilimleri (LGS)', topic: 'Mevsimlerin Oluşumu ve DNA/Genetik Kod', code: 'F.8.1.1.1', desc: 'Mevsimlerin oluşumuna yönelik dönme ekseni eğikliği ve Güneş etrafında dolanma hareketinin etkilerini modeller üzerinden tahmin eder ve açıklar.', room: '8/A Sınıfı' },
                 '8/B': { subject: 'Fen Bilimleri (LGS)', topic: 'İklim, Hava Hareketleri ve DNA Eşlenmesi', code: 'F.8.1.2.1', desc: 'İklim ve hava olayları arasındaki temel farkları, klimatoloji ve meteoroloji bilim dallarının çalışma yöntemlerini grafik ve harita verileriyle analiz eder.', room: '8/B Sınıfı' },
@@ -1411,8 +1411,8 @@ document.addEventListener('alpine:init', () => {
                 '5/A': { subject: 'Fen Bilimleri', topic: 'Gökyüzündeki Komşumuz: Güneş', code: 'FB.5.1.1', desc: 'Güneş’in yapısı ve dönme hareketi ile ilgili bilgi toplayabilme', room: '5/A Sınıfı' },
                 '5/D': { subject: 'Fen Bilimleri', topic: 'Gökyüzündeki Komşumuz: Güneş & Ay', code: 'FB.5.1.1', desc: 'Güneş’in yapısı ve dönme hareketi ile ilgili bilgi toplayabilme; Ay’ın evrelerini modelleme', room: '5/D Sınıfı' },
                 '6/G': { subject: 'Fen Bilimleri', topic: 'Güneş Sistemi ve Gezegenler', code: 'FB.6.1.1', desc: 'Güneş sistemindeki gezegenleri niteliklerine göre sınıflandırabilme', room: '6/G Sınıfı' },
-                '7/A': { subject: 'Fen Bilimleri', topic: 'Uzay Çağı & Uzay Araştırmaları', code: 'FB.7.1.1', desc: 'Uzay araştırmaları için geliştirilen teknolojileri karşılaştırabilme', room: 'Kendi Sınıfı' },
-                '7/B': { subject: 'Fen Bilimleri', topic: 'Uzay Çağı & Gözlem Araçları', code: 'FB.7.1.1', desc: 'Uzay araştırmaları için geliştirilen teknolojileri karşılaştırabilme; gözlem araçlarını modelleme', room: 'Kendi Sınıfı' },
+                '7/A': { subject: 'Fen Bilimleri', topic: 'Uzay Çağı & Uzay Araştırmaları', code: 'FB.7.1.1', desc: 'Uzay araştırmaları için geliştirilen teknolojileri karşılaştırabilme', room: '5/A Sınıfı' },
+                '7/B': { subject: 'Fen Bilimleri', topic: 'Uzay Çağı & Gözlem Araçları', code: 'FB.7.1.1', desc: 'Uzay araştırmaları için geliştirilen teknolojileri karşılaştırabilme; gözlem araçlarını modelleme', room: '5/A Sınıfı' },
                 '5/D Rehberlik': { subject: 'Rehberlik ve Yönlendirme', topic: 'Sınıf Rehberliği ve Uyum', code: 'REHB.5.1', desc: '5/D Şube Rehberliği: Okula uyum, akran iletişimi, zaman yönetimi ve verimli çalışma oturumu.', room: '5/D Sınıfı' },
                 '8/A': { subject: 'Fen Bilimleri (LGS)', topic: 'Mevsimlerin Oluşumu', code: 'F.8.1.1.1', desc: 'Mevsimlerin oluşumuna yönelik tahminlerde bulunur.', room: '8/A Sınıfı' },
                 '8/B': { subject: 'Fen Bilimleri (LGS)', topic: 'İklim ve Hava Hareketleri', code: 'F.8.1.2.1', desc: 'İklim ve hava olayları arasındaki farkı açıklar.', room: '8/B Sınıfı' },
@@ -1507,8 +1507,8 @@ document.addEventListener('alpine:init', () => {
                 '5/A': { subject: 'Fen Bilimleri', topic: 'Gökyüzündeki Komşumuz: Güneş', code: 'FB.5.1.1', desc: 'Güneş’in yapısı ve dönme hareketi ile ilgili bilgi toplayabilme', room: '5/A Sınıfı' },
                 '5/D': { subject: 'Fen Bilimleri', topic: 'Gökyüzündeki Komşumuz: Güneş & Ay', code: 'FB.5.1.1', desc: 'Güneş’in yapısı ve dönme hareketi ile ilgili bilgi toplayabilme; Ay’ın evrelerini modelleme', room: '5/D Sınıfı' },
                 '6/G': { subject: 'Fen Bilimleri', topic: 'Güneş Sistemi ve Gezegenler', code: 'FB.6.1.1', desc: 'Güneş sistemindeki gezegenleri niteliklerine göre sınıflandırabilme', room: '6/G Sınıfı' },
-                '7/A': { subject: 'Fen Bilimleri', topic: 'Uzay Çağı & Uzay Araştırmaları', code: 'FB.7.1.1', desc: 'Uzay araştırmaları için geliştirilen teknolojileri karşılaştırabilme', room: 'Kendi Sınıfı' },
-                '7/B': { subject: 'Fen Bilimleri', topic: 'Uzay Çağı & Gözlem Araçları', code: 'FB.7.1.1', desc: 'Uzay araştırmaları için geliştirilen teknolojileri karşılaştırabilme; gözlem araçlarını modelleme', room: 'Kendi Sınıfı' },
+                '7/A': { subject: 'Fen Bilimleri', topic: 'Uzay Çağı & Uzay Araştırmaları', code: 'FB.7.1.1', desc: 'Uzay araştırmaları için geliştirilen teknolojileri karşılaştırabilme', room: '5/A Sınıfı' },
+                '7/B': { subject: 'Fen Bilimleri', topic: 'Uzay Çağı & Gözlem Araçları', code: 'FB.7.1.1', desc: 'Uzay araştırmaları için geliştirilen teknolojileri karşılaştırabilme; gözlem araçlarını modelleme', room: '5/A Sınıfı' },
                 '5/D Rehberlik': { subject: 'Rehberlik ve Yönlendirme', topic: 'Sınıf Rehberliği ve Uyum', code: 'REHB.5.1', desc: '5/D Şube Rehberliği: Okula uyum, akran iletişimi, zaman yönetimi ve verimli çalışma oturumu.', room: '5/D Sınıfı' },
                 '8/A': { subject: 'Fen Bilimleri (LGS)', topic: 'Mevsimlerin Oluşumu', code: 'F.8.1.1.1', desc: 'Mevsimlerin oluşumuna yönelik tahminlerde bulunur.', room: '8/A Sınıfı' },
                 '8/B': { subject: 'Fen Bilimleri (LGS)', topic: 'İklim ve Hava Hareketleri', code: 'F.8.1.2.1', desc: 'İklim ve hava olayları arasındaki farkı açıklar.', room: '8/B Sınıfı' },
@@ -1524,7 +1524,7 @@ document.addEventListener('alpine:init', () => {
                 topic: '',
                 code: '',
                 desc: '',
-                room: 'Kendi Sınıfı'
+                room: '5/A Sınıfı'
             };
 
             if (!this.data.weeklySchedule) this.data.weeklySchedule = {};

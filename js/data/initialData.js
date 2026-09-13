@@ -113,7 +113,7 @@ window.InitialData = {
         { id: 'school-tasks', title: '📌 Okul Görevlerim', icon: 'check-square', color: 'red', visible: true, isSystem: true, badge: '' },
         { id: 'annual-plan', title: '📋 Maarif Yıllık Planı', icon: 'book-open', color: 'emerald', visible: true, isSystem: true, badge: '5, 6, 7, 8' },
         { id: 'daily-plan', title: '📑 Günlük Plan', icon: 'file-text', color: 'teal', visible: true, isSystem: true, badge: 'Maarif Modeli' },
-        { id: 'account', title: '👤 Hesap & Profil Bilgilerim', icon: 'user-check', color: 'red', visible: true, isSystem: true, badge: 'Kişisel' },
+        { id: 'account', title: '👤 Hesap Bilgilerim', icon: 'user-check', color: 'red', visible: true, isSystem: true, badge: 'Kişisel' },
         { id: 'project-calendar', title: 'Proje Takvimi', icon: 'calendar-range', color: 'emerald', visible: true, isSystem: true, badge: '' },
         { id: 'certificates', title: 'Sertifika / Belge Üretici', icon: 'award', color: 'yellow', visible: true, isSystem: true, badge: '' },
         { id: 'social', title: 'Sosyal Medya & Bülten', icon: 'share-2', color: 'pink', visible: true, isSystem: true, badge: '' },
@@ -516,11 +516,11 @@ window.InitialData = {
     ],
     weeklySchedule: {
         "Pazartesi": [
-            { periodNo: 1, classId: "7/B", subject: "Fen Bilimleri", topic: "Uzay Araştırmaları ve Uzay Teknolojileri", outcomeCode: "FB.7.1.1", outcomeDesc: "Uzay araştırmaları için geliştirilen teknolojileri karşılaştırabilme", room: "Kendi Sınıfı" },
-            { periodNo: 2, classId: "7/B", subject: "Fen Bilimleri", topic: "Uzay Gözlem Araçları ve Teleskop Modeli", outcomeCode: "FB.7.1.2", outcomeDesc: "Uzay gözlem araçları ile ilgili bilimsel model oluşturabilme", room: "Kendi Sınıfı" },
+            { periodNo: 1, classId: "7/B", subject: "Fen Bilimleri", topic: "Uzay Araştırmaları ve Uzay Teknolojileri", outcomeCode: "FB.7.1.1", outcomeDesc: "Uzay araştırmaları için geliştirilen teknolojileri karşılaştırabilme", room: "7/B Sınıfı" },
+            { periodNo: 2, classId: "7/B", subject: "Fen Bilimleri", topic: "Uzay Gözlem Araçları ve Teleskop Modeli", outcomeCode: "FB.7.1.2", outcomeDesc: "Uzay gözlem araçları ile ilgili bilimsel model oluşturabilme", room: "7/B Sınıfı" },
             { periodNo: 3, classId: "Boş", subject: "Ders Yok", topic: "", outcomeCode: "-", outcomeDesc: "Bu saatte planlanmış dersiniz bulunmamaktadır (Boş Saat / Hazırlık).", room: "Öğretmenler Odası" },
-            { periodNo: 4, classId: "7/A", subject: "Fen Bilimleri", topic: "Uzay Araştırmaları ve Uzay Teknolojileri", outcomeCode: "FB.7.1.1", outcomeDesc: "Uzay araştırmaları için geliştirilen teknolojileri karşılaştırabilme", room: "Kendi Sınıfı" },
-            { periodNo: 5, classId: "7/A", subject: "Fen Bilimleri", topic: "Uzay Gözlem Araçları ve Teleskop Modeli", outcomeCode: "FB.7.1.2", outcomeDesc: "Uzay gözlem araçları ile ilgili bilimsel model oluşturabilme", room: "Kendi Sınıfı" },
+            { periodNo: 4, classId: "7/A", subject: "Fen Bilimleri", topic: "Uzay Araştırmaları ve Uzay Teknolojileri", outcomeCode: "FB.7.1.1", outcomeDesc: "Uzay araştırmaları için geliştirilen teknolojileri karşılaştırabilme", room: "7/A Sınıfı" },
+            { periodNo: 5, classId: "7/A", subject: "Fen Bilimleri", topic: "Uzay Gözlem Araçları ve Teleskop Modeli", outcomeCode: "FB.7.1.2", outcomeDesc: "Uzay gözlem araçları ile ilgili bilimsel model oluşturabilme", room: "7/A Sınıfı" },
             { periodNo: 6, classId: "6/G", subject: "Fen Bilimleri", topic: "Güneş Sistemi ve Gezegenlerin Nitelikleri", outcomeCode: "FB.6.1.1", outcomeDesc: "Güneş sistemindeki gezegenleri niteliklerine göre sınıflandırabilme", room: "6/G Sınıfı" },
             { periodNo: 7, classId: "6/G", subject: "Fen Bilimleri", topic: "Güneş Sistemi Boyut ve Uzaklık Modeli", outcomeCode: "FB.6.1.2", outcomeDesc: "Güneş sistemi ile ilgili bilimsel model oluşturabilme", room: "6/G Sınıfı" }
         ],
