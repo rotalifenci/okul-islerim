@@ -1596,6 +1596,10 @@ document.addEventListener('alpine:init', () => {
         // ==========================================
         // 📑 GÜNLÜK PLAN YÖNETİCİSİ (5, 6, 7, 8 & 37 HAFTA)
         // ==========================================
+        getGradeCurriculum(grade = null) {
+            const g = String(grade || this.selectedDailyPlanGrade || 5);
+            return (window.AnnualPlanData && window.AnnualPlanData[g]) || (this.annualPlanData && this.annualPlanData[g]) || [];
+        },
         getDailyPlanCurrentWeek(grade = null) {
             const g = grade || this.selectedDailyPlanGrade || 5;
             const weeks = this.getGradeCurriculum(g);
@@ -1621,12 +1625,12 @@ document.addEventListener('alpine:init', () => {
             this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
         },
         getDailyLessonsForWeek(grade, weekIdx) {
-            const w = this.getDailyPlanCurrentWeek(grade);
+            const g = grade || this.selectedDailyPlanGrade || 5;
+            const w = this.getDailyPlanCurrentWeek(g);
             if (!w) return [];
             
-            const g = grade || this.selectedDailyPlanGrade || 5;
-            const key = `dp_${g}_${w.weekNo || (weekIdx + 1)}`;
-            const custom = this.customDailyPlans[key];
+            const key = this.getWeekKey(g, weekIdx);
+            const custom = this.customDailyPlans[key] || {};
 
             const outc = (w.outcomesList && w.outcomesList[0]) || { code: w.outcomeCode || `FB.${g}.`, desc: w.outcome || w.outcomeDesc || '' };
             const proc = (w.processList && w.processList.length) ? w.processList.join(' ') : (w.process || '');
@@ -1636,45 +1640,48 @@ document.addEventListener('alpine:init', () => {
                     lessonNo: 1,
                     title: "1. Ders: Giriş & Merak Uyandırma (Ön Bilgi & Problem Durumu)",
                     focus: "Ön Bilgileri Harekete Geçirme & Günlük Yaşam Bağlantısı",
-                    intro: custom?.l1_intro || `Derse ${w.topic} ile ilgili günlük yaşamdan merak uyandırıcı soru, görsel veya kısa video ile başlanır. Öğrencilerin ön bilgileri yoklanır.`,
-                    activity: custom?.l1_act || `Öğrencilere problem durumu sunulur. ${outc.code} kapsamında dikkat çekici bir örnek tartışmaya açılır.`,
-                    materials: "Akıllı Tahta, EBA Görselleri, Ders Kitabı",
+                    intro: custom.l1_intro || `Derse ${w.topic} ile ilgili günlük yaşamdan merak uyandırıcı soru, görsel veya kısa video ile başlanır. Öğrencilerin ön bilgileri yoklanır.`,
+                    activity: custom.l1_act || `Öğrencilere problem durumu sunulur. ${outc.code} kapsamında dikkat çekici bir örnek tartışmaya açılır.`,
+                    materials: custom.materials || "Akıllı Tahta, EBA Görselleri, Ders Kitabı",
                     evaluation: "Ön değerlendirme soru-cevap oturumu."
                 },
                 {
                     lessonNo: 2,
                     title: "2. Ders: Keşfetme & Deney / Model Uygulaması",
                     focus: "Uygulamalı Grup Çalışması & Deney / Simülasyon Süreci",
-                    intro: custom?.l2_intro || "Deney ve model etkinliği için laboratuvar/sınıf kuralları hatırlatılır, malzeme setleri dağıtılır.",
-                    activity: custom?.l2_act || (proc ? `Etkinlik Süreci: ${proc.substring(0, 180)}... Öğrenciler gruplar halinde modeli kurar ve gözlem verilerini kaydeder.` : "Öğrenciler 4'erli gruplar halinde deney ve modelleme çalışmasını yürütür."),
-                    materials: "Etkinlik Defteri, Deney Malzemeleri, Model Hamuru / Küreler",
+                    intro: custom.l2_intro || "Deney ve model etkinliği için laboratuvar/sınıf kuralları hatırlatılır, malzeme setleri dağıtılır.",
+                    activity: custom.l2_act || (proc ? `Etkinlik Süreci: ${proc.substring(0, 180)}... Öğrenciler gruplar halinde modeli kurar ve gözlem verilerini kaydeder.` : "Öğrenciler 4'erli gruplar halinde deney ve modelleme çalışmasını yürütür."),
+                    materials: custom.materials || "Etkinlik Defteri, Deney Malzemeleri, Model Hamuru / Küreler",
                     evaluation: "Grup çalışma formu ve deney gözlem çizelgesi kontrolü."
                 },
                 {
                     lessonNo: 3,
                     title: "3. Ders: Açıklama & Bilimsel Kavram İnşası",
                     focus: "Verilerin Analizi, Kavram Haritası & Bilimsel Çıkarım",
-                    intro: custom?.l3_intro || "Grupların deney ve gözlem sonuçları tahtada toplanır, karşılaştırmalı analiz yapılır.",
-                    activity: custom?.l3_act || `Öğretmen rehberliğinde ${w.topic} konusundaki temel bilimsel ilkeler yapılandırılır. Kavram haritası ve defter notları tamamlanır.`,
-                    materials: "Ders Defteri, Kavram Haritaları, Çalışma Yaprağı",
+                    intro: custom.l3_intro || "Grupların deney ve gözlem sonuçları tahtada toplanır, karşılaştırmalı analiz yapılır.",
+                    activity: custom.l3_act || `Öğretmen rehberliğinde ${w.topic} konusundaki temel bilimsel ilkeler yapılandırılır. Kavram haritası ve defter notları tamamlanır.`,
+                    materials: custom.materials || "Ders Defteri, Kavram Haritaları, Çalışma Yaprağı",
                     evaluation: "Kavram yanılgısı tespit soruları ve sözlü pekiştirme."
                 },
                 {
                     lessonNo: 4,
                     title: "4. Ders: Derinleştirme, Değerlendirme & Ödev",
                     focus: "Kazanım Pekiştirme, Çıkış Kartı & Beceri Temelli Sorular",
-                    intro: custom?.l4_intro || "Önceki 3 dersin özetlenmesi ve MEB/LGS tarzı örnek soru çözümü ile derse başlanır.",
-                    activity: custom?.l4_act || "Öğrenciler bireysel olarak değerlendirme sorularını çözer. Çıkış kartı (3 soruluk mini test) uygulanır. Haftalık etkinlik defteri ödevi verilir.",
-                    materials: "Soru Bankası, Çıkış Kartları, Ödev Çalışma Sayfaları",
-                    evaluation: `Ödev: ${w.unit} - ${w.topic} etkinlik defteri soruları tamamlanacak.`
+                    intro: custom.l4_intro || "Önceki 3 dersin özetlenmesi ve MEB/LGS tarzı örnek soru çözümü ile derse başlanır.",
+                    activity: custom.l4_act || "Öğrenciler bireysel olarak değerlendirme sorularını çözer. Çıkış kartı (3 soruluk mini test) uygulanır. Haftalık etkinlik defteri ödevi verilir.",
+                    materials: custom.materials || "Soru Bankası, Çıkış Kartları, Ödev Çalışma Sayfaları",
+                    evaluation: custom.evaluation || `Ödev: ${w.unit} - ${w.topic} etkinlik defteri soruları tamamlanacak.`
                 }
             ];
         },
         openEditWeeklyDailyPlan() {
-            const w = this.getDailyPlanCurrentWeek();
-            if (!w) return;
-            const g = this.selectedDailyPlanGrade;
-            const key = `dp_${g}_${w.weekNo || (this.selectedDailyPlanWeekIndex + 1)}`;
+            const g = this.selectedDailyPlanGrade || 5;
+            const w = this.getDailyPlanCurrentWeek(g);
+            if (!w) {
+                this.showToast("Lütfen geçerli bir hafta seçiniz.");
+                return;
+            }
+            const key = this.getWeekKey(g, this.selectedDailyPlanWeekIndex);
             const custom = this.customDailyPlans[key] || {};
             const outc = (w.outcomesList && w.outcomesList[0]) || { code: w.outcomeCode || `FB.${g}.`, desc: w.outcome || '' };
 
@@ -1697,18 +1704,21 @@ document.addEventListener('alpine:init', () => {
                 notes: custom.notes || ''
             };
             this.isDailyPlanModalOpen = true;
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
         },
         saveCustomWeeklyDailyPlan() {
-            const key = this.dailyPlanForm.id;
-            this.customDailyPlans[key] = {
-                methods: this.dailyPlanForm.methods,
-                materials: this.dailyPlanForm.materials,
-                l1_intro: this.dailyPlanForm.intro,
-                l2_act: this.dailyPlanForm.development,
-                l3_act: this.dailyPlanForm.summary,
-                evaluation: this.dailyPlanForm.evaluation,
-                notes: this.dailyPlanForm.notes
-            };
+            const key = this.dailyPlanForm.id || this.getWeekKey();
+            if (!this.customDailyPlans[key]) {
+                this.customDailyPlans[key] = {};
+            }
+            this.customDailyPlans[key].methods = this.dailyPlanForm.methods;
+            this.customDailyPlans[key].materials = this.dailyPlanForm.materials;
+            this.customDailyPlans[key].l1_intro = this.dailyPlanForm.intro;
+            this.customDailyPlans[key].l2_act = this.dailyPlanForm.development;
+            this.customDailyPlans[key].l3_act = this.dailyPlanForm.summary;
+            this.customDailyPlans[key].evaluation = this.dailyPlanForm.evaluation;
+            this.customDailyPlans[key].notes = this.dailyPlanForm.notes;
+
             localStorage.setItem('rotali_custom_daily_plans', JSON.stringify(this.customDailyPlans));
             this.isDailyPlanModalOpen = false;
             this.showToast("Bu haftanın günlük planı kaydedildi! 📑");
@@ -1848,22 +1858,43 @@ document.addEventListener('alpine:init', () => {
             document.body.removeChild(a);
         },
         pullFromAnnualPlanToDailyPlan() {
-            const w = this.getDailyPlanCurrentWeek();
-            if (!w) return;
-            const g = this.selectedDailyPlanGrade;
-            const key = this.getWeekKey();
+            const g = this.selectedDailyPlanGrade || 5;
+            const w = this.getDailyPlanCurrentWeek(g);
+            if (!w) {
+                this.showToast("Haftalık plan verisi bulunamadı!");
+                return;
+            }
+            const key = this.getWeekKey(g, this.selectedDailyPlanWeekIndex);
             if (!this.customDailyPlans[key]) this.customDailyPlans[key] = {};
 
             const outc = (w.outcomesList && w.outcomesList[0]) || { code: w.outcomeCode || `FB.${g}.`, desc: w.outcome || '' };
             const proc = (w.processList && w.processList.length) ? w.processList.join(' ') : (w.process || '');
 
-            this.customDailyPlans[key].methods = 'Model Oluşturma, Deney & Gözlem, Soru-Cevap, Akran Öğrenmesi';
-            this.customDailyPlans[key].materials = `Ders Kitabı, Etkinlik Defteri, Akıllı Tahta, ${w.topic} Deney Seti`;
-            this.customDailyPlans[key].l1_intro = `Derse ${w.topic} ile ilgili günlük yaşamdan problem durumu ve merak uyandırıcı soru/video ile başlanır.`;
-            this.customDailyPlans[key].l2_act = proc ? `Süreç Bileşeni: ${proc}` : `${outc.code} kapsamında grup deney ve modelleme çalışması yürütülür.`;
-            this.customDailyPlans[key].l3_act = `${w.topic} konusundaki temel bilimsel kavramlar yapılandırılır, kavram haritası ve özet çıkarılır.`;
-            this.customDailyPlans[key].evaluation = `Çıkış kartı değerlendirmesi ve ${w.topic} etkinlik defteri ödevi tamamlanır.`;
-            this.customDailyPlans[key].notes = `Yıllık plandan çekildi: ${w.values ? 'Değerler: ' + w.values : ''} ${w.skills ? 'Beceriler: ' + w.skills : ''}`;
+            const methods = 'Model Oluşturma, Deney & Gözlem, Soru-Cevap, Akran Öğrenmesi';
+            const materials = `Ders Kitabı, Etkinlik Defteri, Akıllı Tahta, ${w.topic} Deney Seti`;
+            const intro = `Derse "${w.topic}" konusu ile ilgili günlük yaşamdan problem durumu ve merak uyandırıcı soru/video ile başlanır.`;
+            const act = proc ? `Süreç Bileşeni: ${proc}` : `${outc.code} (${outc.desc}) kapsamında grup deney ve modelleme çalışması yürütülür.`;
+            const summary = `"${w.topic}" konusundaki temel bilimsel kavramlar yapılandırılır, kavram haritası ve özet çıkarılır.`;
+            const evalStr = `Çıkış kartı değerlendirmesi ve ${w.topic} etkinlik defteri ödevi tamamlanır.`;
+            const notes = `Yıllık plandan çekildi: ${w.values ? 'Değerler: ' + w.values : ''} ${w.skills ? 'Beceriler: ' + w.skills : ''}`;
+
+            this.customDailyPlans[key].methods = methods;
+            this.customDailyPlans[key].materials = materials;
+            this.customDailyPlans[key].l1_intro = intro;
+            this.customDailyPlans[key].l2_act = act;
+            this.customDailyPlans[key].l3_act = summary;
+            this.customDailyPlans[key].evaluation = evalStr;
+            this.customDailyPlans[key].notes = notes;
+
+            if (this.dailyPlanForm) {
+                this.dailyPlanForm.methods = methods;
+                this.dailyPlanForm.materials = materials;
+                this.dailyPlanForm.intro = intro;
+                this.dailyPlanForm.development = act;
+                this.dailyPlanForm.summary = summary;
+                this.dailyPlanForm.evaluation = evalStr;
+                this.dailyPlanForm.notes = notes;
+            }
 
             localStorage.setItem('rotali_custom_daily_plans', JSON.stringify(this.customDailyPlans));
             this.showToast("📋 Maarif Yıllık Plan bilgileri günlük plana aktarıldı! ✨");

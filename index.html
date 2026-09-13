@@ -3012,6 +3012,127 @@
         </div>
     </div>
 
+    <!-- ================= MODAL: MAARİF MODELİ GÜNLÜK DERS PLANI DÜZENLEME ================= -->
+    <div x-show="isDailyPlanModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-black/80 backdrop-blur-md overflow-hidden" @click.self="isDailyPlanModalOpen = false">
+        <div class="bg-white text-slate-900 w-full max-w-4xl max-h-[92vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden border-4 border-teal-600">
+            
+            <!-- Modal Başlığı -->
+            <div class="p-4 sm:p-5 bg-gradient-to-r from-teal-800 via-teal-700 to-slate-900 text-white flex items-center justify-between gap-4 border-b-2 border-teal-700">
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 bg-teal-600 text-white rounded-2xl shadow-lg shadow-teal-900/40">
+                        <i data-lucide="edit-3" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h2 class="text-base sm:text-lg font-black tracking-tight brand-font">
+                                📑 Günlük Ders Planını Düzenle
+                            </h2>
+                            <span class="px-2.5 py-0.5 rounded-full bg-teal-500/30 text-teal-200 border border-teal-400/40 text-[11px] font-black uppercase" x-text="(dailyPlanForm.grade || selectedDailyPlanGrade) + '. Sınıf • ' + (dailyPlanForm.weekTitle || '')"></span>
+                        </div>
+                        <p class="text-xs text-teal-100/90 font-bold" x-text="(dailyPlanForm.unit || '') + ' — ' + (dailyPlanForm.topic || '')"></p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button @click="pullFromAnnualPlanToDailyPlan()" title="Yıllık Plandan Bilgileri Otomatik Çek" class="px-3 py-1.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-black text-xs shadow-md transition flex items-center gap-1.5">
+                        <i data-lucide="import" class="w-4 h-4"></i>
+                        <span class="hidden sm:inline">Plandan Doldur</span>
+                    </button>
+                    <button @click="isDailyPlanModalOpen = false" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-black transition">
+                        ✕
+                    </button>
+                </div>
+            </div>
+
+            <!-- Form Alanı (Kaydırılabilir) -->
+            <div class="p-4 sm:p-6 overflow-y-auto space-y-4 flex-1 custom-scrollbar">
+                <!-- Kazanım Bilgi Şeridi -->
+                <div class="p-3.5 bg-teal-50 rounded-2xl border border-teal-200 space-y-1">
+                    <div class="flex items-center gap-2">
+                        <span class="px-2 py-0.5 rounded-md bg-teal-800 text-white font-mono text-[11px] font-black" x-text="dailyPlanForm.outcomeCode || 'KAZANIM'"></span>
+                        <span class="text-xs font-black text-teal-950">Öğrenme Çıktısı (Kazanım)</span>
+                    </div>
+                    <p class="text-xs text-slate-800 font-bold leading-relaxed" x-text="dailyPlanForm.outcomeDesc || ''"></p>
+                </div>
+
+                <!-- 4 Derslik Akış Alanları -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- 1. Ders: Giriş -->
+                    <div class="space-y-1.5 p-3.5 bg-slate-50 rounded-2xl border-2 border-slate-200">
+                        <label class="block text-xs font-black text-slate-900 flex items-center gap-1.5">
+                            <span class="w-5 h-5 rounded-full bg-teal-600 text-white text-[11px] flex items-center justify-center font-bold">1</span>
+                            <span>1. Ders: Giriş & Problem Durumu / Merak Uyandırma</span>
+                        </label>
+                        <textarea x-model="dailyPlanForm.intro" rows="3" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:border-teal-600 focus:outline-none shadow-inner" placeholder="Derse dikkat çekme, video/görsel sunumu ve ön bilgi yoklama adımları..."></textarea>
+                    </div>
+
+                    <!-- 2. Ders: Keşfetme & Deney -->
+                    <div class="space-y-1.5 p-3.5 bg-slate-50 rounded-2xl border-2 border-slate-200">
+                        <label class="block text-xs font-black text-slate-900 flex items-center gap-1.5">
+                            <span class="w-5 h-5 rounded-full bg-teal-600 text-white text-[11px] flex items-center justify-center font-bold">2</span>
+                            <span>2. Ders: Keşfetme & Deney / Model Uygulaması</span>
+                        </label>
+                        <textarea x-model="dailyPlanForm.development" rows="3" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:border-teal-600 focus:outline-none shadow-inner" placeholder="Öğrenci grup çalışmaları, modelleme, simülasyon ve deney basamakları..."></textarea>
+                    </div>
+
+                    <!-- 3. Ders: Açıklama & Kavram İnşası -->
+                    <div class="space-y-1.5 p-3.5 bg-slate-50 rounded-2xl border-2 border-slate-200">
+                        <label class="block text-xs font-black text-slate-900 flex items-center gap-1.5">
+                            <span class="w-5 h-5 rounded-full bg-teal-600 text-white text-[11px] flex items-center justify-center font-bold">3</span>
+                            <span>3. Ders: Açıklama & Bilimsel Kavram İnşası</span>
+                        </label>
+                        <textarea x-model="dailyPlanForm.summary" rows="3" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:border-teal-600 focus:outline-none shadow-inner" placeholder="Verilerin değerlendirilmesi, kavram haritası ve defter özetleri..."></textarea>
+                    </div>
+
+                    <!-- 4. Ders: Değerlendirme & Ödev -->
+                    <div class="space-y-1.5 p-3.5 bg-slate-50 rounded-2xl border-2 border-slate-200">
+                        <label class="block text-xs font-black text-slate-900 flex items-center gap-1.5">
+                            <span class="w-5 h-5 rounded-full bg-teal-600 text-white text-[11px] flex items-center justify-center font-bold">4</span>
+                            <span>4. Ders: Derinleştirme, Değerlendirme & Ödev</span>
+                        </label>
+                        <textarea x-model="dailyPlanForm.evaluation" rows="3" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:border-teal-600 focus:outline-none shadow-inner" placeholder="Çıkış kartı, soru çözümü, haftalık etkinlik defteri ödevleri..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Yöntem, Materyal ve Notlar -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <label class="block text-xs font-black text-slate-700">🎯 Öğretim Yöntem & Teknikleri</label>
+                        <input type="text" x-model="dailyPlanForm.methods" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold text-slate-900 focus:border-teal-600 focus:outline-none" placeholder="Model Oluşturma, Deney & Gözlem, Soru-Cevap...">
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="block text-xs font-black text-slate-700">📦 Kullanılan Araç & Gereç / Materyaller</label>
+                        <input type="text" x-model="dailyPlanForm.materials" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold text-slate-900 focus:border-teal-600 focus:outline-none" placeholder="Ders Kitabı, Etkinlik Defteri, Akıllı Tahta, Deney Seti...">
+                    </div>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="block text-xs font-black text-slate-700">📝 Öğretmen Özel Notları & Hatırlatmalar</label>
+                    <textarea x-model="dailyPlanForm.notes" rows="2" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:border-teal-600 focus:outline-none" placeholder="Bu haftaki ders işlenişi ve öğrenci takibi ile ilgili özel notlar..."></textarea>
+                </div>
+            </div>
+
+            <!-- Alt Butonlar -->
+            <div class="p-4 bg-slate-100 border-t-2 border-slate-200 flex items-center justify-between gap-3">
+                <button @click="pullFromAnnualPlanToDailyPlan()" class="px-4 py-2.5 rounded-xl bg-white hover:bg-emerald-50 text-emerald-900 border-2 border-emerald-400 font-black text-xs shadow-sm flex items-center gap-1.5 transition active:scale-95">
+                    <i data-lucide="import" class="w-4 h-4 text-emerald-600"></i>
+                    <span>📋 Yıllık Plandan Doldur</span>
+                </button>
+
+                <div class="flex items-center gap-2">
+                    <button @click="isDailyPlanModalOpen = false" class="px-4 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-black text-xs transition">
+                        Vazgeç
+                    </button>
+                    <button @click="saveCustomWeeklyDailyPlan()" class="px-6 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-black text-xs shadow-lg shadow-teal-600/30 flex items-center gap-2 transform active:scale-95 transition">
+                        <i data-lucide="check" class="w-4 h-4"></i>
+                        <span>💾 Günlük Planı Kaydet</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ================= MODAL: TÜRKİYE YÜZYILI MAARİF MODELİ YILLIK PLANI (5, 6, 7 VE 8. SINIFLAR) ================= -->
     <div x-show="isAnnualPlanModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-black/80 backdrop-blur-md overflow-hidden">
         <div class="bg-white text-slate-900 w-full max-w-6xl max-h-[94vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden border-4 border-emerald-600">
