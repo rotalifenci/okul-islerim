@@ -1,0 +1,142 @@
+/* Rotalı Fenci - rotalifenci.vercel.app Tasarım ve Renk Paleti */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+    --brand-red: #dc2626;
+    --brand-red-dark: #b91c1c;
+    --brand-navy: #1e3a8a;
+    --brand-navy-dark: #0f172a;
+    --brand-space: #090d16;
+    --brand-sky: #0284c7;
+    --brand-gold: #d97706;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: #090d16;
+    color: #f8fafc;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+}
+
+/* Açık Tema (Light Mode) */
+body.light {
+    background-color: #f8fafc;
+    color: #0f172a;
+}
+
+/* Başlıklar için Outfit */
+h1, h2, h3, .brand-font {
+    font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: rgba(9, 13, 22, 0.6);
+}
+::-webkit-scrollbar-thumb {
+    background: #1e293b;
+    border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #dc2626;
+}
+
+/* Glassmorphism & Panel Kartları */
+.glass-panel {
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.light .glass-panel {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+}
+
+.glass-nav {
+    background: rgba(9, 13, 22, 0.88);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.light .glass-nav {
+    background: rgba(255, 255, 255, 0.95);
+    border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+}
+
+/* Üst Marka Çizgisi */
+.brand-top-bar {
+    height: 3px;
+    background: linear-gradient(90deg, #dc2626, #1e3a8a, #0284c7);
+}
+
+/* Glow Efektleri */
+.glow-red {
+    box-shadow: 0 0 25px -5px rgba(220, 38, 38, 0.35);
+}
+.glow-navy {
+    box-shadow: 0 0 25px -5px rgba(30, 58, 138, 0.35);
+}
+
+/* Sertifika Baskı Çerçevesi */
+.certificate-frame {
+    background: #ffffff;
+    color: #0f172a;
+    border: 10px double #dc2626;
+    position: relative;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+}
+
+.cert-corner-tl {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    width: 36px;
+    height: 36px;
+    border-top: 4px solid #1e3a8a;
+    border-left: 4px solid #1e3a8a;
+}
+.cert-corner-tr {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 36px;
+    height: 36px;
+    border-top: 4px solid #1e3a8a;
+    border-right: 4px solid #1e3a8a;
+}
+.cert-corner-bl {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    width: 36px;
+    height: 36px;
+    border-bottom: 4px solid #1e3a8a;
+    border-left: 4px solid #1e3a8a;
+}
+.cert-corner-br {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    width: 36px;
+    height: 36px;
+    border-bottom: 4px solid #1e3a8a;
+    border-right: 4px solid #1e3a8a;
+}
+
+/* Yazdırma Modu */
+@media print {
+    body {
+        background: #ffffff !important;
+        color: #000000 !important;
+    }
+    .no-print, nav, aside, header, .sidebar, .command-palette-modal {
+        display: none !important;
+    }
+}

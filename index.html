@@ -1,0 +1,1863 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rotalı Fenci — Okul İşlerim & Proje Takvimi</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fef2f2',
+                            100: '#fee2e2',
+                            200: '#fecaca',
+                            400: '#f87171',
+                            500: '#ef4444',
+                            600: '#dc2626',
+                            700: '#b91c1c',
+                            800: '#991b1b',
+                            900: '#7f1d1d'
+                        },
+                        navy: {
+                            800: '#1e3a8a',
+                            900: '#0f172a',
+                            950: '#090d16'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Tesseract.js OCR Engine -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/app.css">
+
+    <!-- Veri Katmanları ve Yardımcılar -->
+    <script src="js/data/initialData.js"></script>
+    <script src="js/data/templates.js"></script>
+    <script src="js/utils/storage.js"></script>
+    <script src="js/utils/exporter.js"></script>
+    <script src="js/modules/aiEngine.js"></script>
+    <script src="js/app.js"></script>
+
+    <!-- Alpine.js CDN -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body x-data="rotaliApp" class="bg-[#090d16] text-slate-100 min-h-screen flex flex-col selection:bg-red-600 selection:text-white">
+
+    <!-- ================= GİRİŞ PORTALI (AUTHENTICATION) ================= -->
+    <div x-show="!isAuthenticated" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#090d16] bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(220,38,38,0.3),rgba(9,13,22,0.95))] backdrop-blur-md">
+        <div class="w-full max-w-md bg-white p-8 rounded-3xl border-4 border-red-600 shadow-2xl space-y-6 text-slate-900 relative">
+            
+            <!-- Logo ve Başlık -->
+            <div class="text-center space-y-3">
+                <div class="relative w-24 h-24 mx-auto">
+                    <img src="assets/logo.jpg" alt="Rotalı Fenci Logo" class="w-24 h-24 rounded-2xl shadow-xl border-2 border-red-600 object-cover object-center ring-4 ring-red-100">
+                </div>
+                <h1 class="text-2xl font-black tracking-tight text-black brand-font">
+                    ROTALI <span class="text-red-600">FENCİ</span>
+                </h1>
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-100 text-red-800 border border-red-300 text-xs font-black">
+                    <i data-lucide="shield-check" class="w-4 h-4 text-red-600"></i>
+                    <span>Yönetici Giriş Portalı</span>
+                </div>
+                <p class="text-xs text-slate-600 font-bold pt-1">
+                    Öğretmen paneline erişmek için lütfen yönetici şifrenizi giriniz.
+                </p>
+            </div>
+
+            <!-- Giriş Formu -->
+            <form @submit.prevent="login()" class="space-y-4">
+                <div>
+                    <label class="text-xs font-black text-black block mb-1.5 flex items-center justify-between">
+                        <span>🔑 Yönetici Şifresi:</span>
+                        <span class="text-[10px] text-slate-500 font-bold">Güvenli Giriş</span>
+                    </label>
+                    <div class="relative">
+                        <input :type="isPasswordVisible ? 'text' : 'password'" x-model="loginPassword" placeholder="Şifrenizi yazınız..." autofocus class="w-full px-4 py-3 bg-slate-100 border-2 border-slate-300 rounded-xl text-sm font-black text-black placeholder-slate-400 focus:outline-none focus:border-red-600 focus:bg-white transition shadow-sm">
+                        <button type="button" @click="isPasswordVisible = !isPasswordVisible" class="absolute right-3 top-3 text-slate-500 hover:text-black font-black text-xs">
+                            <span x-text="isPasswordVisible ? 'Gizle 🙈' : 'Göster 👁️'"></span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Hata Uyarısı -->
+                <div x-show="loginError" class="p-3 bg-red-100 border border-red-300 rounded-xl text-xs font-black text-red-800 flex items-center gap-2">
+                    <span>⚠️</span>
+                    <span x-text="loginError"></span>
+                </div>
+
+                <!-- Giriş Butonu -->
+                <button type="submit" class="w-full py-3.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-sm transition shadow-lg shadow-red-600/30 flex items-center justify-center gap-2 active:scale-95">
+                    <span>Giriş Yap</span>
+                    <span>➔</span>
+                </button>
+            </form>
+
+            <!-- Alt Bilgi -->
+            <div class="text-center pt-2 border-t border-slate-200 text-[11px] text-slate-500 font-bold">
+                <span>Rotalı Fenci — Kişisel Dijital Öğretmen Paneli & İşletim Sistemi</span>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Üst Marka Çizgisi (rotalifenci.vercel.app Gradients) -->
+    <div class="brand-top-bar"></div>
+
+    <!-- 1. ÜST GEZİNME ÇUBUĞU (GLASS NAVBAR) -->
+    <header class="sticky top-0 z-40 glass-nav px-4 py-3 border-b border-slate-800/80">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+            
+            <!-- Logo & Marka -->
+            <div class="flex items-center gap-3 cursor-pointer" @click="setTab('dashboard')">
+                <img src="assets/logo.jpg" alt="Rotalı Fenci Logo" class="w-11 h-11 rounded-xl border-2 border-red-600/40 object-cover object-center shadow-lg shadow-red-600/30 ring-2 ring-red-500/20">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-extrabold text-xl tracking-tight text-white brand-font">
+                            ROTALI <span class="text-red-500">FENCİ</span>
+                        </span>
+                        <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-red-500/10 text-red-400 border border-red-500/20 rounded-full">
+                            Öğretmen Paneli
+                        </span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 hidden sm:block">Öğrenci Takibi, Gözlem Defteri & Proje Takvimi</p>
+                </div>
+            </div>
+
+            <!-- Global Hızlı Komut Butonu (Ctrl+K) -->
+            <div class="flex-1 max-w-md hidden md:block">
+                <button @click="isCommandOpen = true" class="w-full flex items-center justify-between px-3.5 py-2 bg-slate-900/80 hover:bg-slate-800/80 border border-slate-700/60 rounded-xl text-slate-400 text-sm transition-all shadow-inner">
+                    <span class="flex items-center gap-2">
+                        <i data-lucide="search" class="w-4 h-4 text-red-400"></i>
+                        <span>Ne yapmak istiyorsun? (Gözlem, Proje, Görev...)</span>
+                    </span>
+                    <kbd class="px-2 py-0.5 text-xs bg-slate-800 border border-slate-700 rounded text-slate-400 font-mono">Ctrl K</kbd>
+                </button>
+            </div>
+
+            <!-- Sağ Aksiyon Butonları -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                
+                <!-- Yönetici Durumu & Çıkış Yap Butonu -->
+                <div class="flex items-center gap-2 bg-slate-900/90 px-3 py-1.5 rounded-xl border border-red-500/30 text-xs">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span class="font-black text-white hidden sm:inline">👤 Yönetici: Rotalı Fenci</span>
+                    <button @click="logout()" title="Yönetici Oturumunu Kapat" class="ml-1 px-2.5 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white font-black text-[11px] shadow transition flex items-center gap-1">
+                        <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+                        <span>Çıkış</span>
+                    </button>
+                </div>
+
+                <!-- ✨ AI Asistanı Butonu (Kırmızı-Mavi Gradyan) -->
+                <button @click="openAIModal('observation-enhancer')" class="relative group px-3.5 py-2 rounded-xl bg-gradient-to-r from-red-600 to-blue-800 hover:from-red-500 hover:to-blue-700 text-white font-semibold text-xs sm:text-sm flex items-center gap-2 shadow-lg shadow-red-600/25 transition-all active:scale-95">
+                    <span>✨</span>
+                    <span class="hidden sm:inline">AI</span>
+                </button>
+
+                <!-- Tema Değiştirici -->
+                <button @click="toggleTheme()" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700/50 text-slate-300 hover:text-white transition">
+                    <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
+                    <i data-lucide="moon" class="w-4 h-4 block dark:hidden"></i>
+                </button>
+
+                <!-- Yedek İndir Butonu -->
+                <button @click="exportBackup()" title="JSON Yedek İndir" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700/50 text-slate-300 hover:text-emerald-400 transition hidden sm:block">
+                    <i data-lucide="download-cloud" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 2. ANA DÜZEN (KENAR ÇUBUĞU + İÇERİK) -->
+    <div class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- SOL MENÜ (rotalifenci.vercel.app - Kalın Siyah Yazı Stili) -->
+        <aside class="lg:col-span-3 space-y-4">
+            <div class="bg-slate-100/95 p-3 rounded-2xl space-y-1.5 border-2 border-slate-300 shadow-md">
+                <div class="px-3 py-2 text-xs font-black uppercase tracking-wider text-red-700 flex items-center justify-between border-b border-slate-300/80 pb-2">
+                    <div class="flex items-center gap-2">
+                        <img src="assets/logo.jpg" alt="Logo" class="w-5 h-5 rounded-md object-cover border border-red-500/50 shadow-sm">
+                        <span class="tracking-wide">YÖNETİM MENÜSÜ</span>
+                    </div>
+                    <span class="text-[10px] bg-red-100 text-red-800 px-2 py-0.5 rounded-md font-black">YÖNETİCİ</span>
+                </div>
+                
+                <button @click="setTab('dashboard')" :class="currentTab === 'dashboard' ? 'bg-red-600 text-white font-black shadow-md border-2 border-red-700' : 'text-black bg-white hover:bg-red-50 hover:text-red-700 font-black border border-slate-300 shadow-sm'" class="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm transition text-left">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5 text-red-600"></i>
+                    <span class="text-[14px]">Ana Dashboard</span>
+                </button>
+
+                <button @click="setTab('calendar-tasks')" :class="currentTab === 'calendar-tasks' ? 'bg-red-600 text-white font-black shadow-md border-2 border-red-700' : 'text-black bg-white hover:bg-amber-50 hover:text-amber-800 font-black border border-slate-300 shadow-sm'" class="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm transition text-left">
+                    <i data-lucide="calendar" class="w-5 h-5 text-amber-600"></i>
+                    <span class="text-[14px]">📅 Ders Programı</span>
+                </button>
+
+                <button @click="setTab('students')" :class="currentTab === 'students' ? 'bg-red-600 text-white font-black shadow-md border-2 border-red-700' : 'text-black bg-white hover:bg-sky-50 hover:text-sky-800 font-black border border-slate-300 shadow-sm'" class="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm transition text-left">
+                    <i data-lucide="clipboard-check" class="w-5 h-5 text-sky-600"></i>
+                    <span class="text-[14px]">Ödev Takip Sistemi</span>
+                </button>
+
+                <button @click="setTab('observations')" :class="currentTab === 'observations' ? 'bg-red-600 text-white font-black shadow-md border-2 border-red-700' : 'text-black bg-white hover:bg-purple-50 hover:text-purple-800 font-black border border-slate-300 shadow-sm'" class="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm transition text-left">
+                    <i data-lucide="clipboard-list" class="w-5 h-5 text-purple-600"></i>
+                    <span class="text-[14px]">Öğrenci Gözlem Defteri</span>
+                </button>
+
+                <button @click="setTab('project-calendar')" :class="currentTab === 'project-calendar' ? 'bg-red-600 text-white font-black shadow-md border-2 border-red-700' : 'text-black bg-white hover:bg-emerald-50 hover:text-emerald-800 font-black border border-slate-300 shadow-sm'" class="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm transition text-left">
+                    <i data-lucide="calendar-range" class="w-5 h-5 text-emerald-600"></i>
+                    <span class="text-[14px]">Proje Takvimi</span>
+                </button>
+
+                <button @click="setTab('certificates')" :class="currentTab === 'certificates' ? 'bg-red-600 text-white font-black shadow-md border-2 border-red-700' : 'text-black bg-white hover:bg-yellow-50 hover:text-yellow-800 font-black border border-slate-300 shadow-sm'" class="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm transition text-left">
+                    <i data-lucide="award" class="w-5 h-5 text-yellow-600"></i>
+                    <span class="text-[14px]">Sertifika / Belge Üretici</span>
+                </button>
+
+                <button @click="setTab('social')" :class="currentTab === 'social' ? 'bg-red-600 text-white font-black shadow-md border-2 border-red-700' : 'text-black bg-white hover:bg-pink-50 hover:text-pink-800 font-black border border-slate-300 shadow-sm'" class="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm transition text-left">
+                    <i data-lucide="share-2" class="w-5 h-5 text-pink-600"></i>
+                    <span class="text-[14px]">Sosyal Medya & Bülten</span>
+                </button>
+
+                <button @click="setTab('ai-assistant')" :class="currentTab === 'ai-assistant' ? 'bg-red-600 text-white font-black shadow-md border-2 border-red-700' : 'text-black bg-white hover:bg-rose-50 hover:text-rose-800 font-black border border-slate-300 shadow-sm'" class="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm transition text-left">
+                    <i data-lucide="sparkles" class="w-5 h-5 text-red-600"></i>
+                    <span class="text-[14px]">AI Öğretmen Asistanı</span>
+                </button>
+
+                <button @click="setTab('settings')" :class="currentTab === 'settings' ? 'bg-red-600 text-white font-black shadow-md border-2 border-red-700' : 'text-black bg-white hover:bg-slate-200 hover:text-black font-black border border-slate-300 shadow-sm'" class="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm transition text-left">
+                    <i data-lucide="settings" class="w-5 h-5 text-slate-700"></i>
+                    <span class="text-[14px]">Ayarlar & Yedekleme</span>
+                </button>
+            </div>
+
+            <!-- Bilgi Özeti & Yönetici Paneli -->
+            <div class="bg-slate-100/95 p-4 rounded-2xl text-xs space-y-2.5 border-2 border-slate-300 shadow-md">
+                <div class="flex items-center justify-between text-black font-black pb-2 border-b border-slate-300">
+                    <span class="text-slate-800 font-extrabold">Öğretim Yılı</span>
+                    <span class="text-red-700 font-black">2026-2027</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-800 font-black">Kayıtlı Öğrenci</span>
+                    <span class="font-black text-black text-sm" x-text="totalStudentsCount"></span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-800 font-black">Takvimdeki Projeler</span>
+                    <span class="font-black text-emerald-700 text-sm" x-text="data.projectCalendar.length"></span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-800 font-black">Bekleyen Görev</span>
+                    <span class="font-black text-amber-700 text-sm" x-text="pendingTasksCount"></span>
+                </div>
+
+                <!-- Yönetici Oturumu Butonu -->
+                <div class="pt-2 border-t border-slate-300">
+                    <button @click="logout()" class="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-red-50 hover:bg-red-600 text-red-800 hover:text-white font-black text-xs border border-red-300 transition shadow-sm">
+                        <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+                        <span>Yönetici Oturumunu Kapat</span>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- SAĞ İÇERİK ALANI -->
+        <main class="lg:col-span-9 space-y-6">
+
+            <!-- ================= TAB 1: ANA DASHBOARD ================= -->
+            <div x-show="currentTab === 'dashboard'" class="space-y-6">
+                
+                <!-- Karşılama Kartı -->
+                <div class="p-6 rounded-3xl bg-gradient-to-r from-red-950/60 via-slate-900 to-blue-950/50 border border-red-500/20 shadow-xl relative overflow-hidden">
+                    <div class="relative z-10 space-y-2">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-500/10 text-red-300 text-xs font-semibold border border-red-500/20">
+                                <span>📅 Bugün: 11 Eylül 2026</span>
+                                <span>•</span>
+                                <span x-text="data.teacher.school"></span>
+                            </span>
+                            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-black border border-amber-500/30">
+                                <span>🛡️ Nöbet Günü:</span>
+                                <span class="font-extrabold text-white">Cuma (2. Kat & Fen Lab)</span>
+                            </span>
+                            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-bold border border-blue-500/30">
+                                <span>📊 Toplam: 21 Ders (20 Fen + 1 Rehberlik)</span>
+                            </span>
+                        </div>
+                        <h1 class="text-2xl sm:text-3xl font-black text-slate-100 tracking-tight brand-font">
+                            Günaydın, <span class="bg-gradient-to-r from-red-400 via-rose-300 to-amber-200 bg-clip-text text-transparent" x-text="data.teacher.name"></span> 👋
+                        </h1>
+                        <p class="text-slate-300 text-sm max-w-xl">
+                            5/A, 5/D, 6/G, 7/A, 7/B sınıfları haftalık ders akışı, 5/D şube rehberliği ve Cuma nöbet göreviniz sisteme işlenmiştir.
+                        </p>
+                    </div>
+
+                    <!-- Hızlı İşlem Butonları -->
+                    <div class="mt-4 pt-4 border-t border-red-500/20 flex flex-wrap gap-2">
+                        <button @click="isObsModalOpen = true" class="px-3.5 py-1.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-xs font-semibold text-slate-300 hover:text-amber-200 flex items-center gap-1.5 transition">
+                            ✍️ Gözlem Ekle
+                        </button>
+                        <button @click="isProjCalModalOpen = true" class="px-3.5 py-1.5 rounded-lg bg-red-700/30 hover:bg-red-600 text-xs font-semibold text-red-300 hover:text-amber-100 border border-red-500/30 flex items-center gap-1.5 transition">
+                            📅 Proje Takvimine Ekle
+                        </button>
+                        <button @click="isTaskModalOpen = true" class="px-3.5 py-1.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-xs font-semibold text-slate-300 hover:text-amber-200 flex items-center gap-1.5 transition">
+                            📌 Görev Ekle
+                        </button>
+                        <button @click="openCertModal()" class="px-3.5 py-1.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-xs font-semibold text-slate-300 hover:text-amber-200 flex items-center gap-1.5 transition">
+                            🏆 Sertifika Oluştur
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Günün Dersleri & MEB Kazanımları (7 Derslik Günlük Akış) -->
+                <div class="bg-slate-900/95 p-5 sm:p-6 rounded-3xl border-2 border-red-500/40 shadow-2xl space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-700/80">
+                        <div class="flex items-center gap-3">
+                            <div class="p-3 bg-red-600 rounded-2xl shadow-lg shadow-red-600/30 text-white">
+                                <i data-lucide="calendar" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-lg sm:text-xl font-black text-white flex items-center gap-2 brand-font">
+                                    <span>📅 Ders Programı & MEB Kazanımları (Günde 7 Ders)</span>
+                                </h2>
+                                <p class="text-xs text-slate-300 font-bold">Günün ders akışı, ilgili sınıflar ve MEB ünite kazanımları detaylı listesi</p>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2">
+                            <!-- Gün Seçim Butonları -->
+                            <div class="flex bg-slate-800 p-1 rounded-xl border border-slate-700">
+                                <template x-for="d in ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma']" :key="d">
+                                    <button @click="selectedScheduleDay = d" :class="selectedScheduleDay === d ? 'bg-red-600 text-white font-black shadow-md' : 'text-slate-300 hover:text-white font-bold'" class="px-3 py-1.5 rounded-lg text-xs transition">
+                                        <span x-text="d"></span>
+                                    </button>
+                                </template>
+                            </div>
+
+                            <button @click="setTab('calendar-tasks')" class="px-3.5 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-xs shadow-md transition flex items-center gap-1.5 whitespace-nowrap">
+                                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                                <span>Programı Düzenle</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 7 Derslik Geniş, Okunaklı ve Ferah Satır Kartları (Grid: 1-2 Sütun) -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <template x-for="sch in getDailySchedule(selectedScheduleDay)" :key="sch.periodNo">
+                            
+                            <!-- DOLU DERS KARTI (Büyük & Net Kazanım Vurgulu) -->
+                            <template x-if="sch.classId && sch.classId !== 'Boş'">
+                                <div class="bg-white p-4.5 sm:p-5 rounded-3xl border-2 border-slate-300 shadow-md border-l-8 border-l-red-600 hover:shadow-xl transition flex flex-col justify-between space-y-3">
+                                    
+                                    <!-- Üst Bilgi Satırı: Saat, Sınıf, Ders Adı, Derslik -->
+                                    <div class="flex items-center justify-between flex-wrap gap-2 pb-2.5 border-b-2 border-slate-100">
+                                        <div class="flex items-center gap-2.5">
+                                            <span class="px-3 py-1.5 rounded-xl bg-red-600 text-white font-black text-sm sm:text-base shadow-sm tracking-wide" x-text="sch.classId"></span>
+                                            <span class="text-xs font-black text-slate-900 bg-slate-100 px-3 py-1 rounded-xl border border-slate-300" x-text="sch.periodNo + '. Ders'"></span>
+                                            <span class="text-xs font-mono font-black text-red-700 bg-red-50 px-2.5 py-1 rounded-lg border border-red-200" x-text="((data.lessonPeriods || []).find(p => p.periodNo === sch.periodNo) || {}).time"></span>
+                                        </div>
+
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-xs font-black text-blue-800 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200" x-text="'📍 ' + (sch.room || 'Fen Laboratuvarı')"></span>
+                                            <button @click="openEditLessonModal(selectedScheduleDay, sch.periodNo)" title="Dersi Düzenle" class="p-1.5 rounded-lg bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-red-700 border border-slate-200 transition">
+                                                <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Ders Adı ve Konusu -->
+                                    <div>
+                                        <h3 class="text-base sm:text-lg font-black text-black leading-snug tracking-tight" x-text="sch.subject"></h3>
+                                        <p class="text-xs sm:text-sm text-slate-700 font-extrabold mt-0.5" x-text="'📖 Ünite / Konu: ' + (sch.topic || 'Belirtilmedi')"></p>
+                                    </div>
+
+                                    <!-- MEB DERS KAZANIMI KUTUSU (Geniş, Büyük Font, Yüksek Kontrast) -->
+                                    <div class="p-3.5 sm:p-4 bg-emerald-50/90 rounded-2xl border-2 border-emerald-400 shadow-sm space-y-1.5">
+                                        <div class="flex items-center justify-between gap-2">
+                                            <div class="flex items-center gap-2">
+                                                <span class="px-2.5 py-0.5 rounded-lg bg-emerald-700 text-white font-mono text-xs font-black shadow-sm" x-text="sch.outcomeCode || 'KOD YOK'"></span>
+                                                <span class="text-xs font-black text-emerald-950 uppercase tracking-wider">MEB Müfredat Kazanımı</span>
+                                            </div>
+                                            <span class="text-[11px] font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md border border-emerald-300 hidden sm:inline">Günün Hedefi</span>
+                                        </div>
+                                        <p class="text-sm sm:text-base text-black font-black leading-relaxed" x-text="sch.outcomeDesc || 'Bu ders için henüz kazanım açıklaması girilmedi.'"></p>
+                                    </div>
+
+                                </div>
+                            </template>
+
+                            <!-- BOŞ DERS SAATİ KARTI (Ders Yok) -->
+                            <template x-if="!sch.classId || sch.classId === 'Boş'">
+                                <div class="bg-white/90 p-4.5 sm:p-5 rounded-3xl border-2 border-dashed border-slate-300 shadow-sm flex items-center justify-between gap-4 hover:border-slate-400 transition min-h-[140px]">
+                                    <div class="flex items-center gap-3.5">
+                                        <div class="w-12 h-12 rounded-2xl bg-slate-100 border border-slate-300 flex items-center justify-center text-slate-500 font-black text-sm">
+                                            <span x-text="sch.periodNo + '.D'"></span>
+                                        </div>
+                                        <div>
+                                            <div class="flex items-center gap-2">
+                                                <span class="px-3 py-1 rounded-xl bg-slate-200 text-slate-700 font-black text-xs">Ders Yok</span>
+                                                <span class="text-xs font-mono font-bold text-slate-500" x-text="((data.lessonPeriods || []).find(p => p.periodNo === sch.periodNo) || {}).time"></span>
+                                            </div>
+                                            <p class="text-xs text-slate-500 font-bold mt-1">Bu saatte planlanmış dersiniz bulunmuyor (Boş Saat / Hazırlık)</p>
+                                        </div>
+                                    </div>
+
+                                    <button @click="openEditLessonModal(selectedScheduleDay, sch.periodNo)" class="px-3.5 py-2 rounded-xl bg-white hover:bg-red-600 hover:text-white text-red-700 font-black text-xs border-2 border-slate-300 hover:border-red-600 shadow-sm transition whitespace-nowrap">
+                                        + Ders Ata
+                                    </button>
+                                </div>
+                            </template>
+
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Proje Takvimi Özeti & Öncelikli Görevler -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    
+                    <!-- Proje Takvimi Yaklaşan Teslimler -->
+                    <div class="bg-slate-100/95 p-5 rounded-3xl border-2 border-slate-300 shadow-md space-y-4">
+                        <div class="flex items-center justify-between pb-2 border-b border-slate-300">
+                            <h2 class="text-base font-black text-black flex items-center gap-2 brand-font">
+                                <i data-lucide="calendar-range" class="w-5 h-5 text-emerald-600"></i>
+                                <span>Yaklaşan Proje Takvimi</span>
+                            </h2>
+                            <button @click="setTab('project-calendar')" class="text-xs text-red-700 hover:text-red-900 font-black">Tüm Takvim →</button>
+                        </div>
+
+                        <div class="space-y-2.5">
+                            <template x-for="p in data.projectCalendar.slice(0, 3)" :key="p.id">
+                                <div class="p-3.5 rounded-2xl bg-white border border-slate-300 shadow-sm space-y-1.5">
+                                    <div class="flex items-center justify-between">
+                                        <span class="px-2.5 py-0.5 text-[10px] font-black rounded" :class="p.category === 'TÜBİTAK' ? 'bg-red-100 text-red-800 border border-red-300' : 'bg-emerald-100 text-emerald-800 border border-emerald-300'" x-text="p.category"></span>
+                                        <span class="text-xs font-black font-mono text-amber-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-300" x-text="'Son: ' + p.deadline"></span>
+                                    </div>
+                                    <h3 class="text-xs font-black text-black" x-text="p.title"></h3>
+                                    <p class="text-[11px] text-slate-700 font-semibold line-clamp-1" x-text="p.notes"></p>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Öncelikli Görevler -->
+                    <div class="bg-slate-100/95 p-5 rounded-3xl border-2 border-slate-300 shadow-md space-y-4">
+                        <div class="flex items-center justify-between pb-2 border-b border-slate-300">
+                            <h2 class="text-base font-black text-black flex items-center gap-2 brand-font">
+                                <i data-lucide="check-square" class="w-5 h-5 text-amber-600"></i>
+                                <span>Öncelikli Görevler</span>
+                            </h2>
+                            <button @click="isTaskModalOpen = true" class="text-xs text-red-700 hover:text-red-900 font-black">+ Görev Ekle</button>
+                        </div>
+
+                        <div class="space-y-2.5">
+                            <template x-for="task in data.tasks.slice(0, 4)" :key="task.id">
+                                <div class="flex items-center justify-between p-3 rounded-xl bg-white border border-slate-300 shadow-sm" :class="task.done ? 'opacity-50' : ''">
+                                    <div class="flex items-center gap-3">
+                                        <input type="checkbox" :checked="task.done" @change="toggleTask(task)" class="rounded text-red-600 focus:ring-red-500 w-4 h-4 cursor-pointer">
+                                        <div>
+                                            <p class="text-xs font-black text-black" :class="task.done ? 'line-through text-slate-400' : ''" x-text="task.title"></p>
+                                            <span class="text-[10px] text-slate-600 font-bold" x-text="task.category"></span>
+                                        </div>
+                                    </div>
+                                    <span class="px-2 py-0.5 text-[10px] rounded-full font-black uppercase" :class="task.priority === 'urgent' ? 'bg-red-100 text-red-800 border border-red-300' : 'bg-amber-100 text-amber-800 border border-amber-300'" x-text="task.priority === 'urgent' ? 'ACİL' : 'ÖNEMLİ'"></span>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- ================= TAB: DERS PROGRAMI (7 DERS / GÜN) ================= -->
+            <div x-show="currentTab === 'calendar-tasks'" class="space-y-6">
+                
+                <!-- Başlık ve Kontrol Paneli -->
+                <div class="bg-slate-100/95 p-5 rounded-3xl border-2 border-slate-300 shadow-md space-y-4">
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <div class="p-3 bg-red-600 rounded-2xl text-white shadow-lg shadow-red-600/30">
+                                <i data-lucide="calendar" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-xl font-black text-black brand-font flex items-center gap-2">
+                                    <span>📅 Ders Programı & Planlama</span>
+                                    <span class="text-xs bg-red-600 text-white font-black px-2.5 py-0.5 rounded-lg shadow-sm">Günde 7 Ders</span>
+                                </h2>
+                                <p class="text-xs text-slate-700 font-bold">Günlük 7 derslik ders akışı, MEB Türkiye Yüzyılı Maarif Modeli öğrenme çıktıları, görselden otomatik program aktarımı</p>
+                            </div>
+                        </div>
+
+                        <!-- Üst Sağ Aksiyonlar -->
+                        <div class="flex flex-wrap items-center gap-2">
+                            <!-- Görünüm Seçici (Günlük Detay Ön Planda) -->
+                            <div class="flex bg-white p-1 rounded-xl border-2 border-slate-300 shadow-sm">
+                                <button @click="scheduleViewMode = 'daily'" :class="scheduleViewMode === 'daily' ? 'bg-red-600 text-white font-black shadow-md' : 'text-slate-700 hover:text-black font-bold'" class="px-3.5 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5">
+                                    <i data-lucide="list" class="w-3.5 h-3.5"></i>
+                                    <span>Günlük Detay</span>
+                                </button>
+                                <button @click="scheduleViewMode = 'weekly'" :class="scheduleViewMode === 'weekly' ? 'bg-red-600 text-white font-black shadow-md' : 'text-slate-700 hover:text-black font-bold'" class="px-3.5 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5">
+                                    <i data-lucide="grid" class="w-3.5 h-3.5"></i>
+                                    <span>Haftalık Matris</span>
+                                </button>
+                            </div>
+
+                            <!-- 📷 Görsel Yükle Butonu -->
+                            <button @click="openScheduleImageModal()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-500 hover:to-rose-600 text-white font-black text-xs shadow-md transition flex items-center gap-1.5">
+                                <i data-lucide="camera" class="w-4 h-4"></i>
+                                <span>📷 Görselden Yükle</span>
+                            </button>
+
+                            <!-- Sıfırla Butonu -->
+                            <button @click="resetScheduleToEmpty()" title="Tüm programı boşalt" class="px-3 py-2 rounded-xl bg-white hover:bg-rose-50 text-rose-700 font-black text-xs border border-rose-300 shadow-sm transition flex items-center gap-1">
+                                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                                <span class="hidden sm:inline">Temizle</span>
+                            </button>
+
+                            <!-- Yazdır Butonu -->
+                            <button @click="printWeeklySchedule()" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-black text-white font-black text-xs shadow-md transition flex items-center gap-1.5">
+                                <i data-lucide="printer" class="w-4 h-4 text-red-400"></i>
+                                <span>🖨️ Yazdır</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Gün Seçim Butonları (Günlük Detay Modunda) -->
+                    <div x-show="scheduleViewMode === 'daily'" class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-300">
+                        <div class="flex flex-wrap gap-2">
+                            <template x-for="d in ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma']" :key="d">
+                                <button @click="selectedScheduleDay = d" :class="selectedScheduleDay === d ? 'bg-red-600 text-white font-black shadow-md border-2 border-red-700 ring-2 ring-red-300 scale-105' : 'bg-white text-black font-black hover:bg-red-50 border border-slate-300 shadow-sm'" class="px-4 py-2 rounded-xl text-xs transition flex items-center gap-1.5">
+                                    <span x-text="d"></span>
+                                    <span class="text-[10px] px-1.5 py-0.2 rounded-md font-bold" :class="selectedScheduleDay === d ? 'bg-red-800 text-white' : 'bg-slate-100 text-slate-700'" x-text="getDailySchedule(d).filter(l => l.classId && l.classId !== 'Boş').length + ' Ders'"></span>
+                                </button>
+                            </template>
+                        </div>
+
+                        <span class="text-xs text-slate-700 font-bold bg-white px-3 py-1.5 rounded-xl border border-slate-300 shadow-sm">
+                            Seçili Gün: <strong class="text-red-700" x-text="selectedScheduleDay"></strong>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- ================= 1. GÖRÜNÜM: GÜNLÜK DETAYLI LİSTE (ÖN PLANDA) ================= -->
+                <div x-show="scheduleViewMode === 'daily'" class="space-y-4">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                        <template x-for="sch in getDailySchedule(selectedScheduleDay)" :key="sch.periodNo">
+                            <div class="bg-white p-5 rounded-3xl border-2 shadow-md space-y-3 flex flex-col justify-between hover:shadow-xl transition" :class="sch.classId && sch.classId !== 'Boş' ? 'border-slate-300 border-t-8 border-t-red-600' : 'border-dashed border-slate-300 bg-slate-50/70 opacity-80'">
+                                <div class="space-y-3">
+                                    
+                                    <!-- Ders Saati & Hızlı Sınıf Ekleme / Çıkarma Dropdown -->
+                                    <div class="flex items-center justify-between pb-2 border-b-2 border-slate-100 gap-2">
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="text-xs font-black text-slate-900 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-300" x-text="sch.periodNo + '. Ders'"></span>
+                                            <span class="text-xs font-mono font-black text-red-700" x-text="((data.lessonPeriods || []).find(p => p.periodNo === sch.periodNo) || {}).time"></span>
+                                        </div>
+
+                                        <!-- Hızlı Sınıf Ata / Çıkar Seçici -->
+                                        <select :value="sch.classId || 'Boş'" @change="quickAssignClass(selectedScheduleDay, sch.periodNo, $event.target.value)" class="text-xs font-black px-2 py-1 rounded-lg border-2 border-slate-300 bg-slate-50 focus:border-red-500 shadow-sm cursor-pointer" :class="sch.classId && sch.classId !== 'Boş' ? 'text-red-700 font-extrabold bg-red-50' : 'text-slate-500'">
+                                            <option value="Boş">⚪ Ders Yok</option>
+                                            <option value="5/A">5/A (Fen)</option>
+                                            <option value="5/D">5/D (Fen)</option>
+                                            <option value="6/G">6/G (Fen)</option>
+                                            <option value="7/A">7/A (Fen)</option>
+                                            <option value="7/B">7/B (Fen)</option>
+                                            <option value="5/D Rehberlik">⭐ 5/D Rehberlik</option>
+                                            <option value="Nöbet Görevi">🛡️ Nöbet Görevi (Cuma)</option>
+                                            <option value="TÜBİTAK Proje">🔬 TÜBİTAK Proje</option>
+                                            <option value="Zümre / Plan">👥 Zümre / Plan</option>
+                                            <option value="STEM Kulübü">🚀 STEM Kulübü</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Ders Bilgileri (Doluysa) -->
+                                    <template x-if="sch.classId && sch.classId !== 'Boş'">
+                                        <div class="space-y-2">
+                                            <div class="flex items-center justify-between">
+                                                <span class="px-3 py-1 rounded-xl bg-red-600 text-white font-black text-sm shadow tracking-wide" x-text="sch.classId"></span>
+                                                <span class="text-[11px] text-blue-700 font-black bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-200" x-text="sch.room || 'Sınıf'"></span>
+                                            </div>
+
+                                            <div>
+                                                <h4 class="text-sm font-black text-black leading-snug" x-text="sch.subject"></h4>
+                                                <p class="text-xs text-slate-700 font-bold mt-0.5" x-text="sch.topic || 'Genel Ders Akışı'"></p>
+                                            </div>
+
+                                            <!-- MEB Maarif Modeli Öğrenme Çıktısı Kutusu -->
+                                            <div class="p-3 bg-emerald-50 rounded-2xl border-2 border-emerald-300 space-y-1.5 shadow-sm">
+                                                <div class="flex items-center gap-1.5 text-xs font-black text-emerald-950">
+                                                    <span class="px-2 py-0.5 rounded-md bg-emerald-700 text-white font-mono text-[11px] font-black tracking-wide" x-text="sch.outcomeCode || 'KOD YOK'"></span>
+                                                    <span class="text-[11px] font-black text-emerald-900">Maarif Modeli Öğrenme Çıktısı</span>
+                                                </div>
+                                                <p class="text-xs sm:text-sm text-black font-black leading-relaxed" x-text="sch.outcomeDesc || 'Öğrenme çıktısı tanımlı değil.'"></p>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    <!-- Ders Yok Durumu -->
+                                    <template x-if="!sch.classId || sch.classId === 'Boş'">
+                                        <div class="py-6 text-center space-y-2">
+                                            <span class="px-3 py-1.5 rounded-xl bg-slate-200 text-slate-600 font-black text-xs inline-block border border-slate-300">Ders Yok</span>
+                                            <p class="text-[11px] text-slate-400 font-bold">Bu saatte dersiniz bulunmamaktadır.</p>
+                                        </div>
+                                    </template>
+                                </div>
+
+                                <!-- Alt İşlem Butonları -->
+                                <div class="flex items-center gap-2 pt-3 border-t border-slate-100">
+                                    <button @click="openEditLessonModal(selectedScheduleDay, sch.periodNo)" class="flex-1 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-xs shadow-sm transition flex items-center justify-center gap-1">
+                                        <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                                        <span>Detay Düzenle</span>
+                                    </button>
+                                    <button @click="clearLessonCell(selectedScheduleDay, sch.periodNo)" title="Dersi Çıkar / Boşalt" class="p-2 rounded-xl bg-slate-100 hover:bg-rose-100 text-slate-700 hover:text-rose-700 border border-slate-300 font-black text-xs transition">
+                                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- ================= 2. GÖRÜNÜM: HAFTALIK MATRİS TABLOSU (SADECE SINIF VEYA DERS YOK) ================= -->
+                <div x-show="scheduleViewMode === 'weekly'" class="bg-slate-100/95 rounded-3xl overflow-hidden border-2 border-slate-300 shadow-md space-y-2 p-2">
+                    <div class="px-4 py-2 bg-white rounded-2xl border border-slate-300 flex items-center justify-between">
+                        <span class="text-xs font-black text-black">💡 İpucu: Hücreye tıklayarak dersi hızlıca düzenleyebilir veya değiştirebilirsiniz.</span>
+                        <button @click="openScheduleImageModal()" class="text-xs text-red-700 hover:text-red-900 font-black flex items-center gap-1">
+                            <span>📷 Görselden Yükle →</span>
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto rounded-2xl border-2 border-slate-300">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="bg-slate-900 text-white">
+                                    <th class="p-3.5 text-center font-black uppercase tracking-wider w-28 border-r border-slate-700">
+                                        Saat / Ders
+                                    </th>
+                                    <template x-for="dayName in ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma']" :key="dayName">
+                                        <th class="p-3.5 text-center font-black text-sm uppercase tracking-wider border-r border-slate-700 last:border-none min-w-[140px]">
+                                            <span x-text="dayName"></span>
+                                        </th>
+                                    </template>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y-2 divide-slate-300 bg-white">
+                                <template x-for="period in (data.lessonPeriods || [])" :key="period.periodNo">
+                                    <tr class="hover:bg-slate-50/80 transition">
+                                        
+                                        <!-- Ders Saati Sütunu -->
+                                        <td class="p-3 text-center bg-slate-100/90 border-r-2 border-slate-300 font-black text-slate-900">
+                                            <div class="text-sm font-black text-red-700" x-text="period.label"></div>
+                                            <div class="text-[11px] font-mono font-bold text-slate-600 mt-0.5" x-text="period.time"></div>
+                                        </td>
+
+                                        <!-- 5 Günün Hücreleri (SADECE SINIF ADI veya DERS YOK) -->
+                                        <template x-for="dayName in ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma']" :key="dayName">
+                                            <td class="p-3 border-r-2 border-slate-200 last:border-none text-center align-middle">
+                                                
+                                                <!-- Dolu Ders: Sadece Dersine Girilen Sınıf -->
+                                                <template x-if="getScheduleCell(dayName, period.periodNo) && getScheduleCell(dayName, period.periodNo).classId && getScheduleCell(dayName, period.periodNo).classId !== 'Boş'">
+                                                    <button @click="openEditLessonModal(dayName, period.periodNo)" title="Dersi Düzenle" class="w-full py-2.5 px-3 rounded-xl font-black text-sm shadow-md transition transform hover:scale-105 flex items-center justify-center gap-1.5" :class="getScheduleCell(dayName, period.periodNo).classId.includes('Proje') ? 'bg-amber-600 hover:bg-amber-700 text-white' : (getScheduleCell(dayName, period.periodNo).classId.includes('Nöbet') ? 'bg-purple-600 hover:bg-purple-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white')">
+                                                        <span x-text="getScheduleCell(dayName, period.periodNo).classId"></span>
+                                                    </button>
+                                                </template>
+
+                                                <!-- Boş Ders: Sadece 'Ders Yok' -->
+                                                <template x-if="!getScheduleCell(dayName, period.periodNo) || !getScheduleCell(dayName, period.periodNo).classId || getScheduleCell(dayName, period.periodNo).classId === 'Boş'">
+                                                    <button @click="openEditLessonModal(dayName, period.periodNo)" title="Ders Ekle" class="w-full py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-red-50 text-slate-500 hover:text-red-700 font-black text-xs border border-slate-300 transition text-center">
+                                                        Ders Yok
+                                                    </button>
+                                                </template>
+
+                                            </td>
+                                        </template>
+
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Alt Kısım: Nöbet & Öncelikli Görevler Eisenhower Matrisi -->
+                <div class="bg-slate-100/95 p-5 rounded-3xl border-2 border-slate-300 shadow-md space-y-4">
+                    <div class="flex items-center justify-between pb-2 border-b border-slate-300">
+                        <h3 class="font-black text-black text-base brand-font flex items-center gap-2">
+                            <i data-lucide="check-square" class="w-5 h-5 text-red-600"></i>
+                            <span>Ders Programı İle İlgili Görevler & Nöbet Takibi</span>
+                        </h3>
+                        <button @click="isTaskModalOpen = true" class="px-3.5 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-xs shadow-sm">
+                            + Yeni Görev
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="p-4 rounded-2xl bg-white border-2 border-slate-300 shadow-sm border-l-8 border-l-red-600 space-y-2">
+                            <h4 class="font-black text-black text-xs uppercase text-red-700 flex items-center justify-between">
+                                <span>🔴 Acil & Önemli Okul Görevleri</span>
+                                <span class="text-[10px] bg-red-100 px-2 py-0.5 rounded font-black" x-text="data.tasks.filter(t => t.priority === 'urgent' && !t.done).length + ' Görev'"></span>
+                            </h4>
+                            <div class="space-y-1.5">
+                                <template x-for="t in data.tasks.filter(t => t.priority === 'urgent')" :key="t.id">
+                                    <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
+                                        <span class="font-black text-black" :class="t.done ? 'line-through text-slate-400' : 'text-black'" x-text="t.title"></span>
+                                        <input type="checkbox" :checked="t.done" @change="toggleTask(t)" class="rounded text-red-600 focus:ring-red-500 cursor-pointer">
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <div class="p-4 rounded-2xl bg-white border-2 border-slate-300 shadow-sm border-l-8 border-l-amber-500 space-y-2">
+                            <h4 class="font-black text-black text-xs uppercase text-amber-800 flex items-center justify-between">
+                                <span>🟠 Planlanacak Zümre / Kulüp Görevleri</span>
+                                <span class="text-[10px] bg-amber-100 px-2 py-0.5 rounded font-black" x-text="data.tasks.filter(t => t.priority === 'important' && !t.done).length + ' Görev'"></span>
+                            </h4>
+                            <div class="space-y-1.5">
+                                <template x-for="t in data.tasks.filter(t => t.priority === 'important')" :key="t.id">
+                                    <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
+                                        <span class="font-black text-black" :class="t.done ? 'line-through text-slate-400' : 'text-black'" x-text="t.title"></span>
+                                        <input type="checkbox" :checked="t.done" @change="toggleTask(t)" class="rounded text-red-600 focus:ring-red-500 cursor-pointer">
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ================= TAB 2: ÖDEV TAKİP SİSTEMİ ================= -->
+            <div x-show="currentTab === 'students'" class="space-y-6">
+                
+                <!-- Üst Başlık ve Sınıf Seçimi -->
+                <div class="bg-slate-100/95 p-5 rounded-3xl border-2 border-slate-300 shadow-md space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h2 class="text-xl font-black text-black brand-font flex items-center gap-2">
+                                <i data-lucide="clipboard-check" class="w-6 h-6 text-red-600"></i>
+                                <span>📚 Günlük & Tarihli Ödev Takip Sistemi</span>
+                            </h2>
+                            <p class="text-xs text-slate-700 font-bold">Öğrencilerin ödevlerini takvime göre günbegün işleme, puanlama ve sınıf başarı takibi</p>
+                        </div>
+                        
+                        <div class="relative min-w-[240px]">
+                            <input type="text" x-model="searchQuery" placeholder="Öğrenci ara (İsim veya No)..." class="w-full px-3.5 py-2 pl-9 bg-white border-2 border-slate-300 rounded-xl text-xs text-black font-black placeholder-slate-500 focus:outline-none focus:border-red-500 shadow-sm">
+                            <i data-lucide="search" class="w-4 h-4 text-slate-500 absolute left-3 top-2.5"></i>
+                        </div>
+                    </div>
+
+                    <!-- Sınıf Butonları -->
+                    <div class="flex flex-wrap gap-2 pt-2 border-t border-slate-300">
+                        <template x-for="cls in data.classes" :key="cls.id">
+                            <button @click="selectedClassId = cls.id" :class="selectedClassId === cls.id ? 'bg-red-600 text-white font-black shadow-md border-2 border-red-700 ring-2 ring-red-300' : 'bg-white text-black font-black hover:bg-red-50 border border-slate-300 shadow-sm'" class="px-4 py-2 rounded-xl text-xs transition flex items-center gap-1.5">
+                                <span x-text="cls.name"></span>
+                                <span class="px-1.5 py-0.5 rounded-md text-[10px]" :class="selectedClassId === cls.id ? 'bg-red-800 text-white font-bold' : 'bg-slate-200 text-black font-bold'" x-text="data.students.filter(s => s.classId === cls.id).length + ' Öğrenci'"></span>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Günlük Takvim & Ödev Tanımlama Paneli -->
+                <div class="bg-white p-5 rounded-3xl border-2 border-slate-300 shadow-md space-y-4">
+                    
+                    <!-- 1. Satır: Tarih Gezgini ve Ödev Başlığı -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+                        
+                        <!-- Tarih Seçici -->
+                        <div class="lg:col-span-5 flex items-center gap-2 bg-slate-100 p-2 rounded-2xl border-2 border-slate-300">
+                            <button @click="changeHomeworkDate(-1)" title="Önceki Gün" class="p-2 rounded-xl bg-white hover:bg-red-50 text-black border border-slate-300 font-black shadow-sm transition">
+                                ◀
+                            </button>
+                            
+                            <div class="flex-1 text-center">
+                                <input type="date" x-model="selectedHomeworkDate" class="w-full bg-transparent text-center text-xs font-black text-black focus:outline-none cursor-pointer">
+                                <div class="text-xs font-black text-red-700 tracking-tight" x-text="getFormattedHomeworkDate()"></div>
+                            </div>
+
+                            <button @click="changeHomeworkDate(1)" title="Sonraki Gün" class="p-2 rounded-xl bg-white hover:bg-red-50 text-black border border-slate-300 font-black shadow-sm transition">
+                                ▶
+                            </button>
+                            
+                            <button @click="setTodayHomeworkDate()" class="px-2.5 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-black shadow-sm transition">
+                                Bugün
+                            </button>
+                        </div>
+
+                        <!-- Ödev Konusu / Kazanım Girişi -->
+                        <div class="lg:col-span-7">
+                            <label class="text-[11px] font-black text-slate-800 block mb-1">📝 Günün Ödev Konusu & Açıklaması:</label>
+                            <div class="flex gap-2">
+                                <input type="text" x-model="currentHomeworkTitle" @input="getTodayHomeworkSession().title = currentHomeworkTitle" placeholder="Örn: 2. Ünite Hücre Organelleri Etkinliği & Test (s. 24-28)" class="flex-1 px-3.5 py-2 bg-slate-50 border-2 border-slate-300 rounded-xl text-xs text-black font-black focus:outline-none focus:border-red-500 focus:bg-white shadow-sm">
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- 2. Satır: Puanlama Kılavuzu & Toplu Hızlı İşlemler -->
+                    <div class="pt-3 border-t-2 border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                        
+                        <!-- Puan Skalası Açıklaması (Legend) -->
+                        <div class="flex flex-wrap items-center gap-2 text-xs">
+                            <span class="font-black text-black">Puanlama:</span>
+                            <span class="px-2.5 py-1 rounded-lg bg-red-100 text-red-900 border border-red-300 font-black text-[11px]">
+                                ❌ 0: Yok (0p)
+                            </span>
+                            <span class="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-900 border border-amber-300 font-black text-[11px]">
+                                ⚠️ 1: Yarım (1p)
+                            </span>
+                            <span class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-900 border border-emerald-300 font-black text-[11px]">
+                                ✅ 2: Tam (+2p)
+                            </span>
+                            <span class="px-2.5 py-1 rounded-lg bg-yellow-100 text-yellow-950 border border-yellow-300 font-black text-[11px]">
+                                ⭐ 4: Yıldız (+4p)
+                            </span>
+                            <span class="px-2.5 py-1 rounded-lg bg-slate-200 text-slate-900 border border-slate-400 font-black text-[11px]">
+                                🚫 G: Gelmedi
+                            </span>
+                        </div>
+
+                        <!-- Hızlı Toplu Aksiyon Butonları -->
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button @click="bulkSetClassHomework('2')" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-sm flex items-center gap-1 transition">
+                                ⚡ Tümüne Tam (2) Ver
+                            </button>
+                            <button @click="bulkSetClassHomework('4')" class="px-3 py-1.5 rounded-xl bg-yellow-500 hover:bg-yellow-600 text-black font-black text-xs shadow-sm flex items-center gap-1 transition">
+                                ⭐ Tümüne Yıldız (4) Ver
+                            </button>
+                            <button @click="printClassHomeworkReport()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-black text-white font-black text-xs shadow-sm flex items-center gap-1 transition">
+                                🖨️ Çizelgeyi Yazdır
+                            </button>
+                            <button @click="clearHomeworkDate()" title="Seçili tarihteki ödev puanlarını temizle" class="px-2.5 py-1.5 rounded-xl bg-slate-200 hover:bg-red-100 text-red-700 font-black text-xs border border-slate-300 shadow-sm transition">
+                                🧹 Sıfırla
+                            </button>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- Seçili Gün İçin Sınıf Özet İstatistikleri -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                    <div class="bg-yellow-50 p-3 rounded-2xl border-2 border-yellow-300 shadow-sm text-center">
+                        <span class="text-[11px] font-black text-yellow-900 block">⭐ Yıldız (4p)</span>
+                        <span class="text-xl font-black text-yellow-950" x-text="getClassDailyStats().stars"></span>
+                    </div>
+                    <div class="bg-emerald-50 p-3 rounded-2xl border-2 border-emerald-300 shadow-sm text-center">
+                        <span class="text-[11px] font-black text-emerald-900 block">✅ Tam (2p)</span>
+                        <span class="text-xl font-black text-emerald-950" x-text="getClassDailyStats().full"></span>
+                    </div>
+                    <div class="bg-amber-50 p-3 rounded-2xl border-2 border-amber-300 shadow-sm text-center">
+                        <span class="text-[11px] font-black text-amber-900 block">⚠️ Yarım (1p)</span>
+                        <span class="text-xl font-black text-amber-950" x-text="getClassDailyStats().half"></span>
+                    </div>
+                    <div class="bg-red-50 p-3 rounded-2xl border-2 border-red-300 shadow-sm text-center">
+                        <span class="text-[11px] font-black text-red-900 block">❌ Yok (0p)</span>
+                        <span class="text-xl font-black text-red-950" x-text="getClassDailyStats().zero"></span>
+                    </div>
+                    <div class="bg-slate-100 p-3 rounded-2xl border-2 border-slate-300 shadow-sm text-center">
+                        <span class="text-[11px] font-black text-slate-800 block">🚫 Gelmedi (G)</span>
+                        <span class="text-xl font-black text-slate-900" x-text="getClassDailyStats().absent"></span>
+                    </div>
+                    <div class="bg-blue-50 p-3 rounded-2xl border-2 border-blue-300 shadow-sm text-center">
+                        <span class="text-[11px] font-black text-blue-900 block">📊 Sınıf Başarısı</span>
+                        <span class="text-xl font-black text-blue-950" x-text="'%' + getClassDailyStats().classPercent"></span>
+                    </div>
+                </div>
+
+                <!-- Öğrenci Ödev Tablosu (Tek Tıkla Puanlama) -->
+                <div class="bg-slate-100/95 rounded-3xl overflow-hidden border-2 border-slate-300 shadow-md">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-slate-900">
+                            <thead class="bg-slate-200 text-slate-900 uppercase font-black border-b-2 border-slate-300">
+                                <tr>
+                                    <th class="p-3.5 w-12 text-center">No</th>
+                                    <th class="p-3.5">Öğrenci Bilgisi</th>
+                                    <th class="p-3.5 text-center min-w-[320px]">Bugünkü Ödev Durumu (Tıkla ve Ver)</th>
+                                    <th class="p-3.5 min-w-[200px]">Öğretmen Notu / Açıklama</th>
+                                    <th class="p-3.5 text-center">Toplam Başarı</th>
+                                    <th class="p-3.5 text-right">İşlem</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y-2 divide-slate-200 bg-white">
+                                <template x-for="(st, index) in filteredStudents" :key="st.id">
+                                    <tr class="hover:bg-red-50/40 transition">
+                                        
+                                        <!-- No -->
+                                        <td class="p-3.5 text-center font-mono font-black text-red-700 text-sm" x-text="st.no"></td>
+
+                                        <!-- Öğrenci -->
+                                        <td class="p-3.5">
+                                            <div class="flex items-center gap-3">
+                                                <span class="text-2xl" x-text="st.avatar"></span>
+                                                <div>
+                                                    <div class="font-black text-black text-sm" x-text="st.name"></div>
+                                                    <div class="text-[11px] text-slate-600 font-bold" x-text="st.notes"></div>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <!-- 1-Tıkla Ödev Durumu Puanlama Butonları (0, 1, 2, 4, G) -->
+                                        <td class="p-3.5 text-center">
+                                            <div class="inline-flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl border border-slate-300 shadow-inner">
+                                                
+                                                <!-- 0: Yok -->
+                                                <button @click="setStudentHomeworkGrade(st.id, '0')" :class="getStudentHomeworkGrade(st.id).score === '0' ? 'bg-red-600 text-white font-black ring-2 ring-red-400 shadow-md scale-105' : 'bg-white text-red-800 hover:bg-red-100 border border-slate-300 font-bold'" class="px-2.5 py-1.5 rounded-lg text-xs transition flex items-center gap-1" title="0: Yok / Yapmadı (0 Puan)">
+                                                    <span>❌</span>
+                                                    <span class="font-black">0</span>
+                                                </button>
+
+                                                <!-- 1: Yarım -->
+                                                <button @click="setStudentHomeworkGrade(st.id, '1')" :class="getStudentHomeworkGrade(st.id).score === '1' ? 'bg-amber-500 text-white font-black ring-2 ring-amber-300 shadow-md scale-105' : 'bg-white text-amber-900 hover:bg-amber-100 border border-slate-300 font-bold'" class="px-2.5 py-1.5 rounded-lg text-xs transition flex items-center gap-1" title="1: Yarım / Eksik (+/- 1 Puan)">
+                                                    <span>⚠️</span>
+                                                    <span class="font-black">1</span>
+                                                </button>
+
+                                                <!-- 2: Tam -->
+                                                <button @click="setStudentHomeworkGrade(st.id, '2')" :class="getStudentHomeworkGrade(st.id).score === '2' ? 'bg-emerald-600 text-white font-black ring-2 ring-emerald-400 shadow-md scale-105' : 'bg-white text-emerald-900 hover:bg-emerald-100 border border-slate-300 font-bold'" class="px-2.5 py-1.5 rounded-lg text-xs transition flex items-center gap-1" title="2: Tam / Artı (+ 2 Puan)">
+                                                    <span>✅</span>
+                                                    <span class="font-black">2</span>
+                                                </button>
+
+                                                <!-- 4: Yıldız -->
+                                                <button @click="setStudentHomeworkGrade(st.id, '4')" :class="getStudentHomeworkGrade(st.id).score === '4' ? 'bg-yellow-400 text-black font-black ring-2 ring-yellow-300 shadow-md scale-105' : 'bg-white text-yellow-900 hover:bg-yellow-100 border border-slate-300 font-bold'" class="px-2.5 py-1.5 rounded-lg text-xs transition flex items-center gap-1" title="4: Yıldız / Üstün Başarı (★ 4 Puan)">
+                                                    <span>⭐</span>
+                                                    <span class="font-black">4</span>
+                                                </button>
+
+                                                <!-- G: Gelmedi -->
+                                                <button @click="setStudentHomeworkGrade(st.id, 'G')" :class="getStudentHomeworkGrade(st.id).score === 'G' ? 'bg-slate-700 text-white font-black ring-2 ring-slate-400 shadow-md scale-105' : 'bg-white text-slate-800 hover:bg-slate-200 border border-slate-300 font-bold'" class="px-2.5 py-1.5 rounded-lg text-xs transition flex items-center gap-1" title="G: Okula Gelmedi (Devamsız)">
+                                                    <span>🚫</span>
+                                                    <span class="font-black">G</span>
+                                                </button>
+
+                                            </div>
+                                        </td>
+
+                                        <!-- Öğretmen Notu -->
+                                        <td class="p-3.5">
+                                            <input type="text" :value="getStudentHomeworkGrade(st.id).note || ''" @change="setStudentHomeworkNote(st.id, $event.target.value)" placeholder="Not veya sayfa detayı..." class="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs text-black font-bold focus:outline-none focus:border-red-500 focus:bg-white shadow-inner">
+                                        </td>
+
+                                        <!-- Toplam Başarı İstatistiği -->
+                                        <td class="p-3.5 text-center">
+                                            <div class="space-y-1">
+                                                <span class="px-2.5 py-1 bg-red-50 text-red-900 border border-red-300 rounded-lg font-black text-xs shadow-sm inline-block" x-text="getStudentHomeworkStats(st.id).totalPoints + ' Puan'"></span>
+                                                <div class="flex justify-center gap-1.5 text-[10px] font-black text-slate-700">
+                                                    <span class="text-yellow-700" x-text="'⭐ ' + getStudentHomeworkStats(st.id).stars"></span>
+                                                    <span class="text-red-700" x-text="'❌ ' + getStudentHomeworkStats(st.id).zero"></span>
+                                                    <span class="text-slate-600" x-text="'🚫 ' + getStudentHomeworkStats(st.id).absent"></span>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <!-- İşlemler -->
+                                        <td class="p-3.5 text-right space-x-1 whitespace-nowrap">
+                                            <button @click="openStudentHomeworkHistory(st)" title="Öğrencinin geçmiş ödev karnesini görüntüle" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-black font-black text-xs border border-slate-300 shadow-sm transition">
+                                                👁️ Geçmiş
+                                            </button>
+                                            <button @click="openCertModal(st)" title="Başarı Belgesi Oluştur" class="px-2.5 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-black text-xs shadow-sm transition">
+                                                🏆 Belge
+                                            </button>
+                                        </td>
+
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ================= TAB 3: ÖĞRENCİ GÖZLEM DEFTERİ ================= -->
+            <div x-show="currentTab === 'observations'" class="space-y-6">
+                
+                <div class="bg-slate-100/95 p-5 rounded-3xl border-2 border-slate-300 shadow-md flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-black text-black flex items-center gap-2 brand-font">
+                            <span>📝 Öğretmen Gözlem ve Not Defteri</span>
+                        </h2>
+                        <p class="text-xs text-slate-700 font-semibold">Ham öğretmen notlarını resmi pedagojik gözlem raporuna dönüştürme ve kalıcı arşiv</p>
+                    </div>
+                    <button @click="isObsModalOpen = true" class="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-xs transition shadow-md">
+                        + Yeni Gözlem Notu
+                    </button>
+                </div>
+
+                <!-- Gözlem Notları Listesi -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <template x-for="obs in data.observations" :key="obs.id">
+                        <div class="bg-slate-100/95 p-5 rounded-3xl border-2 border-slate-300 shadow-md space-y-3 hover:border-red-500 transition">
+                            <div class="flex items-center justify-between pb-2 border-b border-slate-300">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-black text-black text-base" x-text="obs.studentName"></span>
+                                    <span class="px-2 py-0.5 rounded bg-slate-200 text-slate-800 text-xs font-black border border-slate-300" x-text="obs.classId"></span>
+                                </div>
+                                <span class="text-xs text-slate-600 font-bold font-mono" x-text="obs.date"></span>
+                            </div>
+
+                            <div class="text-xs text-slate-900 bg-white p-3.5 rounded-xl border border-slate-300 shadow-sm">
+                                <span class="text-slate-700 font-black block mb-1">Öğretmen Ham Notu:</span>
+                                <p class="italic font-semibold text-black text-sm" x-text="'“' + obs.rawNote + '”'"></p>
+                            </div>
+
+                            <div class="text-xs text-red-950 bg-red-50 p-3.5 rounded-xl border border-red-200">
+                                <span class="text-red-700 font-black flex items-center gap-1 block mb-1">
+                                    <span>✨</span> Pedagojik AI Özeti:
+                                </span>
+                                <p class="font-bold text-slate-900 text-xs leading-relaxed" x-text="obs.aiSummary"></p>
+                            </div>
+
+                            <div class="flex items-center justify-between pt-2 border-t border-slate-300">
+                                <div class="flex flex-wrap gap-1">
+                                    <template x-for="t in obs.tags" :key="t">
+                                        <span class="px-2 py-0.5 bg-white border border-slate-300 rounded text-[10px] font-bold text-slate-800" x-text="t"></span>
+                                    </template>
+                                </div>
+                                <span class="px-2.5 py-1 rounded text-[10px] font-black" :class="obs.status === 'Olumlu Gelişim' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-amber-100 text-amber-800 border border-amber-300'" x-text="obs.status"></span>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+            </div>
+
+            <!-- ================= TAB 4: PROJE TAKVİMİ ================= -->
+            <div x-show="currentTab === 'project-calendar'" class="space-y-6">
+                
+                <div class="bg-slate-100/95 p-5 rounded-3xl border-2 border-slate-300 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-xl font-black text-black flex items-center gap-2 brand-font">
+                            <i data-lucide="calendar-range" class="w-6 h-6 text-emerald-600"></i>
+                            <span>Proje Takvimi & Aşama Yönetimi</span>
+                        </h2>
+                        <p class="text-xs text-slate-700 font-semibold">TÜBİTAK (2204, 4006), TEKNOFEST, eTwinning ve Okul Projeleri Takvimi</p>
+                    </div>
+
+                    <button @click="isProjCalModalOpen = true" class="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-xs transition shadow-md flex items-center gap-2">
+                        <span>+</span>
+                        <span>Yeni Proje Takvimi Ekle</span>
+                    </button>
+                </div>
+
+                <!-- Filtre Butonları -->
+                <div class="flex gap-2">
+                    <template x-for="cat in ['Hepsi', 'TÜBİTAK', 'eTwinning', 'TEKNOFEST', 'Okul Projesi']" :key="cat">
+                        <button @click="projectCategoryFilter = cat" :class="projectCategoryFilter === cat ? 'bg-red-600 text-white font-black shadow-md border-2 border-red-700' : 'bg-white text-black font-black hover:bg-red-50 border border-slate-300 shadow-sm'" class="px-4 py-2 rounded-xl text-xs transition">
+                            <span x-text="cat"></span>
+                        </button>
+                    </template>
+                </div>
+
+                <!-- Proje Takvimi Kartları -->
+                <div class="space-y-4">
+                    <template x-for="item in filteredProjectCalendar" :key="item.id">
+                        <div class="bg-slate-100/95 p-5 rounded-3xl border-2 border-slate-300 shadow-md space-y-3 hover:border-red-500 transition">
+                            <div class="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-slate-300">
+                                <div class="flex items-center gap-2">
+                                    <span class="px-2.5 py-1 rounded-lg text-xs font-black uppercase" :class="item.category === 'TÜBİTAK' ? 'bg-red-100 text-red-800 border border-red-300' : (item.category === 'eTwinning' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-blue-100 text-blue-800 border border-blue-300')" x-text="item.category"></span>
+                                    <span class="px-2.5 py-1 rounded bg-slate-200 text-[10px] text-slate-800 font-black border border-slate-300" x-text="item.status"></span>
+                                    <span class="px-2.5 py-1 rounded text-[10px] font-black" :class="item.priority === 'Yüksek' ? 'bg-red-100 text-red-800 border border-red-300' : 'bg-amber-100 text-amber-800 border border-amber-300'" x-text="'Öncelik: ' + item.priority"></span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-black font-mono text-amber-900 bg-amber-100 px-3 py-1 rounded-lg border border-amber-300" x-text="'📅 Son Teslim: ' + item.deadline"></span>
+                                    <button @click="deleteProjectCalendarItem(item.id)" title="Sil" class="text-slate-500 hover:text-rose-600 font-black text-xs px-2 py-1">✕</button>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h3 class="font-black text-black text-lg brand-font" x-text="item.title"></h3>
+                                <p class="text-xs text-red-700 font-black mt-0.5" x-text="'🎯 İlgili Çalışma: ' + item.targetProject"></p>
+                            </div>
+
+                            <p class="text-xs text-slate-800 font-semibold bg-white p-3.5 rounded-xl border border-slate-300 shadow-sm leading-relaxed" x-text="item.notes"></p>
+
+                            <!-- Proje Aşamaları Kontrol Listesi -->
+                            <div class="space-y-1.5 pt-1" x-show="item.checkpoints && item.checkpoints.length">
+                                <span class="text-xs font-black text-slate-700">Takvim Aşamaları & Görevler:</span>
+                                <template x-for="cp in item.checkpoints" :key="cp.text">
+                                    <div class="flex items-center justify-between text-xs p-2.5 rounded-xl bg-white border border-slate-300 shadow-sm">
+                                        <div class="flex items-center gap-2.5">
+                                            <input type="checkbox" :checked="cp.done" @change="cp.done = !cp.done" class="rounded text-red-600 focus:ring-red-500 w-4 h-4 cursor-pointer">
+                                            <span class="font-black text-black" :class="cp.done ? 'line-through text-slate-400' : 'text-black'" x-text="cp.text"></span>
+                                        </div>
+                                        <span class="text-xs text-slate-600 font-mono font-bold" x-text="cp.date"></span>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <div class="flex justify-between items-center text-xs text-slate-600 font-bold pt-2 border-t border-slate-300">
+                                <span x-text="'Başlangıç: ' + item.startDate"></span>
+                                <button @click="openAIModal('project-planner', item.title)" class="text-red-700 hover:text-red-900 font-black">
+                                    ✨ AI Takvim Önerisi Al →
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+            </div>
+
+            <!-- ================= TAB 6: SERTİFİKA & BELGE ================= -->
+            <div x-show="currentTab === 'certificates'" class="space-y-6">
+                
+                <div class="bg-slate-100/95 p-5 rounded-3xl border-2 border-slate-300 shadow-md flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-black text-black flex items-center gap-2 brand-font">
+                            <span>🏅 Başarı & Katılım Belgesi Oluşturucu</span>
+                        </h2>
+                        <p class="text-xs text-slate-700 font-semibold">Rotalı Fenci markalı, yüksek kaliteli A4 başarı ve katılım sertifikaları</p>
+                    </div>
+                    <button @click="printCertificate()" class="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-xs transition shadow-md">
+                        🖨️ Sayfayı Yazdır / PDF
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <!-- Form -->
+                    <div class="lg:col-span-4 bg-slate-100/95 p-5 rounded-3xl border-2 border-slate-300 shadow-md space-y-4">
+                        <h3 class="text-xs font-black uppercase text-slate-800 border-b border-slate-300 pb-2">Sertifika Bilgileri</h3>
+                        
+                        <div>
+                            <label class="text-xs font-black text-black block mb-1">Belge Türü</label>
+                            <select x-model="selectedCertType" class="w-full px-3 py-2 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-black shadow-sm">
+                                <template x-for="ct in templates.certificateTypes" :key="ct.id">
+                                    <option :value="ct.id" x-text="ct.title"></option>
+                                </template>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="text-xs font-black text-black block mb-1">Öğrenci Adı Soyadı</label>
+                            <input type="text" x-model="certStudentName" class="w-full px-3 py-2 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-black shadow-sm">
+                        </div>
+
+                        <div>
+                            <label class="text-xs font-black text-black block mb-1">Sınıf / Şube</label>
+                            <input type="text" x-model="certStudentClass" class="w-full px-3 py-2 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-black shadow-sm">
+                        </div>
+
+                        <div>
+                            <label class="text-xs font-black text-black block mb-1">Tarih</label>
+                            <input type="date" x-model="certDate" class="w-full px-3 py-2 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-black shadow-sm">
+                        </div>
+                    </div>
+
+                    <!-- Canlı Önizleme -->
+                    <div class="lg:col-span-8">
+                        <div id="printable-certificate-container" class="certificate-frame p-8 rounded-2xl text-center space-y-6 shadow-2xl">
+                            <div class="cert-corner-tl"></div>
+                            <div class="cert-corner-tr"></div>
+                            <div class="cert-corner-bl"></div>
+                            <div class="cert-corner-br"></div>
+
+                            <div class="space-y-1">
+                                <span class="text-xs font-extrabold uppercase tracking-widest text-red-700">T.C. MİLLÎ EĞİTİM BAKANLIĞI</span>
+                                <h1 class="text-2xl font-black text-slate-900 tracking-tight" x-text="(templates.certificateTypes.find(c => c.id === selectedCertType) || {}).title"></h1>
+                                <p class="text-xs font-semibold text-red-600 uppercase" x-text="(templates.certificateTypes.find(c => c.id === selectedCertType) || {}).badge"></p>
+                            </div>
+
+                            <div class="py-4 space-y-3">
+                                <p class="text-xs text-slate-600">Bu belge, üstün gayret ve katkılarından dolayı öğrencimiz;</p>
+                                <div class="text-2xl font-extrabold text-slate-950 underline decoration-red-500 underline-offset-8" x-text="certStudentName"></div>
+                                <p class="text-xs text-slate-500" x-text="certStudentClass + ' Sınıfı Öğrencisi'"></p>
+                                <p class="text-xs text-slate-700 max-w-lg mx-auto leading-relaxed pt-2" x-text="(templates.certificateTypes.find(c => c.id === selectedCertType) || {}).defaultReason"></p>
+                            </div>
+
+                            <div class="pt-6 flex justify-between items-end px-8 border-t border-slate-300 text-xs">
+                                <div class="text-left">
+                                    <span class="block text-slate-400">Tarih:</span>
+                                    <span class="font-bold text-slate-800" x-text="certDate"></span>
+                                </div>
+                                <div class="text-center flex flex-col items-center">
+                                    <img src="assets/logo.jpg" alt="Rotalı Fenci" class="w-8 h-8 rounded-lg border border-red-500 mb-1 object-cover shadow-sm">
+                                    <span class="font-bold text-red-700 block">ROTALI FENCİ</span>
+                                    <span class="text-[10px] text-slate-500">Proje & Fen Bilimleri Koordinatörü</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="block text-slate-400">Okul Müdürü</span>
+                                    <span class="font-bold text-slate-800">İmza / Mühür</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ================= TAB 7: SOSYAL MEDYA & BÜLTEN ================= -->
+            <div x-show="currentTab === 'social'" class="space-y-6">
+                
+                <div class="bg-slate-100/95 p-5 rounded-3xl border-2 border-slate-300 shadow-md">
+                    <h2 class="text-xl font-black text-black flex items-center gap-2 brand-font">
+                        <span>📢 Sosyal Medya & Okul Bülteni Merkezi</span>
+                    </h2>
+                    <p class="text-xs text-slate-700 font-semibold">Okul etkinlikleri, projeler ve başarılar için hazır duyuru metinleri üretici</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <template x-for="fmt in templates.socialMediaFormats" :key="fmt.id">
+                        <div @click="openAIModal('social-media', fmt.name)" class="bg-slate-100/95 p-5 rounded-3xl border-2 border-slate-300 shadow-md space-y-3 cursor-pointer hover:border-red-500 hover:shadow-lg transition">
+                            <div class="flex items-center justify-between">
+                                <span class="px-2.5 py-0.5 rounded bg-red-100 text-red-800 border border-red-300 text-[10px] font-black" x-text="fmt.charLimit + ' Karakter'"></span>
+                                <i data-lucide="arrow-right" class="w-4 h-4 text-red-600"></i>
+                            </div>
+                            <h3 class="font-black text-black text-base brand-font" x-text="fmt.name"></h3>
+                            <p class="text-xs text-slate-700 font-semibold" x-text="fmt.tips"></p>
+                        </div>
+                    </template>
+                </div>
+
+            </div>
+
+            <!-- ================= TAB 8: AI ÖĞRETMEN ASİSTANI ================= -->
+            <div x-show="currentTab === 'ai-assistant'" class="space-y-6">
+                
+                <div class="bg-slate-100/95 p-5 rounded-3xl border-2 border-slate-300 shadow-md">
+                    <h2 class="text-xl font-black text-black flex items-center gap-2 brand-font">
+                        <span>🤖 Rotalı Fenci Öğretmen Asistanı</span>
+                    </h2>
+                    <p class="text-xs text-slate-700 font-semibold">Gözlem özetleme, proje takvim planlama, iş yükü ve resmi metin asistanları</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <template x-for="ast in assistants" :key="ast.id">
+                        <div @click="openAIModal(ast.id)" class="bg-slate-100/95 p-5 rounded-3xl border-2 border-slate-300 shadow-md space-y-3 cursor-pointer hover:border-red-500 hover:shadow-lg transition">
+                            <div class="flex items-center justify-between">
+                                <span class="px-2.5 py-0.5 rounded bg-red-100 text-red-800 border border-red-300 text-[10px] font-black uppercase" x-text="ast.badge"></span>
+                                <i data-lucide="arrow-up-right" class="w-4 h-4 text-red-600"></i>
+                            </div>
+                            <h3 class="font-black text-black text-base brand-font" x-text="ast.name"></h3>
+                            <p class="text-xs text-slate-700 font-semibold" x-text="ast.role"></p>
+                        </div>
+                    </template>
+                </div>
+
+            </div>
+
+            <!-- ================= TAB 9: AYARLAR & YEDEKLEME ================= -->
+            <div x-show="currentTab === 'settings'" class="space-y-6">
+                
+                <div class="bg-slate-100/95 p-5 rounded-3xl border-2 border-slate-300 shadow-md">
+                    <h2 class="text-xl font-black text-black brand-font">⚙️ Sistem Ayarları & %100 Yerel Veri</h2>
+                    <p class="text-xs text-slate-700 font-semibold">Verilerinizi tek bir JSON dosyasında yedekleyin veya geri yükleyin</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-slate-100/95 p-5 rounded-3xl border-2 border-slate-300 shadow-md space-y-4">
+                        <h3 class="font-black text-black text-sm pb-2 border-b border-slate-300">💾 Veri Yedekleme ve Kurtarma</h3>
+                        <p class="text-xs text-slate-700 font-semibold">Tüm sınıflarınız, öğrencileriniz, gözlemleriniz ve proje takviminiz tek bir JSON dosyasına indirilir.</p>
+
+                        <div class="space-y-2 pt-2">
+                            <button @click="exportBackup()" class="w-full py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-xs transition flex items-center justify-center gap-2 shadow-sm">
+                                <i data-lucide="download" class="w-4 h-4"></i>
+                                <span>JSON Yedek Dosyasını İndir</span>
+                            </button>
+
+                            <button @click="triggerImportBackup()" class="w-full py-2.5 rounded-xl bg-white hover:bg-slate-200 text-black font-black text-xs transition flex items-center justify-center gap-2 border-2 border-slate-300 shadow-sm">
+                                <i data-lucide="upload" class="w-4 h-4 text-red-600"></i>
+                                <span>JSON Yedeğini Geri Yükle</span>
+                            </button>
+                            <input type="file" id="jsonFileInput" @change="handleFileImport($event)" accept=".json" class="hidden">
+                        </div>
+
+                        <div class="pt-4 border-t border-slate-300">
+                            <button @click="window.StorageManager.resetToDefaults()" class="text-xs text-rose-700 hover:text-rose-900 font-black">
+                                ⚠️ Varsayılan Verilere Sıfırla
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-100/95 p-5 rounded-3xl border-2 border-slate-300 shadow-md space-y-4">
+                        <h3 class="font-black text-black text-sm pb-2 border-b border-slate-300">✨ Canlı Gemini API (İsteğe Bağlı)</h3>
+                        <p class="text-xs text-slate-700 font-semibold">Canlı Google Gemini API anahtarı ekleyerek yapay zeka asistanını genişletebilirsiniz.</p>
+
+                        <div>
+                            <label class="text-xs font-black text-black block mb-1">Gemini API Key</label>
+                            <input type="password" x-model="settings.geminiApiKey" @change="window.StorageManager.saveSettings(settings)" placeholder="AIzaSy..." class="w-full px-3 py-2 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-black focus:outline-none focus:border-red-500 font-mono shadow-sm">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ================= MODAL 1: HIZLI KOMUT PALETİ (Ctrl+K) ================= -->
+    <div x-show="isCommandOpen" x-cloak class="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4 bg-slate-950/80 backdrop-blur-sm" @click.self="isCommandOpen = false">
+        <div class="w-full max-w-xl bg-slate-100 p-4 rounded-3xl shadow-2xl border-2 border-slate-300 space-y-4">
+            <div class="flex items-center gap-3 px-3 py-2 bg-white rounded-2xl border-2 border-slate-300">
+                <i data-lucide="search" class="w-5 h-5 text-red-600"></i>
+                <input type="text" x-model="commandQuery" placeholder="Ne yapmak istiyorsun? (Örn: gözlem, proje, takvim, sertifika...)" class="w-full bg-transparent text-sm text-black font-black focus:outline-none placeholder-slate-500">
+                <kbd class="text-[10px] bg-slate-200 px-2 py-0.5 rounded text-black font-black font-mono">ESC</kbd>
+            </div>
+
+            <div class="space-y-1.5 max-h-80 overflow-y-auto">
+                <div class="px-2 py-1 text-xs font-black text-red-700 uppercase">Hızlı Aksiyonlar</div>
+                
+                <button @click="executeCommand('new-obs')" class="w-full flex items-center justify-between p-3 rounded-xl bg-white hover:bg-red-50 text-xs text-black font-black border border-slate-300 transition text-left shadow-sm">
+                    <span class="flex items-center gap-2">✍️ Yeni Öğrenci Gözlemi Ekle</span>
+                    <span class="text-red-700 font-black text-[10px]">Gözlem</span>
+                </button>
+
+                <button @click="executeCommand('new-proj-cal')" class="w-full flex items-center justify-between p-3 rounded-xl bg-white hover:bg-emerald-50 text-xs text-black font-black border border-slate-300 transition text-left shadow-sm">
+                    <span class="flex items-center gap-2">📅 Proje Takvimine Yeni Kayıt Ekle</span>
+                    <span class="text-emerald-700 font-black text-[10px]">Proje</span>
+                </button>
+
+                <button @click="executeCommand('new-task')" class="w-full flex items-center justify-between p-3 rounded-xl bg-white hover:bg-amber-50 text-xs text-black font-black border border-slate-300 transition text-left shadow-sm">
+                    <span class="flex items-center gap-2">📌 Yeni Görev Ekle</span>
+                    <span class="text-amber-700 font-black text-[10px]">Görev</span>
+                </button>
+
+                <button @click="executeCommand('cert')" class="w-full flex items-center justify-between p-3 rounded-xl bg-white hover:bg-yellow-50 text-xs text-black font-black border border-slate-300 transition text-left shadow-sm">
+                    <span class="flex items-center gap-2">🏆 Başarı Belgesi / Sertifika Bas</span>
+                    <span class="text-yellow-700 font-black text-[10px]">Baskı</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL 2: YAPAY ZEKA MODALI ================= -->
+    <div x-show="isAIOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm" @click.self="isAIOpen = false">
+        <div class="w-full max-w-2xl bg-slate-100 p-6 rounded-3xl shadow-2xl border-2 border-slate-300 space-y-4 max-h-[90vh] flex flex-col">
+            
+            <div class="flex items-center justify-between border-b border-slate-300 pb-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">✨</span>
+                    <h3 class="font-black text-black text-lg brand-font">Rotalı Fenci AI Asistanı</h3>
+                </div>
+                <button @click="isAIOpen = false" class="text-slate-600 hover:text-black font-black text-lg">✕</button>
+            </div>
+
+            <div>
+                <label class="text-xs font-black text-black block mb-1">Uzman Asistan</label>
+                <select x-model="selectedAssistant" class="w-full px-3 py-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-black shadow-sm">
+                    <template x-for="ast in assistants" :key="ast.id">
+                        <option :value="ast.id" x-text="ast.name"></option>
+                    </template>
+                </select>
+            </div>
+
+            <div>
+                <label class="text-xs font-black text-black block mb-1">Metin / Ham Not / İstek</label>
+                <textarea x-model="aiParams.customPrompt" rows="3" placeholder="Örn: Ali ders içi etkinliklerde çok hevesli ancak ödev takibinde zorlanıyor..." class="w-full px-3 py-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-black focus:outline-none focus:border-red-500 shadow-sm"></textarea>
+            </div>
+
+            <button @click="runAIGeneration()" :disabled="isAILoading" class="w-full py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-xs transition flex items-center justify-center gap-2 shadow-sm">
+                <span x-show="!isAILoading">🚀 Metni Düzenle & Oluştur</span>
+                <span x-show="isAILoading">✨ Hazırlanıyor...</span>
+            </button>
+
+            <!-- Çıktı -->
+            <div x-show="aiResult" class="flex-1 overflow-y-auto p-4 rounded-2xl bg-white border-2 border-slate-300 text-xs text-black font-bold whitespace-pre-line leading-relaxed shadow-inner">
+                <div x-text="aiResult"></div>
+            </div>
+
+            <div x-show="aiResult" class="flex justify-end gap-2 pt-2 border-t border-slate-300">
+                <button @click="window.Exporter.copyToClipboard(aiResult, showToast)" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-black text-white text-xs font-black shadow-sm">
+                    📋 Panoya Kopyala
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL 3: YENİ GÖZLEM EKLE ================= -->
+    <div x-show="isObsModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm" @click.self="isObsModalOpen = false">
+        <div class="w-full max-w-lg bg-slate-100 p-6 rounded-3xl shadow-2xl border-2 border-slate-300 space-y-4">
+            <h3 class="font-black text-black text-lg brand-font pb-2 border-b border-slate-300">✍️ Yeni Öğrenci Gözlem Notu Ekle</h3>
+            
+            <div>
+                <label class="text-xs font-black text-black block mb-1">Öğrenci Seç</label>
+                <select x-model="newObs.studentId" class="w-full px-3 py-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-black shadow-sm">
+                    <option value="">Seçiniz...</option>
+                    <template x-for="st in data.students" :key="st.id">
+                        <option :value="st.id" x-text="st.name + ' (' + st.classId + ' - No:' + st.no + ')'"></option>
+                    </template>
+                </select>
+            </div>
+
+            <div>
+                <label class="text-xs font-black text-black block mb-1">Kategori</label>
+                <select x-model="newObs.category" class="w-full px-3 py-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-black shadow-sm">
+                    <option value="Etkinlik ve Laboratuvar Becerisi">Etkinlik ve Laboratuvar Becerisi</option>
+                    <option value="Akademik Gelişim & Takip">Akademik Gelişim & Takip</option>
+                    <option value="Proje ve Bilimsel Çalışmalar">Proje ve Bilimsel Çalışmalar</option>
+                    <option value="Derse Katılım ve İletişim">Derse Katılım ve İletişim</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="text-xs font-black text-black block mb-1">Öğretmen Notunuz</label>
+                <textarea x-model="newObs.rawNote" rows="3" placeholder="Öğrenci hakkındaki ham notunuzu yazınız..." class="w-full px-3 py-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-black focus:outline-none focus:border-red-500 shadow-sm"></textarea>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2">
+                <button @click="isObsModalOpen = false" class="px-4 py-2 rounded-xl bg-white hover:bg-slate-200 text-slate-800 font-black text-xs border border-slate-300 shadow-sm">İptal</button>
+                <button @click="addObservation()" class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-xs shadow-sm">Kaydet & Özetle</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL 4: YENİ PROJE TAKVİMİ EKLE ================= -->
+    <div x-show="isProjCalModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm" @click.self="isProjCalModalOpen = false">
+        <div class="w-full max-w-lg bg-slate-100 p-6 rounded-3xl shadow-2xl border-2 border-slate-300 space-y-4">
+            <h3 class="font-black text-black text-lg flex items-center gap-2 brand-font pb-2 border-b border-slate-300">
+                <i data-lucide="calendar-plus" class="w-5 h-5 text-emerald-600"></i>
+                <span>Proje Takvimine Yeni Kayıt Ekle</span>
+            </h3>
+            
+            <div>
+                <label class="text-xs font-black text-black block mb-1">Proje / Takvim Başlığı</label>
+                <input type="text" x-model="newProjCal.title" placeholder="Örn: TÜBİTAK 2204-B Proje Başvurusu" class="w-full px-3 py-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-black shadow-sm">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="text-xs font-black text-black block mb-1">Kategori</label>
+                    <select x-model="newProjCal.category" class="w-full px-3 py-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-black shadow-sm">
+                        <option value="TÜBİTAK">TÜBİTAK</option>
+                        <option value="eTwinning">eTwinning</option>
+                        <option value="TEKNOFEST">TEKNOFEST</option>
+                        <option value="Okul Projesi">Okul Projesi</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="text-xs font-black text-black block mb-1">Öncelik</label>
+                    <select x-model="newProjCal.priority" class="w-full px-3 py-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-black shadow-sm">
+                        <option value="Yüksek">🔴 Yüksek</option>
+                        <option value="Orta">🟠 Orta</option>
+                        <option value="Normal">🟢 Normal</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label class="text-xs font-black text-black block mb-1">İlgili Alt Proje / Ekip</label>
+                <input type="text" x-model="newProjCal.targetProject" placeholder="Örn: 8/A STEM Takımı" class="w-full px-3 py-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-black shadow-sm">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="text-xs font-black text-black block mb-1">Başlangıç Tarihi</label>
+                    <input type="date" x-model="newProjCal.startDate" class="w-full px-3 py-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-black shadow-sm">
+                </div>
+
+                <div>
+                    <label class="text-xs font-black text-black block mb-1">Son Teslim Tarihi</label>
+                    <input type="date" x-model="newProjCal.deadline" class="w-full px-3 py-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-black shadow-sm">
+                </div>
+            </div>
+
+            <div>
+                <label class="text-xs font-black text-black block mb-1">Açıklama & Hatırlatmalar</label>
+                <textarea x-model="newProjCal.notes" rows="2" placeholder="Önemli teslim aşamaları ve görev notları..." class="w-full px-3 py-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-black focus:outline-none focus:border-red-500 shadow-sm"></textarea>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2">
+                <button @click="isProjCalModalOpen = false" class="px-4 py-2 rounded-xl bg-white hover:bg-slate-200 text-slate-800 font-black text-xs border border-slate-300 shadow-sm">İptal</button>
+                <button @click="addProjectCalendarItem()" class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-xs shadow-sm">Takvime Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL 5: YENİ GÖREV EKLE ================= -->
+    <div x-show="isTaskModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm" @click.self="isTaskModalOpen = false">
+        <div class="w-full max-w-md bg-slate-100 p-6 rounded-3xl shadow-2xl border-2 border-slate-300 space-y-4">
+            <h3 class="font-black text-black text-lg brand-font pb-2 border-b border-slate-300">📌 Yeni Görev Ekle</h3>
+            
+            <div>
+                <label class="text-xs font-black text-black block mb-1">Görev Başlığı</label>
+                <input type="text" x-model="newTask.title" placeholder="Örn: 7/A Gözlem Raporunu Tamamla" class="w-full px-3 py-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-black shadow-sm">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="text-xs font-black text-black block mb-1">Kategori</label>
+                    <select x-model="newTask.category" class="w-full px-3 py-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-black shadow-sm">
+                        <option value="Öğrenci Takibi">Öğrenci Takibi</option>
+                        <option value="Proje Takvimi">Proje Takvimi</option>
+                        <option value="Evrak">Evrak</option>
+                        <option value="Sosyal Medya">Sosyal Medya</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="text-xs font-black text-black block mb-1">Öncelik</label>
+                    <select x-model="newTask.priority" class="w-full px-3 py-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-black shadow-sm">
+                        <option value="urgent">🔴 Acil</option>
+                        <option value="important">🟠 Önemli</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2">
+                <button @click="isTaskModalOpen = false" class="px-4 py-2 rounded-xl bg-white hover:bg-slate-200 text-slate-800 font-black text-xs border border-slate-300 shadow-sm">İptal</button>
+                <button @click="addTask()" class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-xs shadow-sm">Görevi Ekle</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL 6: ÖĞRENCİ ÖDEV GEÇMİŞİ & KARNESİ ================= -->
+    <div x-show="isHwHistoryModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm" @click.self="isHwHistoryModalOpen = false">
+        <div class="w-full max-w-2xl bg-slate-100 p-6 rounded-3xl shadow-2xl border-2 border-slate-300 space-y-4 max-h-[90vh] flex flex-col">
+            
+            <!-- Başlık -->
+            <div class="flex items-center justify-between border-b-2 border-slate-300 pb-3">
+                <div class="flex items-center gap-3">
+                    <span class="text-3xl" x-text="selectedHwStudent?.avatar || '👨‍🎓'"></span>
+                    <div>
+                        <h3 class="font-black text-black text-lg brand-font flex items-center gap-2">
+                            <span x-text="selectedHwStudent?.name"></span>
+                            <span class="text-xs bg-red-600 text-white font-black px-2 py-0.5 rounded-lg shadow-sm" x-text="selectedHwStudent?.classId + ' - No: ' + selectedHwStudent?.no"></span>
+                        </h3>
+                        <p class="text-xs text-slate-700 font-bold">Öğrenci Bireysel Ödev Takip Karnesi ve Geçmiş Kayıtları</p>
+                    </div>
+                </div>
+                <button @click="isHwHistoryModalOpen = false" class="p-2 rounded-xl bg-white hover:bg-slate-200 text-black font-black text-base border border-slate-300 shadow-sm">✕</button>
+            </div>
+
+            <!-- İstatistik Kartları -->
+            <template x-if="selectedHwStudent">
+                <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                    <div class="bg-red-100 p-2.5 rounded-xl border border-red-300 text-center">
+                        <span class="text-[10px] font-black text-red-900 block">Toplam Puan</span>
+                        <span class="text-base font-black text-red-950" x-text="getStudentHomeworkStats(selectedHwStudent.id).totalPoints + ' p'"></span>
+                    </div>
+                    <div class="bg-yellow-100 p-2.5 rounded-xl border border-yellow-300 text-center">
+                        <span class="text-[10px] font-black text-yellow-900 block">⭐ Yıldız (4)</span>
+                        <span class="text-base font-black text-yellow-950" x-text="getStudentHomeworkStats(selectedHwStudent.id).stars"></span>
+                    </div>
+                    <div class="bg-emerald-100 p-2.5 rounded-xl border border-emerald-300 text-center">
+                        <span class="text-[10px] font-black text-emerald-900 block">✅ Tam (2)</span>
+                        <span class="text-base font-black text-emerald-950" x-text="getStudentHomeworkStats(selectedHwStudent.id).full"></span>
+                    </div>
+                    <div class="bg-amber-100 p-2.5 rounded-xl border border-amber-300 text-center">
+                        <span class="text-[10px] font-black text-amber-900 block">⚠️ Yarım (1)</span>
+                        <span class="text-base font-black text-amber-950" x-text="getStudentHomeworkStats(selectedHwStudent.id).half"></span>
+                    </div>
+                    <div class="bg-rose-100 p-2.5 rounded-xl border border-rose-300 text-center">
+                        <span class="text-[10px] font-black text-rose-900 block">❌ Yok (0)</span>
+                        <span class="text-base font-black text-rose-950" x-text="getStudentHomeworkStats(selectedHwStudent.id).zero"></span>
+                    </div>
+                    <div class="bg-slate-200 p-2.5 rounded-xl border border-slate-400 text-center">
+                        <span class="text-[10px] font-black text-slate-800 block">🚫 Gelmedi</span>
+                        <span class="text-base font-black text-slate-900" x-text="getStudentHomeworkStats(selectedHwStudent.id).absent"></span>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Geçmiş Liste -->
+            <div class="flex-1 overflow-y-auto space-y-2 max-h-60 pr-1">
+                <template x-if="selectedHwStudent && getStudentHistoryLogs(selectedHwStudent.id).length === 0">
+                    <div class="p-6 text-center text-slate-500 font-bold bg-white rounded-2xl border border-slate-300">
+                        Bu öğrenci için henüz kaydedilmiş ödev bulunmuyor.
+                    </div>
+                </template>
+
+                <template x-for="log in (selectedHwStudent ? getStudentHistoryLogs(selectedHwStudent.id) : [])" :key="log.date + log.title">
+                    <div class="p-3.5 rounded-2xl bg-white border-2 border-slate-300 shadow-sm flex items-center justify-between gap-3">
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-mono font-black text-red-700 bg-red-50 px-2 py-0.5 rounded border border-red-200" x-text="log.date"></span>
+                                <h4 class="text-xs font-black text-black" x-text="log.title"></h4>
+                            </div>
+                            <p class="text-[11px] text-slate-600 font-bold" x-show="log.note" x-text="'💬 Öğretmen Notu: ' + log.note"></p>
+                        </div>
+                        
+                        <div>
+                            <span x-show="log.score === '4'" class="px-3 py-1 rounded-xl bg-yellow-400 text-black font-black text-xs shadow-sm">⭐ 4: Yıldız (+4p)</span>
+                            <span x-show="log.score === '2'" class="px-3 py-1 rounded-xl bg-emerald-600 text-white font-black text-xs shadow-sm">✅ 2: Tam (+2p)</span>
+                            <span x-show="log.score === '1'" class="px-3 py-1 rounded-xl bg-amber-500 text-white font-black text-xs shadow-sm">⚠️ 1: Yarım (+1p)</span>
+                            <span x-show="log.score === '0'" class="px-3 py-1 rounded-xl bg-red-600 text-white font-black text-xs shadow-sm">❌ 0: Yok (0p)</span>
+                            <span x-show="log.score === 'G'" class="px-3 py-1 rounded-xl bg-slate-700 text-white font-black text-xs shadow-sm">🚫 G: Gelmedi</span>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Alt Butonlar -->
+            <div class="flex items-center justify-between pt-3 border-t-2 border-slate-300">
+                <button @click="isHwHistoryModalOpen = false; openCertModal(selectedHwStudent);" class="px-4 py-2 rounded-xl bg-yellow-500 hover:bg-yellow-600 text-black font-black text-xs shadow-sm flex items-center gap-1.5 transition">
+                    🏆 Bu Öğrenciye Belge Ver
+                </button>
+
+                <button @click="isHwHistoryModalOpen = false" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-black text-white font-black text-xs shadow-sm transition">
+                    Kapat
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ================= MODAL 7: DERS PROGRAMI DÜZENLEME PENCERESİ ================= -->
+    <div x-show="isEditLessonModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm" @click.self="isEditLessonModalOpen = false">
+        <div class="w-full max-w-lg bg-slate-100 p-6 rounded-3xl shadow-2xl border-2 border-slate-300 space-y-4 max-h-[95vh] flex flex-col">
+            
+            <!-- Modal Başlığı -->
+            <div class="flex items-center justify-between border-b-2 border-slate-300 pb-3">
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 bg-red-600 rounded-xl text-white shadow-md">
+                        <i data-lucide="edit-3" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-black text-black text-lg brand-font">✏️ Ders Programı Hücresi Düzenle</h3>
+                        <p class="text-xs text-red-700 font-black" x-text="editingLesson.day + ' — ' + editingLesson.periodLabel"></p>
+                    </div>
+                </div>
+                <button @click="isEditLessonModalOpen = false" class="p-2 rounded-xl bg-white hover:bg-slate-200 text-black font-black text-base border border-slate-300 shadow-sm">✕</button>
+            </div>
+
+            <!-- Form İçeriği -->
+            <div class="flex-1 overflow-y-auto space-y-3.5 pr-1">
+                
+                <!-- Sınıf & Derslik -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs font-black text-black block mb-1">Sınıf / Görev Seçimi</label>
+                        <select x-model="editingLesson.classId" class="w-full px-3 py-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-black shadow-sm focus:border-red-500">
+                            <option value="5/A">5/A (Fen Bilimleri)</option>
+                            <option value="5/D">5/D (Fen Bilimleri)</option>
+                            <option value="6/G">6/G (Fen Bilimleri)</option>
+                            <option value="7/A">7/A (Fen Bilimleri)</option>
+                            <option value="7/B">7/B (Fen Bilimleri)</option>
+                            <option value="5/D Rehberlik">⭐ 5/D Rehberlik ve Yönlendirme</option>
+                            <option value="Nöbet Görevi">🛡️ Nöbet Görevi (Cuma)</option>
+                            <option value="TÜBİTAK Proje">🔬 TÜBİTAK Proje</option>
+                            <option value="Zümre / Plan">👥 Zümre / Planlama</option>
+                            <option value="STEM Kulübü">🚀 STEM Kulübü</option>
+                            <option value="Boş">⚪ Boş Ders / Hazırlık</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-black text-black block mb-1">Derslik / Laboratuvar</label>
+                        <input type="text" x-model="editingLesson.room" placeholder="Örn: Fen Laboratuvarı" class="w-full px-3 py-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-black shadow-sm focus:border-red-500">
+                    </div>
+                </div>
+
+                <!-- Ders Adı & Konu -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs font-black text-black block mb-1">Ders / Etkinlik Adı</label>
+                        <input type="text" x-model="editingLesson.subject" placeholder="Örn: Fen Bilimleri" class="w-full px-3 py-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-black shadow-sm focus:border-red-500">
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-black text-black block mb-1">Ders Konusu / Ünite</label>
+                        <input type="text" x-model="editingLesson.topic" placeholder="Örn: Hücre ve Organeller" class="w-full px-3 py-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-black shadow-sm focus:border-red-500">
+                    </div>
+                </div>
+
+                <!-- MEB Kazanım Kodu -->
+                <div>
+                    <label class="text-xs font-black text-black block mb-1">MEB Kazanım Kodu</label>
+                    <input type="text" x-model="editingLesson.outcomeCode" placeholder="Örn: F.6.1.1.1 veya F.7.2.1.2" class="w-full px-3 py-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-mono font-bold text-black shadow-sm focus:border-red-500">
+                </div>
+
+                <!-- MEB Kazanım Açıklaması -->
+                <div>
+                    <label class="text-xs font-black text-black block mb-1">MEB Kazanım Açıklaması & Hedef</label>
+                    <textarea x-model="editingLesson.outcomeDesc" rows="3" placeholder="Örn: Hayvan ve bitki hücrelerini temel kısımları ve görevleri açısından karşılaştırır." class="w-full px-3 py-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-black focus:outline-none focus:border-red-500 shadow-sm leading-relaxed"></textarea>
+                </div>
+
+            </div>
+
+            <!-- Butonlar -->
+            <div class="flex items-center justify-between pt-3 border-t-2 border-slate-300">
+                <button @click="clearLessonCell(editingLesson.day, editingLesson.periodNo); isEditLessonModalOpen = false;" class="px-3.5 py-2 rounded-xl bg-slate-200 hover:bg-rose-100 text-rose-800 font-black text-xs border border-slate-300 shadow-sm transition flex items-center gap-1">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                    <span>Dersi Boşalt</span>
+                </button>
+
+                <div class="flex items-center gap-2">
+                    <button @click="isEditLessonModalOpen = false" class="px-4 py-2 rounded-xl bg-white hover:bg-slate-200 text-slate-800 font-black text-xs border border-slate-300 shadow-sm">
+                        İptal
+                    </button>
+                    <button @click="saveEditingLesson()" class="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-xs shadow-md flex items-center gap-1.5">
+                        <i data-lucide="save" class="w-3.5 h-3.5"></i>
+                        <span>Kaydet & Güncelle</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ================= MODAL 8: DERS PROGRAMI GÖRSELİ YÜKLEME & OCR OTOMATİK DÜZENLEME ================= -->
+    <div x-show="isScheduleImageUploadModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md" @click.self="isScheduleImageUploadModalOpen = false">
+        <div class="w-full max-w-4xl bg-slate-100 p-6 rounded-3xl shadow-2xl border-2 border-slate-300 space-y-4 max-h-[95vh] flex flex-col">
+            
+            <!-- Modal Başlığı -->
+            <div class="flex items-center justify-between border-b-2 border-slate-300 pb-3">
+                <div class="flex items-center gap-3">
+                    <div class="p-3 bg-gradient-to-r from-red-600 to-rose-700 rounded-2xl text-white shadow-md">
+                        <i data-lucide="camera" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-black text-black text-lg brand-font flex items-center gap-2">
+                            <span>📷 Ders Programı Görseli Yükle & Otomatik Yerleştir</span>
+                            <span class="text-[11px] bg-red-600 text-white font-black px-2 py-0.5 rounded-lg shadow-sm">AI / OCR Destekli</span>
+                        </h3>
+                        <p class="text-xs text-slate-700 font-bold">Okul haftalık ders programı fotoğrafını yükleyin, sistem 7 derslik akışı otomatik okuyup yerleştirsin</p>
+                    </div>
+                </div>
+                <button @click="isScheduleImageUploadModalOpen = false" class="p-2 rounded-xl bg-white hover:bg-slate-200 text-black font-black text-base border border-slate-300 shadow-sm">✕</button>
+            </div>
+
+            <!-- İçerik Alanı -->
+            <div class="flex-1 overflow-y-auto space-y-4 pr-1">
+                
+                <!-- Yapay Zeka & Motor Ayarı -->
+                <div class="p-3.5 bg-white rounded-2xl border-2 border-slate-300 space-y-2">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-black text-black">🧠 Çözümleme Motoru:</span>
+                            <span class="px-2.5 py-0.5 rounded-lg text-[11px] font-black" :class="settings.geminiApiKey ? 'bg-emerald-100 text-emerald-900 border border-emerald-300' : 'bg-amber-100 text-amber-900 border border-amber-300'" x-text="settings.geminiApiKey ? '✨ Gemini Vision 1.5/2.0 AI (Aktif)' : '⚡ Cihaz İçi Tesseract OCR'"></span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="password" x-model="settings.geminiApiKey" @change="saveSettings()" placeholder="Gemini API Anahtarı (Opsiyonel / %100 Doğruluk)" class="px-3 py-1.5 rounded-xl border border-slate-300 text-xs font-mono font-bold text-black focus:border-red-500 w-64 shadow-inner">
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-500 font-bold">💡 Ücretsiz Google Gemini API anahtarı girildiğinde görseldeki ders tablosu yapay zeka ile %100 kusursuz okunur; anahtar yoksa yerel Tesseract OCR kullanılır.</p>
+                </div>
+
+                <!-- 1. Yükleme Kutusu -->
+                <div class="border-2 border-dashed border-red-400 bg-red-50/40 rounded-3xl p-5 text-center space-y-2 hover:bg-red-50/70 transition cursor-pointer relative">
+                    <input type="file" accept="image/*" @change="handleScheduleImageUpload($event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                    
+                    <div class="w-12 h-12 mx-auto rounded-2xl bg-red-100 text-red-700 flex items-center justify-center text-xl shadow-inner">
+                        📸
+                    </div>
+                    
+                    <div>
+                        <p class="text-sm font-black text-black">Ders Programı Fotoğrafını Buraya Bırakın veya Seçin</p>
+                        <p class="text-xs text-slate-600 font-bold mt-0.5">PNG, JPG, JPEG veya ekran görüntüsü formatındaki haftalık ders çizelgeleri</p>
+                    </div>
+
+                    <span class="inline-block px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-xs shadow-md transition pointer-events-none">
+                        Fotoğraf Seç / Yükle
+                    </span>
+                </div>
+
+                <!-- 2. Taranan Görsel Önizlemesi & İşlem Durumu -->
+                <template x-if="uploadedScheduleImage">
+                    <div class="bg-white p-4 rounded-2xl border-2 border-slate-300 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-black text-black flex items-center gap-1.5">
+                                <span>🖼️ Yüklenen Görsel:</span>
+                            </span>
+                            <div class="flex items-center gap-2">
+                                <button @click="processScheduleImage()" class="px-3 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-black text-xs border border-slate-300 flex items-center gap-1">
+                                    <span>🔄 Yeniden Tara</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Yükleme İlerlemesi -->
+                        <div x-show="isParsingImage" class="p-4 bg-slate-900 text-white rounded-xl text-center space-y-2">
+                            <div class="inline-block w-6 h-6 border-3 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+                            <p class="text-xs font-black" x-text="imageUploadStatusText"></p>
+                        </div>
+
+                        <div x-show="!isParsingImage" class="p-2.5 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-950 text-xs font-black" x-text="imageUploadStatusText"></div>
+
+                        <div class="flex justify-center max-h-40 overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+                            <img :src="uploadedScheduleImage" alt="Ders Programı Görseli" class="object-contain max-h-40">
+                        </div>
+                    </div>
+                </template>
+
+                <!-- 3. Çözümlenen Program Önizlemesi (Onay Öncesi Doğrulama Matrisi) -->
+                <template x-if="parsedSchedulePreview">
+                    <div class="bg-white p-4.5 rounded-3xl border-2 border-slate-300 space-y-3">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-200">
+                            <div>
+                                <h4 class="font-black text-black text-sm brand-font">📋 Çözümlenen 5 Günlük Program Matrisi</h4>
+                                <p class="text-xs text-slate-600 font-bold">Görselden okunan sınıfları aşağıdan kontrol edebilir, yanlış okunan kutucukları kolayca değiştirebilirsiniz:</p>
+                            </div>
+                            <span class="px-3 py-1 rounded-xl bg-emerald-100 text-emerald-900 border border-emerald-300 text-xs font-black whitespace-nowrap self-start sm:self-auto">
+                                7 Ders / Gün Hazır
+                            </span>
+                        </div>
+
+                        <!-- Önizleme Matrisi -->
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-900 text-white">
+                                        <th class="p-2.5 text-center font-black w-20">Saat</th>
+                                        <template x-for="d in ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma']" :key="d">
+                                            <th class="p-2.5 text-center font-black" x-text="d"></th>
+                                        </template>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-200">
+                                    <template x-for="pNo in [1, 2, 3, 4, 5, 6, 7]" :key="pNo">
+                                        <tr class="hover:bg-slate-50">
+                                            <td class="p-2 text-center font-black bg-slate-100 border-r border-slate-200" x-text="pNo + '. Ders'"></td>
+                                            <template x-for="d in ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma']" :key="d">
+                                                <td class="p-1.5 border-r border-slate-200 text-center">
+                                                    <select x-model="(parsedSchedulePreview[d].find(l => l.periodNo === pNo) || {}).classId" class="w-full text-xs font-black p-1.5 rounded-lg border-2 border-slate-300 bg-white focus:border-red-500 shadow-sm transition" :class="(parsedSchedulePreview[d].find(l => l.periodNo === pNo) || {}).classId !== 'Boş' ? 'text-red-700 font-black bg-red-50/70 border-red-300' : 'text-slate-400 border-slate-200'">
+                                                        <option value="Boş">Ders Yok</option>
+                                                        <option value="5/A">5/A</option>
+                                                        <option value="5/D">5/D</option>
+                                                        <option value="6/G">6/G</option>
+                                                        <option value="7/A">7/A</option>
+                                                        <option value="7/B">7/B</option>
+                                                        <option value="5/D Rehberlik">⭐ 5/D Rehberlik</option>
+                                                        <option value="Nöbet Görevi">🛡️ Nöbet Görevi (Cuma)</option>
+                                                        <option value="TÜBİTAK Proje">🔬 TÜBİTAK Proje</option>
+                                                        <option value="Zümre / Plan">👥 Zümre / Plan</option>
+                                                        <option value="STEM Kulübü">🚀 STEM Kulübü</option>
+                                                    </select>
+                                                </td>
+                                            </template>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </template>
+
+            </div>
+
+            <!-- Alt Butonlar -->
+            <div class="flex items-center justify-between pt-3 border-t-2 border-slate-300">
+                <button @click="isScheduleImageUploadModalOpen = false" class="px-4 py-2 rounded-xl bg-white hover:bg-slate-200 text-slate-800 font-black text-xs border border-slate-300 shadow-sm">
+                    İptal
+                </button>
+
+                <button x-show="parsedSchedulePreview" @click="applyParsedSchedule()" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-500 hover:to-rose-600 text-white font-black text-xs shadow-lg shadow-red-600/30 flex items-center gap-2 transform active:scale-95 transition">
+                    <span>🚀 Programı Panele Aktar ve Yerleştir</span>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- BİLDİRİM TOAST -->
+    <div x-show="toast.show" x-cloak class="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-2xl bg-slate-900 border border-red-500/50 shadow-2xl text-xs font-semibold text-white flex items-center gap-2">
+        <span>🔔</span>
+        <span x-text="toast.message"></span>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) lucide.createIcons();
+        });
+    </script>
+</body>
+</html>
