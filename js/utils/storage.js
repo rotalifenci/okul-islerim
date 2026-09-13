@@ -307,7 +307,7 @@ window.StorageManager = {
         }
     },
 
-    // Verileri kaydet
+    // Verileri kaydet (Telefondan kaydetme hatası korumalı)
     saveData(data, userId = null) {
         const uid = userId || localStorage.getItem('rotali_active_user_id') || 'admin';
         const storageKey = this.getUserStorageKey(uid);
@@ -315,9 +315,76 @@ window.StorageManager = {
             localStorage.setItem(storageKey, JSON.stringify(data));
             localStorage.setItem(`rotali_last_backup_${uid}`, new Date().toISOString());
         } catch (e) {
-            console.error("Veri kaydetme hatası:", e);
+            // localStorage quota aşıldı (genellikle büyük fotoğraflar nedeniyle)
+            if (e.name === 'QuotaExceededError' || e.code === 22 || e.code === 1014) {
+                // Fotoğrafları sıkıştırarak tekrar dene
+                try {
+                    const compressed = JSON.parse(JSON.stringify(data));
+                    if (compressed.maarifWorks && Array.isArray(compressed.maarifWorks)) {
+                        compressed.maarifWorks = compressed.maarifWorks.map(work => {
+                            if (!work.photos || !work.photos.length) return work;
+                            return {
+                                ...work,
+                                photos: work.photos.map(photo => {
+                                    try {
+                                        // Daha küçük boyut ve daha düşük kalite ile yeniden sıkıştır
+                                        const img = new Image();
+                                        const canvas = document.createElement('canvas');
+                                        img.src = photo;
+                                        const maxDim = 600;
+                                        let w = img.naturalWidth || 600, h = img.naturalHeight || 400;
+                                        if (w > maxDim || h > maxDim) {
+                                            if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+                                            else { w = Math.round(w * maxDim / h); h = maxDim; }
+                                        }
+                                        canvas.width = w; canvas.height = h;
+                                        const ctx = canvas.getContext('2d');
+                                        ctx.drawImage(img, 0, 0, w, h);
+                                        return canvas.toDataURL('image/jpeg', 0.5);
+                                    } catch (ce) { return photo; }
+                                })
+                            };
+                        });
+                    }
+                    localStorage.setItem(storageKey, JSON.stringify(compressed));
+                    localStorage.setItem(`rotali_last_backup_${uid}`, new Date().toISOString());
+                    // Kullanıcıya uyarı ver (fotoğraflar küçültüldü ama kaydedildi)
+                    if (typeof window !== 'undefined') {
+                        setTimeout(() => {
+                            const toast = document.createElement('div');
+                            toast.className = 'fixed bottom-4 left-1/2 -translate-x-1/2 z-[9999] bg-amber-600 text-white text-xs font-black px-4 py-2.5 rounded-2xl shadow-2xl max-w-xs text-center';
+                            toast.textContent = '⚠️ Depolama alanı dolu, fotoğraflar otomatik küçültülerek kaydedildi.';
+                            document.body.appendChild(toast);
+                            setTimeout(() => toast.remove(), 5000);
+                        }, 100);
+                    }
+                } catch (e2) {
+                    // Hâlâ aşıyor - eski fotoğrafları temizleyerek son kez dene
+                    try {
+                        const minimal = JSON.parse(JSON.stringify(data));
+                        if (minimal.maarifWorks) {
+                            minimal.maarifWorks = minimal.maarifWorks.map(w => ({ ...w, photos: [] }));
+                        }
+                        localStorage.setItem(storageKey, JSON.stringify(minimal));
+                        if (typeof window !== 'undefined') {
+                            setTimeout(() => {
+                                const toast = document.createElement('div');
+                                toast.className = 'fixed bottom-4 left-1/2 -translate-x-1/2 z-[9999] bg-rose-700 text-white text-xs font-black px-4 py-2.5 rounded-2xl shadow-2xl max-w-xs text-center';
+                                toast.innerHTML = '❌ Depolama alanı tamamen dolu!<br>Fotoğraflar kaydedilemedi.<br>Bazı eski çalışmaları silip tekrar deneyin.';
+                                document.body.appendChild(toast);
+                                setTimeout(() => toast.remove(), 7000);
+                            }, 100);
+                        }
+                    } catch (e3) {
+                        console.error('Kritik kaydetme hatası:', e3);
+                    }
+                }
+            } else {
+                console.error("Veri kaydetme hatası:", e);
+            }
         }
     },
+
 
     // Ayarları yükle
     loadSettings() {

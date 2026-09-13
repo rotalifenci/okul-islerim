@@ -2324,7 +2324,12 @@
 
                             <button @click="exportMaarifWorksToExcel()" title="Maarif Çalışmalarını Excel Olarak İndir" class="px-2.5 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-black text-xs shadow-2xs transition flex items-center gap-1">
                                 <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i>
-                                <span>Excel Rapor</span>
+                                <span>Excel</span>
+                            </button>
+
+                            <button @click="printMaarifWorksPDF()" title="Fotoğraflı Kolaj PDF Raporu Al" class="px-2.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs shadow-2xs transition flex items-center gap-1">
+                                <i data-lucide="file-image" class="w-3.5 h-3.5"></i>
+                                <span>📄 PDF Kolaj</span>
                             </button>
                         </div>
                     </div>
@@ -3985,14 +3990,21 @@
                         <span class="text-xs font-black text-emerald-800 font-mono" x-text="(maarifForm.photos || []).length + ' Fotoğraf'"></span>
                     </div>
 
-                    <!-- Fotoğraf Yükleme Butonu & Sürükle-Bırak Alanı -->
+                    <!-- Fotoğraf Yükleme Butonu (Görünür Buton) -->
+                    <label class="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black text-sm shadow-md shadow-emerald-600/30 cursor-pointer transition transform select-none">
+                        <i data-lucide="image-plus" class="w-5 h-5"></i>
+                        <span>📸 Fotoğraf Ekle</span>
+                        <input type="file" multiple accept="image/*" @change="handleMaarifPhotosUpload($event)" class="hidden">
+                    </label>
+
+                    <!-- Fotoğraf Yükleme Sürükle-Bırak Alanı -->
                     <div class="border-2 border-dashed border-emerald-400 bg-emerald-50/50 hover:bg-emerald-50 p-4 rounded-2xl text-center cursor-pointer transition relative">
                         <input type="file" multiple accept="image/*" @change="handleMaarifPhotosUpload($event)" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
                         <div class="flex flex-col items-center gap-1 pointer-events-none">
                             <div class="p-2 bg-emerald-600 text-white rounded-xl shadow-xs">
                                 <i data-lucide="upload-cloud" class="w-5 h-5"></i>
                             </div>
-                            <span class="text-xs font-black text-slate-900">Fotoğraf Seçin veya Sürükleyip Bırakın</span>
+                            <span class="text-xs font-black text-slate-900">Veya sürükleyip bırakın</span>
                             <span class="text-[11px] text-slate-500 font-medium">Telefon veya bilgisayarınızdan aynı anda birden fazla fotoğraf seçebilirsiniz.</span>
                         </div>
                     </div>
