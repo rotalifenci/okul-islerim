@@ -46,7 +46,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         // Yeni Görev Modalı
-        // 👤 Hesap & Profil Bilgileri Yönetimi
+        // 👤 Hesap Bilgileri Yönetimi
         accountForm: {
             name: '',
             title: '',
@@ -311,6 +311,16 @@ document.addEventListener('alpine:init', () => {
             }
             this.loadAccountForm();
 
+            // Menü başlıklarını garantiye al
+            if (this.data && this.data.navSections && Array.isArray(this.data.navSections)) {
+                this.data.navSections.forEach(sec => {
+                    if (sec.id === 'account') {
+                        sec.title = '👤 Hesap Bilgilerim';
+                    }
+                });
+            }
+
+
             if (this.settings.theme === 'light') {
                 document.body.classList.add('light');
             } else {
@@ -458,6 +468,16 @@ document.addEventListener('alpine:init', () => {
                 // İlgili kullanıcının bağımsız izole verilerini yükle
                 this.data = window.StorageManager.loadData(user.id);
                 this.loadAccountForm();
+
+            // Menü başlıklarını garantiye al
+            if (this.data && this.data.navSections && Array.isArray(this.data.navSections)) {
+                this.data.navSections.forEach(sec => {
+                    if (sec.id === 'account') {
+                        sec.title = '👤 Hesap Bilgilerim';
+                    }
+                });
+            }
+
                 this.showToast(`Giriş başarılı! Hoş geldiniz, ${this.data.teacher?.name || user.name} 👋 ✨`);
                 this.$nextTick(() => {
                     if (window.lucide) window.lucide.createIcons();
@@ -498,6 +518,16 @@ document.addEventListener('alpine:init', () => {
             this.currentTab = tab;
             if (tab === 'account' || tab === 'settings') {
                 this.loadAccountForm();
+
+            // Menü başlıklarını garantiye al
+            if (this.data && this.data.navSections && Array.isArray(this.data.navSections)) {
+                this.data.navSections.forEach(sec => {
+                    if (sec.id === 'account') {
+                        sec.title = '👤 Hesap Bilgilerim';
+                    }
+                });
+            }
+
             }
             window.scrollTo({ top: 0, behavior: 'smooth' });
             this.$nextTick(() => {
@@ -505,7 +535,7 @@ document.addEventListener('alpine:init', () => {
             });
         },
 
-        // 👤 Hesap & Profil Bilgilerini Yükle
+        // 👤 Hesap Bilgilerini Yükle
         loadAccountForm() {
             if (!this.data) return;
             if (!this.data.teacher) {
@@ -532,7 +562,7 @@ document.addEventListener('alpine:init', () => {
             };
         },
 
-        // 👤 Hesap & Profil Bilgilerini Kaydet
+        // 👤 Hesap Bilgilerini Kaydet
         saveAccountForm() {
             if (!this.accountForm.name || !this.accountForm.name.trim()) {
                 alert('Lütfen adınızı ve soyadınızı giriniz!');

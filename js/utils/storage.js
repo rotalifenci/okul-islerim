@@ -187,6 +187,15 @@ window.StorageManager = {
 
                 }
 
+                
+                        if (parsed.navSections && Array.isArray(parsed.navSections)) {
+                            parsed.navSections.forEach(sec => {
+                                if (sec.id === 'account') {
+                                    sec.title = '👤 Hesap Bilgilerim';
+                                }
+                            });
+                        }
+
                 return parsed;
             }
         } catch (e) {
