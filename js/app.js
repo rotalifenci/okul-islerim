@@ -2,11 +2,16 @@
 
 document.addEventListener('alpine:init', () => {
     Alpine.data('rotaliApp', () => ({
-        // Aktif Sekme
-        currentTab: 'dashboard',
+        // Aktif Sekme (Ana sayfa olarak Ders Programı)
+        currentTab: 'calendar-tasks',
         selectedClassId: '7A',
         searchQuery: '',
         projectCategoryFilter: 'Hepsi',
+        
+        // Nöbet Yerleri ve 7 Haftalık Nöbet Rotasyon Döngüsü
+        // (Sıra: Kat-2 (2 hafta), Kat-3 (2 hafta), Bahçe (1 hafta), Zemin (1 hafta), Kat-1 (1 hafta))
+        dutyLocations: ['Bahçe', 'Zemin', 'Kat-1', 'Kat-2', 'Kat-3'],
+        dutyRotation: ['Kat-2', 'Kat-2', 'Kat-3', 'Kat-3', 'Bahçe', 'Zemin', 'Kat-1'],
         
         // Veri Modelleri
         data: window.StorageManager.loadData(),
@@ -793,14 +798,29 @@ document.addEventListener('alpine:init', () => {
         setDutyDay(day) {
             if (!this.data.teacher) this.data.teacher = {};
             this.data.teacher.dutyDay = day;
-            window.StorageManager.saveData(this.data, this.activeTeacherId);
+            window.StorageManager.saveData(this.data);
             this.showToast(`Nöbet günü ${day} olarak belirlendi! 🛡️`);
             this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
         },
 
+        setDutyArea(area) {
+            if (!this.data.teacher) this.data.teacher = {};
+            this.data.teacher.dutyArea = area;
+            window.StorageManager.saveData(this.data);
+            this.showToast(`Nöbet yeri ${area} olarak belirlendi! 📍`);
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+
+        getDutyForWeek(weekNo) {
+            if (!weekNo || weekNo < 1) weekNo = 1;
+            const rot = this.dutyRotation || ['Kat-2', 'Kat-2', 'Kat-3', 'Kat-3', 'Bahçe', 'Zemin', 'Kat-1'];
+            const idx = (weekNo - 1) % rot.length;
+            return rot[idx];
+        },
+
         saveDutyDay() {
-            window.StorageManager.saveData(this.data, this.activeTeacherId);
-            this.showToast(`Nöbet günü ${this.data.teacher?.dutyDay || 'Belirlenmedi'} olarak güncellendi! 🛡️`);
+            window.StorageManager.saveData(this.data);
+            this.showToast(`Nöbet bilgisi (${this.data.teacher?.dutyDay || 'Cuma'} - ${this.data.teacher?.dutyArea || 'Kat-2'}) güncellendi! 🛡️`);
             this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
         },
 

@@ -10,14 +10,16 @@ window.StorageManager = {
             if (raw) {
                 const parsed = JSON.parse(raw);
                 if (window.InitialData) {
-                    if (!parsed._murat_kundakci_21ders_v4) {
-                        parsed.teacher = JSON.parse(JSON.stringify(window.InitialData.teacher));
-                        parsed.classes = JSON.parse(JSON.stringify(window.InitialData.classes));
-                        parsed.students = JSON.parse(JSON.stringify(window.InitialData.students));
-                        parsed.homeworkDays = JSON.parse(JSON.stringify(window.InitialData.homeworkDays));
-                        parsed.weeklySchedule = JSON.parse(JSON.stringify(window.InitialData.weeklySchedule));
-                        parsed.tasks = JSON.parse(JSON.stringify(window.InitialData.tasks));
-                        parsed._murat_kundakci_21ders_v4 = true;
+                    if (!parsed._murat_kundakci_duty_v5) {
+                        if (parsed.teacher) {
+                            parsed.teacher.school = "";
+                            parsed.teacher.dutyArea = window.InitialData.teacher.dutyArea;
+                            parsed.teacher.dutyLocations = window.InitialData.teacher.dutyLocations;
+                            parsed.teacher.dutyRotation = window.InitialData.teacher.dutyRotation;
+                        } else {
+                            parsed.teacher = JSON.parse(JSON.stringify(window.InitialData.teacher));
+                        }
+                        parsed._murat_kundakci_duty_v5 = true;
                         this.saveData(parsed);
                     }
                     if (!parsed.lessonPeriods) parsed.lessonPeriods = JSON.parse(JSON.stringify(window.InitialData.lessonPeriods || []));
@@ -30,7 +32,7 @@ window.StorageManager = {
 
         // İlk defa açılıyorsa InitialData yükle ve kaydet
         const initial = window.InitialData ? JSON.parse(JSON.stringify(window.InitialData)) : {};
-        initial._murat_kundakci_21ders_v4 = true;
+        initial._murat_kundakci_duty_v5 = true;
         this.saveData(initial);
         return initial;
     },
@@ -60,7 +62,7 @@ window.StorageManager = {
             autoBackup: true,
             soundEffects: true,
             compactMode: false,
-            schoolName: 'Şehit Öğretmen Ortaokulu',
+            schoolName: '',
             teacherName: 'Murat Kundakcı (Rotalı Fenci)',
             pinLock: ''
         };
