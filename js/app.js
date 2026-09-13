@@ -1065,6 +1065,28 @@ document.addEventListener('alpine:init', () => {
             return (window.MaarifUnitInfo && window.MaarifUnitInfo[g]) || [];
         },
 
+        formatValuesList(valStr) {
+            if (!valStr || typeof valStr !== 'string') return [];
+            const str = valStr.trim();
+            if (!str) return [];
+            if (str.includes(',') || str.includes(';')) {
+                return str.split(/[,;]+/).map(s => s.trim()).filter(Boolean);
+            }
+            const parts = str.split(/(?=D\d)/g);
+            return parts.map(s => s.trim()).filter(Boolean);
+        },
+
+        formatSkillsList(skillStr) {
+            if (!skillStr || typeof skillStr !== 'string') return [];
+            const str = skillStr.trim();
+            if (!str) return [];
+            if (str.includes(',') || str.includes(';')) {
+                return str.split(/[,;]+/).map(s => s.trim()).filter(Boolean);
+            }
+            const parts = str.split(/(?=(?:SDB|KB|E|OB|AB|DB|MB)\d)/g);
+            return parts.map(s => s.trim()).filter(Boolean);
+        },
+
         printAnnualPlan(grade = null) {
             const g = grade || this.selectedAnnualPlanGrade || 5;
             const container = document.getElementById('printable-annual-plan-container');

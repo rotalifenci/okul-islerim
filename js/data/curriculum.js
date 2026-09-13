@@ -19,8 +19,7 @@ window.CurriculumData = {
               "desc": "Laboratuvar Güvenliği (4 Saat)",
               "process": "Laboratuvar Güvenliği (4 Saat)",
               "processList": [
-                "Laboratuvar Güvenliği (4 Saa",
-                "t)"
+                "Laboratuvar Güvenliği Kuralları ve Güvenli Çalışma İlkeleri (4 Saat)"
               ],
               "week": "1. Hafta",
               "date": "14-18 Eylül",
@@ -3708,8 +3707,7 @@ window.AnnualPlanData = {
       ],
       "process": "Laboratuvar Güvenliği (4 Saat)",
       "processList": [
-        "Laboratuvar Güvenliği (4 Saa",
-        "t)"
+        "Laboratuvar Güvenliği Kuralları ve Güvenli Çalışma İlkeleri (4 Saat)"
       ],
       "skills": "SDB1.2. Kendini Düzenleme (Öz Düzenleme)SDB2.1. İletişim",
       "values": "D16. Sorumluluk",
