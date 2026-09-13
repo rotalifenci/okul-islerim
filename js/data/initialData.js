@@ -18,6 +18,7 @@ window.InitialData = {
         { id: 'calendar-tasks', title: '📅 Ders Programı', icon: 'calendar', color: 'amber', visible: true, isSystem: true, badge: 'Günde 7 Ders' },
         { id: 'students', title: '📝 Öğrenci Ödev Kontrolü', icon: 'clipboard-check', color: 'sky', visible: true, isSystem: true, badge: '' },
         { id: 'assignments', title: '📚 Ödevler', icon: 'book-marked', color: 'purple', visible: true, isSystem: true, badge: '' },
+        { id: 'school-meetings', title: '👥 Okul Toplantılarım', icon: 'users', color: 'indigo', visible: true, isSystem: true, badge: '' },
         { id: 'school-tasks', title: '📌 Okul Görevlerim', icon: 'check-square', color: 'red', visible: true, isSystem: true, badge: '' },
         { id: 'annual-plan', title: '📋 Maarif Yıllık Planı', icon: 'book-open', color: 'emerald', visible: true, isSystem: true, badge: '5, 6, 7, 8' },
         { id: 'daily-plan', title: '📑 Günlük Plan', icon: 'file-text', color: 'teal', visible: true, isSystem: true, badge: 'Maarif Modeli' },
@@ -26,6 +27,56 @@ window.InitialData = {
         { id: 'social', title: 'Sosyal Medya & Bülten', icon: 'share-2', color: 'pink', visible: true, isSystem: true, badge: '' },
         { id: 'ai-assistant', title: 'AI Öğretmen Asistanı', icon: 'sparkles', color: 'red', visible: true, isSystem: true, badge: '' },
         { id: 'settings', title: 'Ayarlar & Yedekleme', icon: 'settings', color: 'slate', visible: true, isSystem: true, badge: '' }
+    ],
+    meetings: [
+        {
+            id: 'meet-1',
+            title: '2026-2027 Sene Başı Öğretmenler Kurulu Toplantısı',
+            type: 'Öğretmenler Kurulu',
+            date: '2026-09-15',
+            time: '14:30',
+            location: 'Konferans Salonu',
+            attendees: 'Tüm Öğretmenler & Okul İdaresi',
+            agenda: '1. Açılış ve yoklama\n2. Türkiye Yüzyılı Maarif Modeli yeni müfredat ilkeleri\n3. 21 saatlik haftalık ders programı ve cuma kat nöbeti dağılımı\n4. Laboratuvar ve STEM etkinliklerinin planlanması',
+            decisions: '5., 6., 7. sınıflarda Maarif Modeli etkinlik defterleri ve deney föyleri haftalık kontrol edilecek. Cuma günleri kat nöbeti düzenli tutulacak.',
+            status: 'Tamamlandı'
+        },
+        {
+            id: 'meet-2',
+            title: 'Fen Bilimleri Dersi 1. Dönem Zümre Öğretmenler Kurulu',
+            type: 'Zümre Öğretmenler Kurulu',
+            date: '2026-09-22',
+            time: '15:15',
+            location: 'Fen Laboratuvarı',
+            attendees: 'Fen Bilimleri Zümresi (Murat Kundakcı & Zümre Öğretmenleri)',
+            agenda: '1. 37 haftalık Maarif Yıllık Planı ile Günlük Planların uyumu\n2. Laboratuvar mikroskop, dinamometre ve kimyasal deney malzemelerinin kullanımı\n3. 5/A, 5/D, 6/G, 7/A, 7/B sınıfları için ortak kazanım değerlendirme testleri\n4. TÜBİTAK 2204-B ve Bilim Fuarı projeleri',
+            decisions: 'Haftalık deney föyleri ortak kullanılacak, her ünitede çıkış kartı ve süreç odaklı ölçme formları sisteme işlenecek.',
+            status: 'Yapılacak'
+        },
+        {
+            id: 'meet-3',
+            title: '5/D Şubesi 1. Dönem Veli Bilgilendirme Toplantısı',
+            type: 'Veli Toplantısı',
+            date: '2026-10-04',
+            time: '11:00',
+            location: '5/D Sınıfı',
+            attendees: '5/D Sınıfı Velileri & Murat Kundakcı (Şube Rehber Öğretmeni)',
+            agenda: '1. Ortaokula ve yeni müfredata uyum süreci\n2. Düzenli ders çalışma ve ödev takip sistemi\n3. Sosyal ve duygusal gelişim, akran ilişkileri\n4. Veli-okul iş birliği ve iletişim kanalları',
+            decisions: '',
+            status: 'Yapılacak'
+        },
+        {
+            id: 'meet-4',
+            title: '5. ve 6. Sınıflar Şube Öğretmenler Kurulu (ŞÖK)',
+            type: 'ŞÖK (Şube Öğretmenler Kurulu)',
+            date: '2026-11-12',
+            time: '15:30',
+            location: 'Öğretmenler Odası',
+            attendees: '5/D ve 6/G Şube Dersi Öğretmenleri, Rehberlik Servisi',
+            agenda: '1. Şubelerin akademik başarı durumları\n2. Özel öğrenme gereksinimi olan ve BEP uygulanan öğrencilerin değerlendirilmesi\n3. Devamsızlık ve motivasyon takip tedbirleri',
+            decisions: '',
+            status: 'Yapılacak'
+        }
     ],
     customSections: [
         {

@@ -46,6 +46,24 @@ document.addEventListener('alpine:init', () => {
         },
 
         // Yeni Görev Modalı
+        // 👥 Okul Toplantılarım Durumu
+        isMeetingModalOpen: false,
+        isEditMeeting: false,
+        meetingFilterType: 'all',
+        meetingFilterStatus: 'all',
+        meetingSearchQuery: '',
+        meetingForm: {
+            id: '',
+            title: '',
+            type: 'Öğretmenler Kurulu',
+            date: new Date().toISOString().slice(0, 10),
+            time: '14:00',
+            location: 'Konferans Salonu',
+            attendees: 'Tüm Öğretmenler',
+            agenda: '',
+            decisions: '',
+            status: 'Yapılacak'
+        },
         isTaskModalOpen: false,
         newTask: {
             title: '',

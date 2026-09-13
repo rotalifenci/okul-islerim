@@ -55,7 +55,26 @@ window.StorageManager = {
                         parsed._school_tasks_tab_v1 = true;
                         this.saveData(parsed);
                     }
-                                        if (!parsed._daily_plan_tab_v1) {
+                                                            if (!parsed._school_meetings_tab_v1) {
+                        if (parsed.navSections && Array.isArray(parsed.navSections)) {
+                            const hasMeetings = parsed.navSections.some(s => s.id === 'school-meetings');
+                            if (!hasMeetings) {
+                                const taskIdx = parsed.navSections.findIndex(s => s.id === 'school-tasks');
+                                const meetSec = { id: 'school-meetings', title: '👥 Okul Toplantılarım', icon: 'users', color: 'indigo', visible: true, isSystem: true, badge: '' };
+                                if (taskIdx !== -1) {
+                                    parsed.navSections.splice(taskIdx, 0, meetSec);
+                                } else {
+                                    parsed.navSections.push(meetSec);
+                                }
+                            }
+                        }
+                        if (!parsed.meetings) {
+                            parsed.meetings = JSON.parse(JSON.stringify(window.InitialData.meetings || []));
+                        }
+                        parsed._school_meetings_tab_v1 = true;
+                        this.saveData(parsed);
+                    }
+                    if (!parsed._daily_plan_tab_v1) {
                         if (parsed.navSections && Array.isArray(parsed.navSections)) {
                             // clean school-tasks badge
                             const stSec = parsed.navSections.find(s => s.id === 'school-tasks');

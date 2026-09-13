@@ -491,10 +491,6 @@
                                             <option value="7/A">7/A (Fen)</option>
                                             <option value="7/B">7/B (Fen)</option>
                                             <option value="5/D Rehberlik">⭐ 5/D Rehberlik</option>
-                                            <option value="Nöbet Görevi">🛡️ Nöbet Görevi (Cuma)</option>
-                                            <option value="TÜBİTAK Proje">🔬 TÜBİTAK Proje</option>
-                                            <option value="Zümre / Plan">👥 Zümre / Plan</option>
-                                            <option value="STEM Kulübü">🚀 STEM Kulübü</option>
                                         </select>
                                     </div>
 
@@ -1270,7 +1266,176 @@
 
             </div>
 
-                        <!-- ================= TAB: OKUL GÖREVLERİM & NÖBET TAKİBİ ================= -->
+                        <!-- ================= TAB: 👥 OKUL TOPLANTILARIM ================= -->
+            <div x-show="currentTab === 'school-meetings'" x-cloak class="space-y-6">
+                
+                <!-- Başlık ve Kontrol Kartı -->
+                <div class="bg-slate-100/95 p-5 sm:p-6 rounded-3xl border-2 border-slate-300 shadow-md space-y-4">
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                        <div class="flex items-center gap-3.5">
+                            <div class="p-3.5 bg-indigo-600 rounded-2xl text-white shadow-lg shadow-indigo-600/30">
+                                <i data-lucide="users" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <h2 class="text-xl font-black text-black brand-font">👥 Okul Toplantılarım</h2>
+                                    <span class="text-xs bg-indigo-600 text-white font-black px-2.5 py-0.5 rounded-lg shadow-sm">
+                                        Toplantı & Karar Takibi
+                                    </span>
+                                </div>
+                                <p class="text-xs text-slate-700 font-bold">Öğretmenler Kurulu, Zümre, ŞÖK, Veli ve Komisyon toplantı takvimi, gündemleri ve alınan resmi kararlar</p>
+                            </div>
+                        </div>
+
+                        <!-- Üst Aksiyonlar -->
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button @click="openNewMeetingModal()" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs shadow-md flex items-center gap-2 transition transform hover:scale-105 active:scale-95">
+                                <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                                <span>+ Yeni Toplantı Ekle</span>
+                            </button>
+
+                            <button @click="printMeetingList()" title="Toplantı Listesini Yazdır" class="px-3.5 py-2.5 rounded-xl bg-slate-900 hover:bg-black text-white font-black text-xs shadow-md transition flex items-center gap-1.5">
+                                <i data-lucide="printer" class="w-4 h-4 text-indigo-300"></i>
+                                <span>🖨️ Liste Yazdır</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Filtreler & Arama Şeridi -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-3 border-t-2 border-slate-200">
+                        <div class="relative">
+                            <input type="text" x-model="meetingSearchQuery" placeholder="Toplantı adı, gündem, yer ara..." class="w-full px-3.5 py-2 pl-9 bg-white border-2 border-slate-300 rounded-xl text-xs font-black text-black placeholder-slate-400 focus:outline-none focus:border-indigo-600 shadow-sm">
+                            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+                        </div>
+
+                        <div>
+                            <select x-model="meetingFilterType" class="w-full px-3 py-2 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-indigo-600 shadow-sm">
+                                <option value="all">Tüm Toplantı Türleri</option>
+                                <option value="Öğretmenler Kurulu">Öğretmenler Kurulu</option>
+                                <option value="Zümre Öğretmenler Kurulu">Zümre Öğretmenler Kurulu</option>
+                                <option value="ŞÖK (Şube Öğretmenler Kurulu)">ŞÖK (Şube Öğretmenler Kurulu)</option>
+                                <option value="Veli Toplantısı">Veli Toplantısı</option>
+                                <option value="Okul Aile Birliği">Okul Aile Birliği</option>
+                                <option value="BEP / Özel Eğitim">BEP / Özel Eğitim Birimi</option>
+                                <option value="Rehberlik & Yürütme">Rehberlik & Yürütme Komisyonu</option>
+                                <option value="Diğer">Diğer Toplantılar</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <select x-model="meetingFilterStatus" class="w-full px-3 py-2 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-indigo-600 shadow-sm">
+                                <option value="all">Tüm Durumlar (Tümü)</option>
+                                <option value="Yapılacak">⏳ Yapılacak / Yaklaşan</option>
+                                <option value="Tamamlandı">✅ Tamamlandı</option>
+                                <option value="Ertelendi">⚠️ Ertelendi</option>
+                                <option value="İptal">❌ İptal Edildi</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- İstatistik Rozetleri -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                        <div class="bg-white p-3 rounded-2xl border border-slate-300 shadow-xs">
+                            <div class="text-[11px] font-bold text-slate-600">Toplam Toplantı</div>
+                            <div class="text-lg font-black text-black" x-text="(data.meetings || []).length"></div>
+                        </div>
+                        <div class="bg-indigo-50 p-3 rounded-2xl border border-indigo-200 shadow-xs">
+                            <div class="text-[11px] font-bold text-indigo-900">⏳ Yaklaşan Toplantı</div>
+                            <div class="text-lg font-black text-indigo-700" x-text="(data.meetings || []).filter(m => m.status === 'Yapılacak').length"></div>
+                        </div>
+                        <div class="bg-emerald-50 p-3 rounded-2xl border border-emerald-200 shadow-xs">
+                            <div class="text-[11px] font-bold text-emerald-900">✅ Tamamlanan</div>
+                            <div class="text-lg font-black text-emerald-700" x-text="(data.meetings || []).filter(m => m.status === 'Tamamlandı').length"></div>
+                        </div>
+                        <div class="bg-purple-50 p-3 rounded-2xl border border-purple-200 shadow-xs">
+                            <div class="text-[11px] font-bold text-purple-900">📝 Karar Alınan</div>
+                            <div class="text-lg font-black text-purple-700" x-text="(data.meetings || []).filter(m => m.decisions && m.decisions.trim()).length"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Toplantı Kartları Listesi -->
+                <div class="space-y-4">
+                    <!-- Boş Durum -->
+                    <div x-show="!getFilteredMeetings().length" class="p-12 text-center bg-white rounded-3xl border-2 border-slate-300 space-y-3">
+                        <div class="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto">
+                            <i data-lucide="calendar-x" class="w-7 h-7"></i>
+                        </div>
+                        <h4 class="text-sm font-black text-slate-900">Filtreye Uygun Toplantı Bulunamadı</h4>
+                        <p class="text-xs text-slate-500 font-medium">Yeni bir toplantı eklemek için yukarıdaki "+ Yeni Toplantı Ekle" butonunu kullanabilirsiniz.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <template x-for="m in getFilteredMeetings()" :key="m.id">
+                            <div class="bg-white p-5 rounded-3xl border-2 border-slate-300 shadow-sm hover:shadow-md transition space-y-3.5 flex flex-col justify-between" :class="m.status === 'Tamamlandı' ? 'border-t-6 border-t-emerald-600' : 'border-t-6 border-t-indigo-600'">
+                                
+                                <div class="space-y-3">
+                                    <!-- Üst Bilgi Rozetleri -->
+                                    <div class="flex items-center justify-between gap-2 flex-wrap pb-2 border-b border-slate-200">
+                                        <span class="px-2.5 py-0.5 rounded-lg text-[11px] font-black" :class="m.status === 'Tamamlandı' ? 'bg-emerald-100 text-emerald-900 border border-emerald-300' : (m.status === 'Ertelendi' ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-indigo-100 text-indigo-900 border border-indigo-300')" x-text="m.status"></span>
+                                        <span class="px-2.5 py-0.5 rounded-lg text-[10px] font-bold bg-slate-100 text-slate-800 border border-slate-200" x-text="m.type"></span>
+                                    </div>
+
+                                    <!-- Toplantı Başlığı -->
+                                    <div>
+                                        <h3 class="text-base font-black text-black leading-snug" x-text="m.title"></h3>
+                                        
+                                        <!-- Zaman, Yer & Katılımcı Rozetleri -->
+                                        <div class="flex flex-wrap items-center gap-2 mt-2 text-[11px] font-bold">
+                                            <span class="px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-950 border border-indigo-200" x-text="'📅 ' + m.date"></span>
+                                            <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-900 border border-slate-200" x-text="'⏰ ' + m.time"></span>
+                                            <span class="px-2 py-0.5 rounded-md bg-amber-50 text-amber-950 border border-amber-200" x-text="'📍 ' + (m.location || 'Okul')"></span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Katılımcılar -->
+                                    <div x-show="m.attendees" class="text-xs text-slate-700 font-semibold flex items-start gap-1.5">
+                                        <span class="text-slate-500 font-bold">👥 Katılımcılar:</span>
+                                        <span class="font-black text-slate-900" x-text="m.attendees"></span>
+                                    </div>
+
+                                    <!-- Gündem Maddeleri -->
+                                    <div x-show="m.agenda" class="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-1">
+                                        <span class="text-[11px] font-black text-slate-800 block">📋 Gündem Maddeleri:</span>
+                                        <p class="text-xs text-slate-700 whitespace-pre-line leading-relaxed" x-text="m.agenda"></p>
+                                    </div>
+
+                                    <!-- Alınan Kararlar -->
+                                    <div x-show="m.decisions" class="p-3 bg-emerald-50/70 rounded-2xl border border-emerald-300 space-y-1">
+                                        <span class="text-[11px] font-black text-emerald-950 block">✅ Alınan Kararlar & Sonuç:</span>
+                                        <p class="text-xs text-emerald-950 font-bold whitespace-pre-line leading-relaxed" x-text="m.decisions"></p>
+                                    </div>
+                                </div>
+
+                                <!-- Alt İşlem Butonları -->
+                                <div class="flex items-center justify-between gap-2 pt-3 border-t border-slate-100">
+                                    <button @click="toggleMeetingStatus(m)" :title="m.status === 'Tamamlandı' ? 'Yapılacak Durumuna Al' : 'Tamamlandı Olarak İşaretle'" class="px-3 py-1.5 rounded-xl font-black text-xs transition flex items-center gap-1.5 shadow-2xs" :class="m.status === 'Tamamlandı' ? 'bg-slate-100 text-slate-700 hover:bg-slate-200' : 'bg-emerald-600 hover:bg-emerald-700 text-white'">
+                                        <i :data-lucide="m.status === 'Tamamlandı' ? 'rotate-ccw' : 'check'" class="w-3.5 h-3.5"></i>
+                                        <span x-text="m.status === 'Tamamlandı' ? 'Geri Al' : 'Tamamlandı Yap'"></span>
+                                    </button>
+
+                                    <div class="flex items-center gap-1.5">
+                                        <button @click="printMeetingDecisions(m)" title="Resmi Tutanak & PDF Al" class="px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-black text-white font-black text-xs transition flex items-center gap-1">
+                                            <i data-lucide="printer" class="w-3.5 h-3.5 text-indigo-300"></i>
+                                            <span class="hidden sm:inline">Tutanak</span>
+                                        </button>
+                                        <button @click="openEditMeetingModal(m)" title="Toplantıyı Düzenle" class="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 transition">
+                                            <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                        </button>
+                                        <button @click="deleteMeeting(m.id)" title="Toplantıyı Sil" class="p-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 transition">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ================= TAB: OKUL GÖREVLERİM & NÖBET TAKİBİ ================= -->
             <div x-show="currentTab === 'school-tasks'" x-cloak class="space-y-6">
                 
                 <!-- Başlık ve Kontrol Kartı -->
@@ -2796,10 +2961,6 @@
                             <option value="7/A">7/A (Fen Bilimleri)</option>
                             <option value="7/B">7/B (Fen Bilimleri)</option>
                             <option value="5/D Rehberlik">⭐ 5/D Rehberlik ve Yönlendirme</option>
-                            <option value="Nöbet Görevi">🛡️ Nöbet Görevi (Cuma)</option>
-                            <option value="TÜBİTAK Proje">🔬 TÜBİTAK Proje</option>
-                            <option value="Zümre / Plan">👥 Zümre / Planlama</option>
-                            <option value="STEM Kulübü">🚀 STEM Kulübü</option>
                             <option value="Boş">⚪ Boş Ders / Hazırlık</option>
                         </select>
                     </div>
@@ -2977,11 +3138,7 @@
                                                         <template x-for="c in (data.classes || [])" :key="c.id">
                                                             <option :value="c.name" x-text="c.name"></option>
                                                         </template>
-                                                        <option value="Rehberlik">⭐ Rehberlik</option>
-                                                        <option value="Nöbet Görevi">🛡️ Nöbet Görevi</option>
-                                                        <option value="TÜBİTAK Proje">🔬 TÜBİTAK Proje</option>
-                                                        <option value="Zümre / Plan">👥 Zümre / Plan</option>
-                                                        <option value="STEM Kulübü">🚀 STEM Kulübü</option>
+                                                        <option value="5/D Rehberlik">⭐ 5/D Rehberlik</option>
                                                     </select>
                                                 </td>
                                             </template>
@@ -3006,6 +3163,114 @@
                 </button>
             </div>
 
+        </div>
+    </div>
+
+    <!-- ================= MODAL: OKUL TOPLANTISI EKLE / DÜZENLE ================= -->
+    <div x-show="isMeetingModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-black/80 backdrop-blur-md overflow-hidden" @click.self="isMeetingModalOpen = false">
+        <div class="bg-white text-slate-900 w-full max-w-2xl max-h-[92vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden border-4 border-indigo-600">
+            
+            <!-- Modal Başlığı -->
+            <div class="p-4 sm:p-5 bg-gradient-to-r from-indigo-800 via-indigo-700 to-slate-900 text-white flex items-center justify-between gap-4 border-b-2 border-indigo-700">
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 bg-indigo-600 text-white rounded-2xl shadow-lg shadow-indigo-900/40">
+                        <i :data-lucide="isEditMeeting ? 'edit-3' : 'plus-circle'" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-base sm:text-lg font-black tracking-tight brand-font" x-text="isEditMeeting ? '✏️ Toplantıyı Düzenle' : '👥 Yeni Toplantı Ekle'"></h2>
+                        <p class="text-xs text-indigo-100/90 font-bold">Toplantı tarihi, saati, katılımcıları, gündem maddeleri ve alınan kararları kaydedin</p>
+                    </div>
+                </div>
+
+                <button @click="isMeetingModalOpen = false" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-black transition">
+                    ✕
+                </button>
+            </div>
+
+            <!-- Form Alanı (Kaydırılabilir) -->
+            <div class="p-4 sm:p-6 overflow-y-auto space-y-4 flex-1 custom-scrollbar">
+                
+                <!-- Toplantı Başlığı -->
+                <div class="space-y-1">
+                    <label class="block text-xs font-black text-slate-800">Toplantı Başlığı / Konusu *</label>
+                    <input type="text" x-model="meetingForm.title" placeholder="Örn: Fen Bilimleri 1. Dönem Zümre Toplantısı..." class="w-full p-2.5 bg-slate-50 border-2 border-slate-300 rounded-xl text-xs font-black text-slate-900 focus:border-indigo-600 focus:outline-none">
+                </div>
+
+                <!-- Toplantı Türü ve Durumu -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="space-y-1">
+                        <label class="block text-xs font-black text-slate-800">Toplantı Türü</label>
+                        <select x-model="meetingForm.type" class="w-full p-2.5 bg-slate-50 border-2 border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:border-indigo-600 focus:outline-none">
+                            <option value="Öğretmenler Kurulu">Öğretmenler Kurulu</option>
+                            <option value="Zümre Öğretmenler Kurulu">Zümre Öğretmenler Kurulu</option>
+                            <option value="ŞÖK (Şube Öğretmenler Kurulu)">ŞÖK (Şube Öğretmenler Kurulu)</option>
+                            <option value="Veli Toplantısı">Veli Toplantısı</option>
+                            <option value="Okul Aile Birliği">Okul Aile Birliği</option>
+                            <option value="BEP / Özel Eğitim">BEP / Özel Eğitim Birimi</option>
+                            <option value="Rehberlik & Yürütme">Rehberlik & Yürütme Komisyonu</option>
+                            <option value="Diğer">Diğer Toplantı</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="block text-xs font-black text-slate-800">Toplantı Durumu</label>
+                        <select x-model="meetingForm.status" class="w-full p-2.5 bg-slate-50 border-2 border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:border-indigo-600 focus:outline-none">
+                            <option value="Yapılacak">⏳ Yapılacak / Planlandı</option>
+                            <option value="Tamamlandı">✅ Tamamlandı & Karara Bağlandı</option>
+                            <option value="Ertelendi">⚠️ Ertelendi</option>
+                            <option value="İptal">❌ İptal Edildi</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Tarih, Saat ve Yer -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div class="space-y-1">
+                        <label class="block text-xs font-black text-slate-800">Tarih</label>
+                        <input type="date" x-model="meetingForm.date" class="w-full p-2.5 bg-slate-50 border-2 border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:border-indigo-600 focus:outline-none">
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="block text-xs font-black text-slate-800">Saat</label>
+                        <input type="time" x-model="meetingForm.time" class="w-full p-2.5 bg-slate-50 border-2 border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:border-indigo-600 focus:outline-none">
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="block text-xs font-black text-slate-800">Toplantı Yeri / Salon</label>
+                        <input type="text" x-model="meetingForm.location" placeholder="Örn: Fen Lab, Konferans Sal..." class="w-full p-2.5 bg-slate-50 border-2 border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:border-indigo-600 focus:outline-none">
+                    </div>
+                </div>
+
+                <!-- Katılımcılar -->
+                <div class="space-y-1">
+                    <label class="block text-xs font-black text-slate-800">Katılımcılar & Kurul Üyeleri</label>
+                    <input type="text" x-model="meetingForm.attendees" placeholder="Örn: Fen Bilimleri Zümresi, 5/D Şube Öğretmenleri..." class="w-full p-2.5 bg-slate-50 border-2 border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:border-indigo-600 focus:outline-none">
+                </div>
+
+                <!-- Gündem Maddeleri -->
+                <div class="space-y-1">
+                    <label class="block text-xs font-black text-slate-800">📋 Gündem Maddeleri</label>
+                    <textarea x-model="meetingForm.agenda" rows="3" placeholder="1. Açılış ve yoklama&#10;2. Yeni Maarif Modeli müfredat planı&#10;3. Laboratuvar deney setlerinin kontrolü..." class="w-full p-2.5 bg-slate-50 border-2 border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:border-indigo-600 focus:outline-none"></textarea>
+                </div>
+
+                <!-- Alınan Kararlar & Sonuç Notları -->
+                <div class="space-y-1">
+                    <label class="block text-xs font-black text-slate-800">✅ Alınan Kararlar & Tutanak Notları</label>
+                    <textarea x-model="meetingForm.decisions" rows="3" placeholder="Toplantı sonunda alınan kararlar, görev dağılımları ve takip edilecek süreçler..." class="w-full p-2.5 bg-slate-50 border-2 border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:border-indigo-600 focus:outline-none"></textarea>
+                </div>
+
+            </div>
+
+            <!-- Alt Butonlar -->
+            <div class="p-4 bg-slate-100 border-t-2 border-slate-200 flex items-center justify-end gap-2">
+                <button @click="isMeetingModalOpen = false" class="px-4 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-black text-xs transition">
+                    Vazgeç
+                </button>
+                <button @click="saveMeetingForm()" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs shadow-lg shadow-indigo-600/30 flex items-center gap-2 transform active:scale-95 transition">
+                    <i data-lucide="check" class="w-4 h-4"></i>
+                    <span>💾 Toplantıyı Kaydet</span>
+                </button>
+            </div>
         </div>
     </div>
 
