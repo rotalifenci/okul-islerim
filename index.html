@@ -89,7 +89,7 @@
                         </button>
                     </label>
                     <div class="relative">
-                        <input :type="isPasswordVisible ? 'text' : 'password'" x-model="loginPassword" placeholder="Şifrenizi yazınız (örn: admin, 1111, 2222...)" autofocus class="w-full px-4 py-3.5 bg-slate-100 border-2 border-slate-300 rounded-xl text-sm font-black text-black placeholder-slate-400 focus:outline-none focus:border-red-600 focus:bg-white transition shadow-inner">
+                        <input :type="isPasswordVisible ? 'text' : 'password'" x-model="loginPassword" placeholder="Şifrenizi yazınız (örn: Rotali5822., 1111, 2222...)" autofocus class="w-full px-4 py-3.5 bg-slate-100 border-2 border-slate-300 rounded-xl text-sm font-black text-black placeholder-slate-400 focus:outline-none focus:border-red-600 focus:bg-white transition shadow-inner">
                     </div>
                 </div>
 
@@ -111,12 +111,12 @@
                 <span class="text-[11px] font-black text-slate-700 block">⚡ Hızlı Giriş Şifreleri (Tıklayıp Girebilirsiniz):</span>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                     <template x-for="u in (users || [])" :key="u.id">
-                        <button type="button" @click="quickLoginWithPassword(u.displayPassword)" class="p-2 rounded-xl bg-slate-50 hover:bg-red-50 hover:border-red-300 border border-slate-200 text-left transition flex items-center justify-between gap-1.5 text-xs active:scale-95">
+                        <button type="button" @click="quickLoginWithPassword(getUserPassword(u.id))" class="p-2 rounded-xl bg-slate-50 hover:bg-red-50 hover:border-red-300 border border-slate-200 text-left transition flex items-center justify-between gap-1.5 text-xs active:scale-95">
                             <div class="flex items-center gap-1.5 min-w-0">
                                 <span class="text-xs" x-text="u.role === 'Yönetici' ? '👑' : '👨‍🏫'"></span>
                                 <span class="font-black text-slate-900 truncate text-[11px]" x-text="u.name"></span>
                             </div>
-                            <span class="px-1.5 py-0.5 rounded bg-slate-200 text-slate-800 font-mono text-[10px] font-black" x-text="u.displayPassword"></span>
+                            <span class="px-1.5 py-0.5 rounded font-mono text-[10px] font-black" :class="u.role === 'Yönetici' ? 'bg-red-100 text-red-900 border border-red-200' : 'bg-slate-200 text-slate-800'" x-text="getUserPassword(u.id)"></span>
                         </button>
                     </template>
                 </div>
@@ -2244,6 +2244,101 @@
                 <div class="bg-slate-100/95 p-5 rounded-3xl border-2 border-slate-300 shadow-md">
                     <h2 class="text-xl font-black text-black brand-font">⚙️ Sistem Ayarları & %100 Yerel Veri</h2>
                     <p class="text-xs text-slate-700 font-semibold">Verilerinizi tek bir JSON dosyasında yedekleyin veya geri yükleyin</p>
+                </div>
+
+                <!-- ================= 👤 HESAP & PROFİL BİLGİLERİ (KİŞİSEL AYARLAR & ŞİFRE DEĞİŞTİRME) ================= -->
+                <div class="bg-white p-5 sm:p-6 rounded-3xl border-2 border-slate-300 shadow-md space-y-4 border-l-8 border-l-red-600">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b-2 border-slate-200">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2.5 bg-red-600 text-white rounded-2xl shadow-md shadow-red-600/30">
+                                <i data-lucide="user-cog" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h3 class="text-base sm:text-lg font-black text-black brand-font">👤 Hesap & Profil Bilgilerim</h3>
+                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-black" :class="currentUser?.role === 'Yönetici' ? 'bg-red-100 text-red-800 border border-red-300' : 'bg-indigo-100 text-indigo-800 border border-indigo-300'" x-text="currentUser?.role || 'Öğretmen'"></span>
+                                </div>
+                                <p class="text-xs text-slate-600 font-bold">Kişisel bilgilerinizi, okul ve nöbet ayarlarınızı, giriş şifrenizi yöneticiden bağımsız olarak buradan güncelleyebilirsiniz</p>
+                            </div>
+                        </div>
+
+                        <button @click="saveAccountForm()" class="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-xs shadow-md transition flex items-center gap-2 active:scale-95 flex-shrink-0">
+                            <i data-lucide="check" class="w-4 h-4"></i>
+                            <span>💾 Bilgileri Kaydet</span>
+                        </button>
+                    </div>
+
+                    <form @submit.prevent="saveAccountForm()" class="space-y-4 text-xs">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- Ad Soyad -->
+                            <div class="space-y-1">
+                                <label class="font-black text-slate-800 block">👤 Ad Soyad *</label>
+                                <input type="text" x-model="accountForm.name" class="w-full p-2.5 bg-slate-50 border-2 border-slate-300 rounded-xl font-bold text-slate-900 focus:border-red-600 focus:outline-none focus:bg-white shadow-xs">
+                            </div>
+
+                            <!-- Unvan / Branş -->
+                            <div class="space-y-1">
+                                <label class="font-black text-slate-800 block">🎓 Unvan & Branş</label>
+                                <input type="text" x-model="accountForm.title" class="w-full p-2.5 bg-slate-50 border-2 border-slate-300 rounded-xl font-bold text-slate-900 focus:border-red-600 focus:outline-none focus:bg-white shadow-xs">
+                            </div>
+
+                            <!-- Okul Adı -->
+                            <div class="space-y-1">
+                                <label class="font-black text-slate-800 block">🏫 Okul / Kurum Adı</label>
+                                <input type="text" x-model="accountForm.school" placeholder="Örn: Atatürk Ortaokulu" class="w-full p-2.5 bg-slate-50 border-2 border-slate-300 rounded-xl font-bold text-slate-900 focus:border-red-600 focus:outline-none focus:bg-white shadow-xs">
+                            </div>
+
+                            <!-- Öğretim Yılı -->
+                            <div class="space-y-1">
+                                <label class="font-black text-slate-800 block">📅 Öğretim Yılı</label>
+                                <input type="text" x-model="accountForm.academicYear" class="w-full p-2.5 bg-slate-50 border-2 border-slate-300 rounded-xl font-bold text-slate-900 focus:border-red-600 focus:outline-none focus:bg-white shadow-xs">
+                            </div>
+
+                            <!-- Nöbet Günü -->
+                            <div class="space-y-1">
+                                <label class="font-black text-slate-800 block">🛡️ Nöbet Günü</label>
+                                <select x-model="accountForm.dutyDay" class="w-full p-2.5 bg-slate-50 border-2 border-slate-300 rounded-xl font-bold text-slate-900 focus:border-red-600 focus:outline-none focus:bg-white shadow-xs">
+                                    <option value="Pazartesi">Pazartesi</option>
+                                    <option value="Salı">Salı</option>
+                                    <option value="Çarşamba">Çarşamba</option>
+                                    <option value="Perşembe">Perşembe</option>
+                                    <option value="Cuma">Cuma</option>
+                                    <option value="Belirlenmedi">Yok / Seçilmedi</option>
+                                </select>
+                            </div>
+
+                            <!-- Nöbet Yeri -->
+                            <div class="space-y-1">
+                                <label class="font-black text-slate-800 block">📍 Nöbet Yeri</label>
+                                <select x-model="accountForm.dutyArea" class="w-full p-2.5 bg-slate-50 border-2 border-slate-300 rounded-xl font-bold text-slate-900 focus:border-red-600 focus:outline-none focus:bg-white shadow-xs">
+                                    <option value="Bahçe">Bahçe</option>
+                                    <option value="Zemin">Zemin</option>
+                                    <option value="Kat-1">Kat-1</option>
+                                    <option value="Kat-2">Kat-2</option>
+                                    <option value="Kat-3">Kat-3</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Şifre Değiştirme Alanı -->
+                        <div class="p-4 bg-red-50/70 rounded-2xl border-2 border-red-200 space-y-3 pt-3">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="key" class="w-4 h-4 text-red-600"></i>
+                                <span class="font-black text-xs text-red-950 uppercase">🔑 Kişisel Giriş Şifrenizi Değiştirin</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="space-y-1">
+                                    <label class="font-black text-slate-800 block">Yeni Giriş Şifresi *</label>
+                                    <input type="text" x-model="accountForm.newPassword" class="w-full p-2.5 bg-white border-2 border-red-300 rounded-xl font-black text-slate-900 focus:border-red-600 focus:outline-none shadow-xs" placeholder="Yeni şifrenizi yazınız">
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="font-black text-slate-800 block">Yeni Şifre (Tekrar) *</label>
+                                    <input type="text" x-model="accountForm.confirmPassword" class="w-full p-2.5 bg-white border-2 border-red-300 rounded-xl font-black text-slate-900 focus:border-red-600 focus:outline-none shadow-xs" placeholder="Yeni şifrenizi tekrar yazınız">
+                                </div>
+                            </div>
+                            <p class="text-[11px] text-slate-600 font-semibold">💡 Şifrenizi değiştirdiğinizde bundan sonraki tüm girişlerinizde yeni şifreniz geçerli olacaktır.</p>
+                        </div>
+                    </form>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">

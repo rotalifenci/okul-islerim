@@ -8,12 +8,12 @@ window.AuthUsers = [
         name: 'Murat Kundakcı (Rotalı Fenci)',
         role: 'Yönetici',
         roleBadge: '👑 Yönetici',
-        password: 'admin',
-        passwords: ['admin', 'Rotali5822.', 'rotali123', 'fenci2026', 'murat'],
+        password: 'Rotali5822.',
+        passwords: ['Rotali5822.'],
         avatar: 'assets/logo.jpg',
         subject: 'Fen Bilimleri & Şube Rehberliği',
         description: 'Tüm sistem yöneticisi ve kadrolu öğretmen',
-        displayPassword: 'admin'
+        displayPassword: 'Rotali5822.'
     },
     {
         id: 'ogretmen1',

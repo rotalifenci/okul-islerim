@@ -46,6 +46,17 @@ document.addEventListener('alpine:init', () => {
         },
 
         // Yeni Görev Modalı
+        // 👤 Hesap & Profil Bilgileri Yönetimi
+        accountForm: {
+            name: '',
+            title: '',
+            school: '',
+            academicYear: '2026-2027',
+            dutyDay: 'Cuma',
+            dutyArea: 'Kat-2',
+            newPassword: '',
+            confirmPassword: ''
+        },
         // 👥 Okul Toplantılarım Durumu
         isMeetingModalOpen: false,
         isEditMeeting: false,
@@ -359,6 +370,22 @@ document.addEventListener('alpine:init', () => {
             this.login();
         },
 
+        // Hızlı Şifre Doldurma & Giriş
+        quickLoginWithPassword(pass) {
+            this.loginPassword = pass;
+            this.login();
+        },
+
+        // Kullanıcının güncel şifresini al
+        getUserPassword(userId) {
+            try {
+                const custom = JSON.parse(localStorage.getItem('rotali_custom_user_passwords') || '{}');
+                if (custom[userId]) return custom[userId];
+            } catch (e) {}
+            const u = (this.users || []).find(x => x.id === userId);
+            return u ? u.password : '';
+        },
+
         // Şifre ile Doğrudan Giriş Yap (Kullanıcı Adı Gerekmez)
         login() {
             const pass = (this.loginPassword || '').trim();
@@ -367,12 +394,16 @@ document.addEventListener('alpine:init', () => {
                 return;
             }
 
-            // Girilen şifre hangi kullanıcıya aitse onu otomatik tespit et
-            const user = (this.users || []).find(u => 
-                u.password === pass || 
-                (u.passwords && u.passwords.includes(pass)) ||
-                (u.id === 'admin' && pass === 'Rotali5822.')
-            );
+            // Girilen şifre hangi kullanıcıya aitse onu otomatik tespit et (Özel şifreler dahil)
+            let customPasswords = {};
+            try {
+                customPasswords = JSON.parse(localStorage.getItem('rotali_custom_user_passwords') || '{}');
+            } catch (e) {}
+
+            const user = (this.users || []).find(u => {
+                const activePass = customPasswords[u.id] || u.password;
+                return activePass === pass || (u.passwords && u.passwords.includes(pass));
+            });
 
             if (user) {
                 this.currentUser = user;
@@ -385,7 +416,8 @@ document.addEventListener('alpine:init', () => {
 
                 // İlgili kullanıcının bağımsız izole verilerini yükle
                 this.data = window.StorageManager.loadData(user.id);
-                this.showToast(`Giriş başarılı! Hoş geldiniz, ${user.name} 👋 ✨`);
+                this.loadAccountForm();
+                this.showToast(`Giriş başarılı! Hoş geldiniz, ${this.data.teacher?.name || user.name} 👋 ✨`);
                 this.$nextTick(() => {
                     if (window.lucide) window.lucide.createIcons();
                 });
