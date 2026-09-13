@@ -97,14 +97,11 @@ document.addEventListener('alpine:init', () => {
             room: 'Fen Laboratuvarı'
         },
 
-        // Aktif Öğretmen & Hesaplar
-        teacherAccounts: window.StorageManager.getAccounts(),
-        activeTeacherId: window.StorageManager.getActiveTeacherId(),
-        loginUsername: '',
+        // Güvenlik & Şifreli Yönetici Girişi
+        isAuthenticated: localStorage.getItem('rotali_auth_state') === 'authenticated',
         loginPassword: '',
         loginError: '',
         isPasswordVisible: false,
-        isAuthenticated: localStorage.getItem('rotali_auth_state') === 'authenticated',
 
         // 📅 Türkiye Yüzyılı Maarif Modeli Yıllık Plan Modalı
         isAnnualPlanModalOpen: false,
@@ -120,7 +117,7 @@ document.addEventListener('alpine:init', () => {
             extra: true,
             notes: true
         },
-        annualPlanNotes: {},
+        annualPlanNotes: JSON.parse(localStorage.getItem('rotali_annual_plan_notes') || '{}'),
         activeWeekNote: '',
         isAddingWeekNote: false,
         annualPlanData: window.AnnualPlanData || {},
@@ -151,12 +148,12 @@ document.addEventListener('alpine:init', () => {
             this.loadCurrentWeekNote();
 
             // Otomatik Maarif Modeli Kazanım Senkronizasyonu (TYMM 2026-2027)
-            if (this.activeTeacherId === 'teacher1' && this.data && this.data.weeklySchedule && !this.data._maarif_outcomes_v4) {
+            if (this.data && this.data.weeklySchedule && !this.data._maarif_outcomes_v4) {
                 const initialSched = window.InitialData ? window.InitialData.weeklySchedule : null;
                 if (initialSched) {
                     this.data.weeklySchedule = JSON.parse(JSON.stringify(initialSched));
                     this.data._maarif_outcomes_v4 = true;
-                    window.StorageManager.saveData(this.data, 'teacher1');
+                    window.StorageManager.saveData(this.data);
                 }
             }
 
@@ -186,7 +183,7 @@ document.addEventListener('alpine:init', () => {
 
             // Veri Değişikliklerini Kaydet
             this.$watch('data', () => {
-                window.StorageManager.saveData(this.data, this.activeTeacherId);
+                window.StorageManager.saveData(this.data);
             }, { deep: true });
 
             this.$nextTick(() => {
@@ -203,70 +200,31 @@ document.addEventListener('alpine:init', () => {
             }, 3000);
         },
 
-        // Aktif Öğretmen Bilgisi
-        getCurrentTeacher() {
-            return this.teacherAccounts[this.activeTeacherId] || this.teacherAccounts['teacher1'] || {
-                name: 'Öğretmen',
-                title: 'Fen Bilimleri Öğretmeni',
-                badge: 'Öğretmen'
-            };
-        },
-
-        // Giriş Yap (Kullanıcı Adı ve Şifreye Göre Otomatik Öğretmen Tespiti)
+        // Giriş Yap
         login() {
-            const inputUser = (this.loginUsername || '').trim().toLowerCase();
-            const inputPass = (this.loginPassword || '').trim();
-
-            if (!inputUser || !inputPass) {
-                this.loginError = 'Lütfen kullanıcı adı ve şifrenizi eksiksiz giriniz.';
-                return;
-            }
-
-            let targetId = null;
-            let targetAcc = null;
-
-            // Girilen kullanıcı adına göre öğretmeni tespit et
-            for (let key in this.teacherAccounts) {
-                if (this.teacherAccounts[key].username && this.teacherAccounts[key].username.toLowerCase() === inputUser) {
-                    targetId = key;
-                    targetAcc = this.teacherAccounts[key];
-                    break;
-                }
-            }
-
-            if (targetAcc && targetAcc.password === inputPass) {
-                this.activeTeacherId = targetId;
-                window.StorageManager.setActiveTeacherId(targetId);
-                this.data = window.StorageManager.loadData(targetId);
-                this.settings = window.StorageManager.loadSettings(targetId);
-                if (this.data.classes && this.data.classes.length > 0) {
-                    this.selectedClassId = this.data.classes[0].id;
-                }
-                this.loadCurrentWeekNote();
-
+            const pass = (this.loginPassword || '').trim();
+            if (pass === 'Rotali5822.') {
                 this.isAuthenticated = true;
                 this.loginError = '';
                 this.loginPassword = '';
-                this.loginUsername = '';
                 localStorage.setItem('rotali_auth_state', 'authenticated');
-                this.showToast(`Hoş geldiniz, ${targetAcc.name}! 🚀`);
+                this.showToast('Hoş geldiniz, Murat Hocam (Rotalı Fenci)! 🚀');
                 this.$nextTick(() => {
                     if (window.lucide) window.lucide.createIcons();
                 });
             } else {
-                this.loginError = 'Hatalı kullanıcı adı veya şifre! Lütfen bilgilerinizi kontrol edip tekrar deneyiniz.';
+                this.loginError = 'Hatalı şifre! Lütfen şifrenizi kontrol edip tekrar deneyiniz.';
             }
         },
 
         // Çıkış Yap
         logout() {
-            if (confirm('Öğretmen oturumunu kapatmak istediğinize emin misiniz?')) {
+            if (confirm('Yönetici oturumunu kapatmak istediğinize emin misiniz?')) {
                 this.isAuthenticated = false;
-                this.loginUsername = '';
                 this.loginPassword = '';
                 this.loginError = '';
                 localStorage.removeItem('rotali_auth_state');
-                this.showToast('Öğretmen oturumu kapatıldı. 🔒');
+                this.showToast('Yönetici oturumu kapatıldı. 🔒');
                 this.$nextTick(() => {
                     if (window.lucide) window.lucide.createIcons();
                 });
@@ -1100,7 +1058,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         loadCurrentWeekNote() {
-            const storageKey = 'rotali_annual_plan_notes_' + (this.activeTeacherId || 'teacher1');
+            const storageKey = 'rotali_annual_plan_notes';
             try {
                 this.annualPlanNotes = JSON.parse(localStorage.getItem(storageKey) || '{}');
             } catch (e) {
@@ -1111,7 +1069,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         saveCurrentWeekNote() {
-            const storageKey = 'rotali_annual_plan_notes_' + (this.activeTeacherId || 'teacher1');
+            const storageKey = 'rotali_annual_plan_notes';
             const key = `${this.selectedAnnualPlanGrade}_${this.selectedAnnualPlanWeekIndex + 1}`;
             this.annualPlanNotes[key] = this.activeWeekNote;
             localStorage.setItem(storageKey, JSON.stringify(this.annualPlanNotes));
@@ -1171,7 +1129,7 @@ document.addEventListener('alpine:init', () => {
 
         // JSON Yedek İndir
         exportBackup() {
-            window.StorageManager.exportJSON(this.data, this.activeTeacherId);
+            window.StorageManager.exportJSON(this.data);
             this.showToast("Yedek dosyası indirildi! 💾");
         },
 
@@ -1185,13 +1143,13 @@ document.addEventListener('alpine:init', () => {
             if (!file) return;
             window.StorageManager.importJSON(file, (success, msg) => {
                 if (success) {
-                    this.data = window.StorageManager.loadData(this.activeTeacherId);
-                    this.settings = window.StorageManager.loadSettings(this.activeTeacherId);
+                    this.data = window.StorageManager.loadData();
+                    this.settings = window.StorageManager.loadSettings();
                     this.showToast(msg);
                 } else {
                     alert(msg);
                 }
-            }, this.activeTeacherId);
+            });
         }
     }));
 });

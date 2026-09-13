@@ -72,29 +72,22 @@
                 </h1>
                 <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-100 text-red-800 border border-red-300 text-xs font-black">
                     <i data-lucide="shield-check" class="w-4 h-4 text-red-600"></i>
-                    <span>Öğretmen Giriş Portalı</span>
+                    <span>Yönetici Giriş Portalı</span>
                 </div>
                 <p class="text-xs text-slate-600 font-bold">
-                    Öğretmen paneline erişmek için lütfen kullanıcı adı ve şifrenizi giriniz.
+                    Öğretmen paneline erişmek için lütfen yönetici şifrenizi giriniz.
                 </p>
             </div>
 
             <!-- Giriş Formu -->
             <form @submit.prevent="login()" class="space-y-4 pt-1">
                 <div>
-                    <label class="text-xs font-black text-black block mb-1.5">
-                        <span>👤 Kullanıcı Adı:</span>
-                    </label>
-                    <input type="text" x-model="loginUsername" placeholder="Kullanıcı adınızı yazınız..." autofocus class="w-full px-4 py-3 bg-slate-100 border-2 border-slate-300 rounded-xl text-sm font-black text-black placeholder-slate-400 focus:outline-none focus:border-red-600 focus:bg-white transition shadow-sm">
-                </div>
-
-                <div>
                     <label class="text-xs font-black text-black block mb-1.5 flex items-center justify-between">
-                        <span>🔑 Şifre:</span>
+                        <span>🔑 Yönetici Şifresi:</span>
                         <span class="text-[10px] text-slate-500 font-bold">Güvenli Giriş</span>
                     </label>
                     <div class="relative">
-                        <input :type="isPasswordVisible ? 'text' : 'password'" x-model="loginPassword" placeholder="Şifrenizi yazınız..." class="w-full px-4 py-3 bg-slate-100 border-2 border-slate-300 rounded-xl text-sm font-black text-black placeholder-slate-400 focus:outline-none focus:border-red-600 focus:bg-white transition shadow-sm">
+                        <input :type="isPasswordVisible ? 'text' : 'password'" x-model="loginPassword" placeholder="Şifrenizi yazınız..." autofocus class="w-full px-4 py-3 bg-slate-100 border-2 border-slate-300 rounded-xl text-sm font-black text-black placeholder-slate-400 focus:outline-none focus:border-red-600 focus:bg-white transition shadow-sm">
                         <button type="button" @click="isPasswordVisible = !isPasswordVisible" class="absolute right-3.5 top-3 text-slate-500 hover:text-black font-black text-xs">
                             <span x-text="isPasswordVisible ? 'Gizle 🙈' : 'Göster 👁️'"></span>
                         </button>
@@ -137,7 +130,7 @@
                         <span class="font-extrabold text-xl tracking-tight text-white brand-font">
                             ROTALI <span class="text-red-500">FENCİ</span>
                         </span>
-                        <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-red-500/10 text-red-400 border border-red-500/20 rounded-full" x-text="getCurrentTeacher().badge || 'Öğretmen Paneli'">
+                        <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-red-500/10 text-red-400 border border-red-500/20 rounded-full">
                             Öğretmen Paneli
                         </span>
                     </div>
@@ -162,8 +155,8 @@
                 <!-- Yönetici Durumu & Çıkış Yap Butonu -->
                 <div class="flex items-center gap-2 bg-slate-900/90 px-3 py-1.5 rounded-xl border border-red-500/30 text-xs">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span class="font-black text-white hidden sm:inline" x-text="'👤 ' + (data?.teacher?.name || getCurrentTeacher().name)"></span>
-                    <button @click="logout()" title="Öğretmen Oturumunu Kapat" class="ml-1 px-2.5 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white font-black text-[11px] shadow transition flex items-center gap-1">
+                    <span class="font-black text-white hidden sm:inline">👤 Yönetici: Murat Kundakcı (Rotalı Fenci)</span>
+                    <button @click="logout()" title="Yönetici Oturumunu Kapat" class="ml-1 px-2.5 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white font-black text-[11px] shadow transition flex items-center gap-1">
                         <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
                         <span>Çıkış</span>
                     </button>
