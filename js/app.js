@@ -59,6 +59,8 @@ document.addEventListener('alpine:init', () => {
         },
         // 👥 Okul Toplantılarım Durumu
         isMeetingModalOpen: false,
+        isLessonPeriodsModalOpen: false,
+        tempLessonPeriods: [],
         isEditMeeting: false,
         meetingFilterType: 'all',
         meetingFilterStatus: 'all',
@@ -2454,6 +2456,236 @@ document.addEventListener('alpine:init', () => {
                 localStorage.setItem(`rotali_curriculum_${grade}`, JSON.stringify(this.curriculumData[grade]));
                 this.showToast("Kazanım planı silindi. 🗑️");
             }
+        },
+
+        
+        // ================= ⏰ DERS SAATLERİ & ZAMANLARI YÖNETİMİ =================
+        openLessonPeriodsModal() {
+            const periods = (this.data.lessonPeriods && this.data.lessonPeriods.length) 
+                ? this.data.lessonPeriods 
+                : (window.InitialData.lessonPeriods || []);
+            this.tempLessonPeriods = JSON.parse(JSON.stringify(periods));
+            this.isLessonPeriodsModalOpen = true;
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+
+        saveLessonPeriods() {
+            if (!this.tempLessonPeriods || !this.tempLessonPeriods.length) {
+                alert('En az 1 ders saati tanımlı olmalıdır!');
+                return;
+            }
+            this.data.lessonPeriods = JSON.parse(JSON.stringify(this.tempLessonPeriods));
+            const uid = this.currentUser ? this.currentUser.id : 'admin';
+            window.StorageManager.saveData(this.data, uid);
+            this.isLessonPeriodsModalOpen = false;
+            this.showToast('Ders saatleri ve zamanları başarıyla kaydedildi! ⏰');
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+
+        addTempLessonPeriod() {
+            const nextNo = (this.tempLessonPeriods.length > 0) 
+                ? Math.max(...this.tempLessonPeriods.map(p => p.periodNo)) + 1 
+                : 1;
+            this.tempLessonPeriods.push({
+                periodNo: nextNo,
+                label: nextNo + '. Ders',
+                time: '15:30 - 16:10'
+            });
+        },
+
+        removeTempLessonPeriod(index) {
+            if (this.tempLessonPeriods.length <= 1) {
+                alert('En az 1 ders saati kalmalıdır!');
+                return;
+            }
+            this.tempLessonPeriods.splice(index, 1);
+            // Numaraları yeniden sırala
+            this.tempLessonPeriods.forEach((p, idx) => {
+                p.periodNo = idx + 1;
+                p.label = (idx + 1) + '. Ders';
+            });
+        },
+
+        resetTempLessonPeriods() {
+            if (confirm('Ders saatlerini MEB standart varsayılanlarına (08:30-15:15) sıfırlamak istediğinize emin misiniz?')) {
+                this.tempLessonPeriods = JSON.parse(JSON.stringify(window.InitialData.lessonPeriods || []));
+                this.showToast('Varsayılan ders saatleri yüklendi.');
+            }
+        },
+
+        // ================= 👥 OKUL TOPLANTILARI YÖNETİMİ =================
+        getFilteredMeetings() {
+            let list = this.data.meetings || [];
+            if (this.meetingFilterType && this.meetingFilterType !== 'all') {
+                list = list.filter(m => m.type === this.meetingFilterType);
+            }
+            if (this.meetingFilterStatus && this.meetingFilterStatus !== 'all') {
+                list = list.filter(m => m.status === this.meetingFilterStatus);
+            }
+            if (this.meetingSearchQuery && this.meetingSearchQuery.trim()) {
+                const q = this.meetingSearchQuery.toLowerCase().trim();
+                list = list.filter(m => 
+                    (m.title && m.title.toLowerCase().includes(q)) ||
+                    (m.agenda && m.agenda.toLowerCase().includes(q)) ||
+                    (m.decisions && m.decisions.toLowerCase().includes(q)) ||
+                    (m.location && m.location.toLowerCase().includes(q)) ||
+                    (m.attendees && m.attendees.toLowerCase().includes(q))
+                );
+            }
+            return list;
+        },
+
+        openNewMeetingModal() {
+            this.isEditMeeting = false;
+            this.meetingForm = {
+                id: 'meet-' + Date.now(),
+                title: '',
+                type: 'Öğretmenler Kurulu',
+                date: new Date().toISOString().slice(0, 10),
+                time: '14:30',
+                location: 'Öğretmenler Odası',
+                attendees: 'Tüm Öğretmenler',
+                agenda: '',
+                decisions: '',
+                status: 'Yapılacak'
+            };
+            this.isMeetingModalOpen = true;
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+
+        openEditMeetingModal(meeting) {
+            this.isEditMeeting = true;
+            this.meetingForm = JSON.parse(JSON.stringify(meeting));
+            this.isMeetingModalOpen = true;
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+
+        saveMeetingForm() {
+            if (!this.meetingForm.title || !this.meetingForm.title.trim()) {
+                alert('Lütfen toplantı başlığını giriniz!');
+                return;
+            }
+
+            if (!this.data.meetings) this.data.meetings = [];
+
+            if (this.isEditMeeting) {
+                const idx = this.data.meetings.findIndex(m => m.id === this.meetingForm.id);
+                if (idx !== -1) {
+                    this.data.meetings[idx] = { ...this.meetingForm };
+                } else {
+                    this.data.meetings.push({ ...this.meetingForm });
+                }
+                this.showToast('Toplantı bilgileri güncellendi! 👥');
+            } else {
+                this.data.meetings.unshift({ ...this.meetingForm });
+                this.showToast('Yeni toplantı başarıyla eklendi! 👥');
+            }
+
+            const uid = this.currentUser ? this.currentUser.id : 'admin';
+            window.StorageManager.saveData(this.data, uid);
+            this.isMeetingModalOpen = false;
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+
+        toggleMeetingStatus(meeting) {
+            meeting.status = meeting.status === 'Tamamlandı' ? 'Yapılacak' : 'Tamamlandı';
+            const uid = this.currentUser ? this.currentUser.id : 'admin';
+            window.StorageManager.saveData(this.data, uid);
+            this.showToast(`Toplantı durumu "${meeting.status}" olarak güncellendi.`);
+        },
+
+        deleteMeeting(meetingId) {
+            if (confirm('Bu toplantı kaydını silmek istediğinize emin misiniz?')) {
+                this.data.meetings = (this.data.meetings || []).filter(m => m.id !== meetingId);
+                const uid = this.currentUser ? this.currentUser.id : 'admin';
+                window.StorageManager.saveData(this.data, uid);
+                this.showToast('Toplantı silindi. 🗑️');
+            }
+        },
+
+        printMeetingList() {
+            window.print();
+        },
+
+        printMeetingDecisions(meeting) {
+            const printWin = window.open('', '_blank');
+            const teacherName = this.data.teacher?.name || this.currentUser?.name || 'Murat Kundakcı';
+            const schoolName = this.data.teacher?.school || 'Cumhuriyet Ortaokulu';
+            const html = `
+                <!DOCTYPE html>
+                <html lang="tr">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>${meeting.title} - Toplantı Tutanağı</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 30px; color: #111; line-height: 1.6; }
+                        h1 { font-size: 18px; text-align: center; margin-bottom: 5px; text-transform: uppercase; }
+                        h2 { font-size: 14px; text-align: center; color: #555; margin-top: 0; margin-bottom: 25px; }
+                        .info-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                        .info-table td { border: 1px solid #ccc; padding: 8px 12px; font-size: 12px; }
+                        .info-table td.label { font-weight: bold; background-color: #f5f5f5; width: 25%; }
+                        .section { margin-bottom: 20px; }
+                        .section-title { font-size: 13px; font-weight: bold; border-bottom: 2px solid #333; padding-bottom: 4px; margin-bottom: 8px; text-transform: uppercase; }
+                        .content-box { font-size: 12px; white-space: pre-line; background: #fafafa; border: 1px solid #eee; padding: 12px; border-radius: 6px; }
+                        .signatures { margin-top: 50px; display: flex; justify-content: space-between; font-size: 12px; }
+                        .sig-box { text-align: center; width: 200px; }
+                    </style>
+                </head>
+                <body>
+                    <h1>${schoolName}</h1>
+                    <h2>${meeting.title} - RESMİ TOPLANTI TUTANAĞI</h2>
+                    
+                    <table class="info-table">
+                        <tr>
+                            <td class="label">Toplantı Türü</td>
+                            <td>${meeting.type}</td>
+                            <td class="label">Tarih / Saat</td>
+                            <td>${meeting.date} - ${meeting.time}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Toplantı Yeri</td>
+                            <td>${meeting.location || 'Okul'}</td>
+                            <td class="label">Durum</td>
+                            <td>${meeting.status}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Katılımcılar</td>
+                            <td colspan="3">${meeting.attendees || 'Tüm Kurul Üyeleri'}</td>
+                        </tr>
+                    </table>
+
+                    <div class="section">
+                        <div class="section-title">1. GÜNDEM MADDELERİ</div>
+                        <div class="content-box">${meeting.agenda || 'Gündem maddesi belirtilmemiştir.'}</div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">2. ALINAN KARARLAR VE DEĞERLENDİRME</div>
+                        <div class="content-box">${meeting.decisions || 'Alınan karar kaydı bulunmamaktadır.'}</div>
+                    </div>
+
+                    <div class="signatures">
+                        <div class="sig-box">
+                            <p><strong>Hazırlayan / Düzenleyen</strong></p>
+                            <br><br>
+                            <p>${teacherName}</p>
+                            <p>${this.data.teacher?.title || 'Fen Bilimleri Öğretmeni'}</p>
+                        </div>
+                        <div class="sig-box">
+                            <p><strong>Okul Müdürü / Kurul Başkanı</strong></p>
+                            <br><br>
+                            <p>.......................................</p>
+                            <p>İmza / Onay</p>
+                        </div>
+                    </div>
+                    <script>
+                        window.onload = function() { window.print(); }
+                    </script>
+                </body>
+                </html>
+            `;
+            printWin.document.write(html);
+            printWin.document.close();
         },
 
         exportBackup() {

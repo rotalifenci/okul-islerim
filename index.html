@@ -276,11 +276,11 @@
         <aside class="hidden lg:block lg:col-span-3 space-y-4">
             <div class="bg-slate-100/95 p-3 rounded-2xl space-y-2 border-2 border-slate-300 shadow-md">
                 <div class="px-3 py-2 text-xs font-black uppercase tracking-wider text-red-700 flex items-center justify-between border-b border-slate-300/80 pb-2">
-                    <div class="flex items-center gap-2">
-                        <img src="assets/logo.jpg" alt="Logo" class="w-5 h-5 rounded-md object-cover border border-red-500/50 shadow-sm">
-                        <span class="tracking-wide">📅 DERS PROGRAMI</span>
+                    <div class="flex items-center gap-2 min-w-0">
+                        <img src="assets/logo.jpg" alt="Logo" class="w-6 h-6 rounded-md object-cover border border-red-500/50 shadow-sm flex-shrink-0">
+                        <span class="font-black text-slate-900 text-xs truncate" x-text="data.teacher?.name || currentUser?.name || 'Murat Kundakcı'" :title="data.teacher?.name || currentUser?.name"></span>
                     </div>
-                    <span class="text-[10px] px-2 py-0.5 rounded-md font-black bg-red-100 text-red-800 border border-red-200 truncate max-w-[130px]" x-text="data.teacher?.name || currentUser?.name || 'Murat Kundakcı'" :title="data.teacher?.name || currentUser?.name"></span>
+                    <span class="text-[9.5px] px-2 py-0.5 rounded-md font-black bg-red-100 text-red-800 border border-red-200 flex-shrink-0" x-text="currentUser?.role || 'Öğretmen'"></span>
                 </div>
 
                 <!-- Dinamik Menü Butonları -->
@@ -352,7 +352,7 @@
                             <div>
                                 <div class="flex items-center gap-2">
                                     <h2 class="text-base sm:text-lg font-black text-black brand-font">
-                                        📅 Ders Programı & Nöbet
+                                        📅 Ders Programı
                                     </h2>
                                     <span class="text-[10px] bg-red-600 text-white font-black px-2 py-0.5 rounded-md shadow-xs">Günde 7 Ders</span>
                                 </div>
@@ -397,6 +397,10 @@
                             </div>
 
                             <!-- 📷 Görsel Yükle -->
+                            <button @click="openLessonPeriodsModal()" title="Ders Saatleri ve Zamanlarını Düzenle" class="px-2.5 py-1 rounded-md bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 font-black text-[11px] shadow-2xs transition flex items-center gap-1 active:scale-95">
+                                <i data-lucide="clock" class="w-3.5 h-3.5 text-red-600"></i>
+                                <span>⏰ Saatleri Düzenle</span>
+                            </button>
                             <button @click="openScheduleImageModal()" title="Program Fotoğrafı Yükle" class="px-2.5 py-1 rounded-lg bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-500 hover:to-rose-600 text-white font-black text-[11px] shadow-xs transition flex items-center gap-1">
                                 <i data-lucide="camera" class="w-3.5 h-3.5"></i>
                                 <span class="hidden sm:inline">Görselden</span>
@@ -469,48 +473,50 @@
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         <template x-for="sch in getDailySchedule(selectedScheduleDay)" :key="sch.periodNo">
-                            <div class="bg-white p-3.5 sm:p-4 rounded-2xl border-2 shadow-sm space-y-2.5 flex flex-col justify-between hover:shadow-md transition" :class="sch.classId && sch.classId !== 'Boş' ? 'border-slate-300 border-t-8 border-t-red-600' : 'border-dashed border-slate-300 bg-slate-50/70 opacity-80'">
+                            <div class="bg-white p-4 rounded-2xl border-2 shadow-sm space-y-3 flex flex-col justify-between hover:shadow-md transition" :class="sch.classId && sch.classId !== 'Boş' ? 'border-slate-300 border-t-8 border-t-red-600' : 'border-dashed border-slate-300 bg-slate-50/70 opacity-80'">
                                 <div class="space-y-3">
                                     
-                                    <!-- Ders Saati & Hızlı Sınıf Ekleme / Çıkarma Dropdown (Kompakt & Tabloya Uyumlu) -->
-                                    <div class="flex items-center justify-between pb-1.5 border-b-2 border-slate-100 gap-1.5">
-                                        <div class="flex items-center gap-1 flex-shrink-0">
-                                            <span class="text-xs font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded-lg border border-slate-300 whitespace-nowrap" x-text="sch.periodNo + '. Ders'"></span>
-                                            <span class="text-[11px] font-mono font-black text-red-700 whitespace-nowrap" x-text="((data.lessonPeriods || []).find(p => p.periodNo === sch.periodNo) || {}).time"></span>
+                                    <!-- Üst Başlık: Ders Saati & Hızlı Sınıf Değiştirici -->
+                                    <div class="flex items-center justify-between pb-2 border-b-2 border-slate-100 gap-2">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-xs font-black text-slate-900 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-300" x-text="sch.periodNo + '. Ders'"></span>
+                                            <span class="text-xs font-mono font-black text-red-700" x-text="((data.lessonPeriods || []).find(p => p.periodNo === sch.periodNo) || {}).time"></span>
                                         </div>
 
-                                        <!-- Hızlı Sınıf Ata / Çıkar Seçici -->
-                                        <select :value="sch.classId || 'Boş'" @change="quickAssignClass(selectedScheduleDay, sch.periodNo, $event.target.value)" class="text-xs font-black px-2 py-1 rounded-lg border-2 border-slate-300 bg-slate-50 focus:border-red-500 shadow-xs cursor-pointer max-w-[115px] truncate" :class="sch.classId && sch.classId !== 'Boş' ? 'text-red-700 font-extrabold bg-red-50' : 'text-slate-500'">
-                                            <option value="Boş">⚪ Boş</option>
-                                            <option value="5/A">5/A</option>
-                                            <option value="5/D">5/D</option>
-                                            <option value="6/G">6/G</option>
-                                            <option value="7/A">7/A</option>
-                                            <option value="7/B">7/B</option>
-                                            <option value="5/D Rehberlik">5/D Reh.</option>
+                                        <!-- Hızlı Sınıf Seçimi -->
+                                        <select :value="sch.classId || 'Boş'" @change="quickAssignClass(selectedScheduleDay, sch.periodNo, $event.target.value)" class="text-xs font-black px-2.5 py-1 rounded-lg border-2 border-slate-300 bg-slate-50 focus:border-red-500 shadow-xs cursor-pointer" :class="sch.classId && sch.classId !== 'Boş' ? 'text-red-700 font-extrabold bg-red-50' : 'text-slate-500'">
+                                            <option value="Boş">⚪ Ders Yok</option>
+                                            <option value="5/A">5/A (Fen)</option>
+                                            <option value="5/D">5/D (Fen)</option>
+                                            <option value="6/G">6/G (Fen)</option>
+                                            <option value="7/A">7/A (Fen)</option>
+                                            <option value="7/B">7/B (Fen)</option>
+                                            <option value="5/D Rehberlik">⭐ 5/D Rehberlik</option>
                                         </select>
                                     </div>
 
                                     <!-- Ders Bilgileri (Doluysa) -->
                                     <template x-if="sch.classId && sch.classId !== 'Boş'">
-                                        <div class="space-y-2">
-                                            <div class="flex items-center justify-between">
+                                        <div class="space-y-2.5">
+                                            <!-- Sınıf & Derslik Rozetleri -->
+                                            <div class="flex items-center justify-between gap-2">
                                                 <span class="px-3 py-1 rounded-xl bg-red-600 text-white font-black text-sm shadow tracking-wide" x-text="sch.classId"></span>
-                                                <span class="text-[11px] text-blue-700 font-black bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-200" x-text="sch.room && !sch.room.includes('Kendi Sınıfı') ? sch.room : (sch.classId + ' Sınıfı')"></span>
+                                                <span class="text-xs text-blue-800 font-black bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200" x-text="sch.room && !sch.room.includes('Kendi Sınıfı') ? sch.room : (sch.classId + ' Sınıfı')"></span>
                                             </div>
 
+                                            <!-- Ders & Konu -->
                                             <div>
-                                                <h4 class="text-sm font-black text-black leading-snug" x-text="sch.subject"></h4>
-                                                <p class="text-xs text-slate-700 font-bold mt-0.5" x-text="sch.topic || 'Genel Ders Akışı'"></p>
+                                                <h4 class="text-sm font-black text-slate-900 leading-snug" x-text="sch.subject"></h4>
+                                                <p class="text-xs text-slate-600 font-bold mt-0.5" x-text="sch.topic || 'Genel Ders Akışı'"></p>
                                             </div>
 
-                                            <!-- MEB Maarif Modeli Öğrenme Çıktısı Kutusu (Kompakt ve Düzenli) -->
-                                            <div class="p-2.5 bg-emerald-50 rounded-xl border border-emerald-300 space-y-1 shadow-xs">
-                                                <div class="flex items-center gap-1.5 text-xs font-black text-emerald-950">
-                                                    <span class="px-1.5 py-0.2 rounded bg-emerald-700 text-white font-mono text-[10.5px] font-black" x-text="sch.outcomeCode || 'KOD YOK'"></span>
-                                                    <span class="text-[10.5px] font-black text-emerald-900 truncate">Maarif Modeli Çıktısı</span>
+                                            <!-- MEB Maarif Modeli Öğrenme Çıktısı Kutusu (KAZANIM TAM GÖRÜNÜR) -->
+                                            <div class="p-3 bg-emerald-50/90 rounded-2xl border-2 border-emerald-300 space-y-1.5 shadow-xs">
+                                                <div class="flex items-center gap-2 text-xs font-black text-emerald-950">
+                                                    <span class="px-2 py-0.5 rounded-md bg-emerald-700 text-white font-mono text-xs font-black tracking-wide" x-text="sch.outcomeCode || 'KOD YOK'"></span>
+                                                    <span class="text-xs font-black text-emerald-900">Maarif Modeli Öğrenme Çıktısı</span>
                                                 </div>
-                                                <p class="text-xs text-black font-bold leading-snug line-clamp-2" :title="sch.outcomeDesc" x-text="sch.outcomeDesc || 'Öğrenme çıktısı tanımlı değil.'"></p>
+                                                <p class="text-xs sm:text-sm text-slate-900 font-bold leading-relaxed" x-text="sch.outcomeDesc || 'Öğrenme çıktısı tanımlı değil.'"></p>
                                             </div>
                                         </div>
                                     </template>
@@ -519,7 +525,7 @@
                                     <template x-if="!sch.classId || sch.classId === 'Boş'">
                                         <div class="py-6 text-center space-y-2">
                                             <span class="px-3 py-1.5 rounded-xl bg-slate-200 text-slate-600 font-black text-xs inline-block border border-slate-300">Ders Yok</span>
-                                            <p class="text-[11px] text-slate-400 font-bold">Bu saatte dersiniz bulunmamaktadır.</p>
+                                            <p class="text-xs text-slate-400 font-bold">Bu saatte planlanmış dersiniz bulunmamaktadır.</p>
                                         </div>
                                     </template>
                                 </div>
@@ -3400,6 +3406,78 @@
                 </button>
             </div>
 
+        </div>
+    </div>
+
+
+    <!-- ================= MODAL: ⏰ DERS SAATLERİ & ZAMANLARI DÜZENLE ================= -->
+    <div x-show="isLessonPeriodsModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-black/80 backdrop-blur-md overflow-hidden" @click.self="isLessonPeriodsModalOpen = false">
+        <div class="bg-white text-slate-900 w-full max-w-xl max-h-[92vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden border-4 border-red-600">
+            
+            <!-- Modal Başlığı -->
+            <div class="p-4 sm:p-5 bg-gradient-to-r from-red-700 via-rose-700 to-slate-900 text-white flex items-center justify-between gap-4 border-b-2 border-red-700">
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 bg-red-600 text-white rounded-2xl shadow-lg shadow-red-900/40">
+                        <i data-lucide="clock" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-base sm:text-lg font-black tracking-tight brand-font">⏰ Ders Saatlerini ve Zamanlarını Düzenle</h2>
+                        <p class="text-xs text-red-100/90 font-medium">Günlük derslerin başlangıç-bitiş saatlerini ve etiketlerini okulunuzun saatlerine göre ayarlayın.</p>
+                    </div>
+                </div>
+
+                <button @click="isLessonPeriodsModalOpen = false" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-black transition">
+                    ✕
+                </button>
+            </div>
+
+            <!-- Form Alanı -->
+            <div class="p-4 sm:p-6 overflow-y-auto space-y-4 flex-1 custom-scrollbar">
+                
+                <div class="flex items-center justify-between pb-2 border-b border-slate-200">
+                    <span class="text-xs font-black text-slate-800">Ders Saat Listesi (Günde <span x-text="tempLessonPeriods.length"></span> Ders)</span>
+                    <button @click="addTempLessonPeriod()" class="px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-xs transition flex items-center gap-1 shadow-xs">
+                        <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                        <span>+ Ders Saati Ekle</span>
+                    </button>
+                </div>
+
+                <div class="space-y-3">
+                    <template x-for="(period, pIdx) in tempLessonPeriods" :key="pIdx">
+                        <div class="p-3 bg-slate-50 rounded-2xl border-2 border-slate-200 flex items-center gap-3 justify-between hover:border-red-300 transition">
+                            <div class="flex items-center gap-2">
+                                <span class="w-7 h-7 rounded-xl bg-red-600 text-white font-black text-xs flex items-center justify-center shadow-xs" x-text="period.periodNo"></span>
+                                <input type="text" x-model="period.label" placeholder="Örn: 1. Ders" class="w-24 p-2 bg-white border-2 border-slate-300 rounded-xl text-xs font-black text-slate-900 focus:border-red-600 focus:outline-none">
+                            </div>
+
+                            <div class="flex items-center gap-2 flex-1 max-w-[220px]">
+                                <input type="text" x-model="period.time" placeholder="08:30 - 09:10" class="w-full p-2 bg-white border-2 border-slate-300 rounded-xl text-xs font-mono font-bold text-slate-900 focus:border-red-600 focus:outline-none">
+                            </div>
+
+                            <button @click="removeTempLessonPeriod(pIdx)" title="Bu Ders Saatini Sil" class="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </template>
+                </div>
+
+                <div class="pt-2 flex items-center justify-between text-xs">
+                    <button @click="resetTempLessonPeriods()" class="text-rose-700 hover:text-rose-900 font-black">
+                        🔄 MEB Standart Saatlerine Sıfırla
+                    </button>
+                </div>
+            </div>
+
+            <!-- Alt Butonlar -->
+            <div class="p-4 bg-slate-100 border-t-2 border-slate-200 flex items-center justify-end gap-2">
+                <button @click="isLessonPeriodsModalOpen = false" class="px-4 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-black text-xs transition">
+                    Vazgeç
+                </button>
+                <button @click="saveLessonPeriods()" class="px-6 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-xs shadow-lg shadow-red-600/30 flex items-center gap-2 transform active:scale-95 transition">
+                    <i data-lucide="check" class="w-4 h-4"></i>
+                    <span>💾 Saatleri Kaydet</span>
+                </button>
+            </div>
         </div>
     </div>
 
