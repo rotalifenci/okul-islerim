@@ -39,6 +39,22 @@ window.StorageManager = {
                         parsed._clean_classrooms_v1 = true;
                         this.saveData(parsed);
                     }
+                                        if (!parsed._school_tasks_tab_v1) {
+                        if (parsed.navSections && Array.isArray(parsed.navSections)) {
+                            const hasTasks = parsed.navSections.some(s => s.id === 'school-tasks');
+                            if (!hasTasks) {
+                                const assignIdx = parsed.navSections.findIndex(s => s.id === 'assignments');
+                                const taskSec = { id: 'school-tasks', title: '📌 Okul Görevlerim', icon: 'check-square', color: 'red', visible: true, isSystem: true, badge: 'Nöbet & Görev' };
+                                if (assignIdx !== -1) {
+                                    parsed.navSections.splice(assignIdx + 1, 0, taskSec);
+                                } else {
+                                    parsed.navSections.push(taskSec);
+                                }
+                            }
+                        }
+                        parsed._school_tasks_tab_v1 = true;
+                        this.saveData(parsed);
+                    }
                     if (!parsed.lessonPeriods) parsed.lessonPeriods = JSON.parse(JSON.stringify(window.InitialData.lessonPeriods || []));
                 }
                 return parsed;

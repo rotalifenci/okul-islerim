@@ -619,62 +619,7 @@
                     </div>
                 </div>
 
-                <!-- Alt Kısım: Nöbet & Öncelikli Görevler Eisenhower Matrisi -->
-                <div class="bg-slate-100/95 p-5 rounded-3xl border-2 border-slate-300 shadow-md space-y-4">
-                    <div class="flex items-center justify-between pb-2 border-b border-slate-300">
-                        <h3 class="font-black text-black text-base brand-font flex items-center gap-2">
-                            <i data-lucide="check-square" class="w-5 h-5 text-red-600"></i>
-                            <span>Ders Programı İle İlgili Görevler & Nöbet Takibi</span>
-                        </h3>
-                        <button @click="isTaskModalOpen = true" class="px-3.5 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-xs shadow-sm">
-                            + Yeni Görev
-                        </button>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="p-4 rounded-2xl bg-white border-2 border-slate-300 shadow-sm border-l-8 border-l-red-600 space-y-2">
-                            <h4 class="font-black text-black text-xs uppercase text-red-700 flex items-center justify-between">
-                                <span>🔴 Acil & Önemli Okul Görevleri</span>
-                                <span class="text-[10px] bg-red-100 px-2 py-0.5 rounded font-black" x-text="data.tasks.filter(t => t.priority === 'urgent' && !t.done).length + ' Görev'"></span>
-                            </h4>
-                            <div class="space-y-1.5">
-                                <template x-for="t in data.tasks.filter(t => t.priority === 'urgent')" :key="t.id">
-                                    <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs gap-2 hover:bg-red-50/40 transition">
-                                        <div class="flex items-center gap-2 flex-1">
-                                            <input type="checkbox" :checked="t.done" @change="toggleTask(t)" class="rounded text-red-600 focus:ring-red-500 cursor-pointer w-4 h-4 flex-shrink-0">
-                                            <span class="font-black text-black leading-tight" :class="t.done ? 'line-through text-slate-400' : 'text-black'" x-text="t.title"></span>
-                                        </div>
-                                        <button @click="deleteTask(t.id)" title="Görevi Sil" class="p-1 rounded-lg hover:bg-red-100 text-slate-400 hover:text-red-600 transition flex-shrink-0">
-                                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                                        </button>
-                                    </div>
-                                </template>
-                            </div>
-                        </div>
-
-                        <div class="p-4 rounded-2xl bg-white border-2 border-slate-300 shadow-sm border-l-8 border-l-amber-500 space-y-2">
-                            <h4 class="font-black text-black text-xs uppercase text-amber-800 flex items-center justify-between">
-                                <span>🟠 Planlanacak Zümre / Kulüp Görevleri</span>
-                                <span class="text-[10px] bg-amber-100 px-2 py-0.5 rounded font-black" x-text="data.tasks.filter(t => t.priority === 'important' && !t.done).length + ' Görev'"></span>
-                            </h4>
-                            <div class="space-y-1.5">
-                                <template x-for="t in data.tasks.filter(t => t.priority === 'important')" :key="t.id">
-                                    <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs gap-2 hover:bg-amber-50/40 transition">
-                                        <div class="flex items-center gap-2 flex-1">
-                                            <input type="checkbox" :checked="t.done" @change="toggleTask(t)" class="rounded text-amber-600 focus:ring-amber-500 cursor-pointer w-4 h-4 flex-shrink-0">
-                                            <span class="font-black text-black leading-tight" :class="t.done ? 'line-through text-slate-400' : 'text-black'" x-text="t.title"></span>
-                                        </div>
-                                        <button @click="deleteTask(t.id)" title="Görevi Sil" class="p-1 rounded-lg hover:bg-red-100 text-slate-400 hover:text-red-600 transition flex-shrink-0">
-                                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                                        </button>
-                                    </div>
-                                </template>
-                            </div>
-                        </div>
-                    </div>
                 </div>
-
-            </div>
 
             <!-- ================= TAB: MAARİF YILLIK PLANI & ÖĞRENME ÇIKTILARI (DERS PROGRAMI GİBİ TAM EKRAN TAB) ================= -->
             <div x-show="currentTab === 'annual-plan'" class="space-y-6">
@@ -1333,6 +1278,157 @@
                             <span>Tüm Değişiklikleri Kaydet</span>
                         </button>
                     </div>
+                </div>
+
+            </div>
+
+                        <!-- ================= TAB: OKUL GÖREVLERİM & NÖBET TAKİBİ ================= -->
+            <div x-show="currentTab === 'school-tasks'" x-cloak class="space-y-6">
+                
+                <!-- Başlık ve Kontrol Kartı -->
+                <div class="bg-slate-100/95 p-5 sm:p-6 rounded-3xl border-2 border-slate-300 shadow-md space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div class="flex items-center gap-3.5">
+                            <div class="p-3.5 bg-red-600 rounded-2xl text-white shadow-lg shadow-red-600/30">
+                                <i data-lucide="check-square" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h2 class="text-xl font-black text-black brand-font">📌 Okul Görevlerim & Nöbet Takibi</h2>
+                                    <span class="px-2.5 py-0.5 text-xs font-black bg-red-100 text-red-800 rounded-lg border border-red-300">Eisenhower Matrisi</span>
+                                </div>
+                                <p class="text-xs text-slate-700 font-bold">Acil okul görevleri, şube rehberlik formları, nöbet hazırlıkları ve zümre/kulüp planlaması</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <button @click="isTaskModalOpen = true" class="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-xs shadow-md flex items-center gap-2 transition transform hover:scale-105 active:scale-95">
+                                <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                                <span>+ Yeni Görev Ekle</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- İstatistik Rozetleri -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-slate-300">
+                        <div class="bg-white p-3 rounded-2xl border border-slate-300 shadow-xs">
+                            <div class="text-[11px] font-bold text-slate-600">Toplam Görev</div>
+                            <div class="text-lg font-black text-black" x-text="(data.tasks || []).length"></div>
+                        </div>
+                        <div class="bg-red-50 p-3 rounded-2xl border border-red-200 shadow-xs">
+                            <div class="text-[11px] font-bold text-red-800">🔴 Acil Bekleyen</div>
+                            <div class="text-lg font-black text-red-700" x-text="(data.tasks || []).filter(t => t.priority === 'urgent' && !t.done).length"></div>
+                        </div>
+                        <div class="bg-amber-50 p-3 rounded-2xl border border-amber-200 shadow-xs">
+                            <div class="text-[11px] font-bold text-amber-900">🟠 Planlanacak</div>
+                            <div class="text-lg font-black text-amber-700" x-text="(data.tasks || []).filter(t => t.priority === 'important' && !t.done).length"></div>
+                        </div>
+                        <div class="bg-emerald-50 p-3 rounded-2xl border border-emerald-200 shadow-xs">
+                            <div class="text-[11px] font-bold text-emerald-900">✅ Tamamlanan</div>
+                            <div class="text-lg font-black text-emerald-700" x-text="(data.tasks || []).filter(t => t.done).length"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2 Sütunlu Görev Panosu -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    
+                    <!-- 1. Sütun: Acil ve Önemli Görevler -->
+                    <div class="bg-slate-100/95 p-5 rounded-3xl border-2 border-slate-300 shadow-md space-y-4">
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-300">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-red-600 animate-pulse"></span>
+                                <h3 class="font-black text-black text-sm uppercase text-red-700">🔴 Acil & Önemli Okul Görevleri</h3>
+                            </div>
+                            <span class="text-xs bg-red-100 text-red-800 px-2.5 py-0.5 rounded-lg font-black" x-text="(data.tasks || []).filter(t => t.priority === 'urgent' && !t.done).length + ' Kalan'"></span>
+                        </div>
+
+                        <!-- Boş Durum -->
+                        <div x-show="!(data.tasks || []).filter(t => t.priority === 'urgent').length" class="py-8 text-center text-slate-500 space-y-2">
+                            <i data-lucide="check-circle-2" class="w-10 h-10 mx-auto text-slate-300"></i>
+                            <p class="text-xs font-bold">Acil görev bulunmamaktadır.</p>
+                        </div>
+
+                        <!-- Görev Listesi -->
+                        <div class="space-y-2">
+                            <template x-for="t in (data.tasks || []).filter(t => t.priority === 'urgent')" :key="t.id">
+                                <div class="p-3.5 rounded-2xl bg-white border-2 border-slate-300 shadow-xs flex items-center justify-between gap-3 hover:border-red-400 transition">
+                                    <div class="flex items-center gap-2.5 flex-1 min-w-0">
+                                        <input type="checkbox" :checked="t.done" @change="toggleTask(t)" class="rounded text-red-600 focus:ring-red-500 cursor-pointer w-4 h-4 flex-shrink-0">
+                                        <div class="min-w-0">
+                                            <p class="font-black text-black text-xs leading-snug break-words" :class="t.done ? 'line-through text-slate-400' : 'text-black'" x-text="t.title"></p>
+                                            <div class="flex items-center gap-2 mt-1 text-[10px] text-slate-500 font-bold">
+                                                <span x-show="t.category" class="px-1.5 py-0.2 rounded bg-slate-100 text-slate-700" x-text="t.category"></span>
+                                                <span x-show="t.date" x-text="t.date"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button @click="deleteTask(t.id)" title="Görevi Sil" class="p-1.5 rounded-lg bg-slate-100 hover:bg-red-100 text-slate-400 hover:text-red-600 transition flex-shrink-0">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- 2. Sütun: Planlanacak Zümre / Kulüp Görevleri -->
+                    <div class="bg-slate-100/95 p-5 rounded-3xl border-2 border-slate-300 shadow-md space-y-4">
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-300">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+                                <h3 class="font-black text-black text-sm uppercase text-amber-800">🟠 Planlanacak Zümre & Kulüp Görevleri</h3>
+                            </div>
+                            <span class="text-xs bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-lg font-black" x-text="(data.tasks || []).filter(t => t.priority === 'important' && !t.done).length + ' Kalan'"></span>
+                        </div>
+
+                        <!-- Boş Durum -->
+                        <div x-show="!(data.tasks || []).filter(t => t.priority === 'important').length" class="py-8 text-center text-slate-500 space-y-2">
+                            <i data-lucide="calendar-check" class="w-10 h-10 mx-auto text-slate-300"></i>
+                            <p class="text-xs font-bold">Planlanmış görev bulunmamaktadır.</p>
+                        </div>
+
+                        <!-- Görev Listesi -->
+                        <div class="space-y-2">
+                            <template x-for="t in (data.tasks || []).filter(t => t.priority === 'important')" :key="t.id">
+                                <div class="p-3.5 rounded-2xl bg-white border-2 border-slate-300 shadow-xs flex items-center justify-between gap-3 hover:border-amber-400 transition">
+                                    <div class="flex items-center gap-2.5 flex-1 min-w-0">
+                                        <input type="checkbox" :checked="t.done" @change="toggleTask(t)" class="rounded text-amber-600 focus:ring-amber-500 cursor-pointer w-4 h-4 flex-shrink-0">
+                                        <div class="min-w-0">
+                                            <p class="font-black text-black text-xs leading-snug break-words" :class="t.done ? 'line-through text-slate-400' : 'text-black'" x-text="t.title"></p>
+                                            <div class="flex items-center gap-2 mt-1 text-[10px] text-slate-500 font-bold">
+                                                <span x-show="t.category" class="px-1.5 py-0.2 rounded bg-slate-100 text-slate-700" x-text="t.category"></span>
+                                                <span x-show="t.date" x-text="t.date"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button @click="deleteTask(t.id)" title="Görevi Sil" class="p-1.5 rounded-lg bg-slate-100 hover:bg-red-100 text-slate-400 hover:text-red-600 transition flex-shrink-0">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- 🛡️ Nöbet Görevi & Nöbet Yeri Bilgi Kartı -->
+                <div class="bg-gradient-to-r from-red-600 to-slate-900 p-5 rounded-3xl text-white shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="flex items-center gap-3.5">
+                        <div class="p-3 bg-white/10 rounded-2xl backdrop-blur-sm border border-white/20">
+                            <i data-lucide="shield-alert" class="w-6 h-6 text-yellow-300"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-base font-black brand-font">Haftalık Resmi Nöbet Görevi</h3>
+                                <span class="px-2 py-0.5 rounded text-[10px] bg-yellow-400 text-slate-950 font-black">CUMA</span>
+                            </div>
+                            <p class="text-xs text-slate-300 font-medium">Nöbet Günü: Cuma • Alan: <strong class="text-white" x-text="data.teacher.dutyArea || 'Kat-2'"></strong> (Kat-2, Kat-3, Bahçe, Zemin Rotasyonu)</p>
+                        </div>
+                    </div>
+                    <button @click="setTab('calendar-tasks')" class="px-4 py-2 rounded-xl bg-white text-slate-950 font-black text-xs hover:bg-yellow-400 transition flex items-center justify-center gap-1.5 shadow-md self-start sm:self-auto">
+                        <i data-lucide="calendar" class="w-4 h-4"></i>
+                        <span>Ders Programına Git ➔</span>
+                    </button>
                 </div>
 
             </div>
