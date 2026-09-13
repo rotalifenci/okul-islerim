@@ -58,94 +58,73 @@
 </head>
 <body x-data="rotaliApp" class="bg-[#090d16] text-slate-100 min-h-screen flex flex-col selection:bg-red-600 selection:text-white">
 
-    <!-- ================= GİRİŞ PORTALI (5 KULLANICI / 1 YÖNETİCİ + 4 ÖĞRETMEN) ================= -->
+    <!-- ================= GİRİŞ PORTALI (SADECE ŞİFRE İLE GİRİŞ) ================= -->
     <div x-show="!isAuthenticated" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#090d16] bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(220,38,38,0.35),rgba(9,13,22,0.98))] backdrop-blur-md overflow-y-auto">
-        <div class="w-full max-w-lg bg-white p-6 sm:p-7 rounded-3xl border-4 border-red-600 shadow-2xl space-y-4 text-slate-900 relative my-auto">
+        <div class="w-full max-w-md bg-white p-6 sm:p-8 rounded-3xl border-4 border-red-600 shadow-2xl space-y-5 text-slate-900 relative my-auto">
             
             <!-- Logo ve Başlık -->
-            <div class="text-center space-y-1.5">
-                <div class="relative w-16 h-16 mx-auto">
-                    <img src="assets/logo.jpg" alt="Rotalı Fenci Logo" class="w-16 h-16 rounded-2xl shadow-xl border-2 border-red-600 object-cover object-center ring-4 ring-red-100">
+            <div class="text-center space-y-2">
+                <div class="relative w-18 h-18 mx-auto">
+                    <img src="assets/logo.jpg" alt="Rotalı Fenci Logo" class="w-18 h-18 rounded-2xl shadow-xl border-2 border-red-600 object-cover object-center ring-4 ring-red-100">
                 </div>
-                <h1 class="text-xl sm:text-2xl font-black tracking-tight text-black brand-font">
+                <h1 class="text-2xl font-black tracking-tight text-black brand-font">
                     ROTALI <span class="text-red-600">FENCİ</span>
                 </h1>
-                <div class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-red-100 text-red-800 border border-red-300 text-xs font-black">
-                    <i data-lucide="users" class="w-3.5 h-3.5 text-red-600"></i>
-                    <span>Öğretmen & Yönetici Giriş Portalı</span>
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-100 text-red-800 border border-red-300 text-xs font-black">
+                    <i data-lucide="key" class="w-3.5 h-3.5 text-red-600"></i>
+                    <span>Şifre ile Giriş Portalı</span>
                 </div>
                 <p class="text-xs text-slate-600 font-bold">
-                    Lütfen giriş yapmak istediğiniz kullanıcı profilini seçiniz:
+                    Kullanıcı adı yazmanıza gerek yoktur. Sadece şifrenizi girerek kendi özel panelinize anında erişebilirsiniz.
                 </p>
             </div>
 
-            <!-- 5 Kullanıcı Profil Seçimi Kartları -->
-            <div class="space-y-1.5">
-                <label class="text-[11px] font-black text-slate-700 block">👤 Giriş Yapılacak Profil:</label>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <template x-for="u in (users || [])" :key="u.id">
-                        <button type="button" @click="selectLoginUser(u)" 
-                                :class="loginSelectedUser === u.id ? 'bg-red-50 border-2 border-red-600 ring-2 ring-red-200 text-red-950 font-black shadow-xs' : 'bg-slate-50 hover:bg-slate-100 border border-slate-300 text-slate-800 font-bold'"
-                                class="p-2.5 rounded-2xl text-left transition flex items-center justify-between gap-2 active:scale-95">
-                            <div class="flex items-center gap-2 min-w-0">
-                                <div class="w-7 h-7 rounded-xl flex items-center justify-center text-xs font-black" :class="u.role === 'Yönetici' ? 'bg-red-600 text-white' : 'bg-indigo-600 text-white'">
-                                    <span x-text="u.role === 'Yönetici' ? '👑' : '👨‍🏫'"></span>
-                                </div>
-                                <div class="min-w-0">
-                                    <p class="text-xs font-black truncate" x-text="u.name"></p>
-                                    <p class="text-[10px] text-slate-500 truncate" x-text="u.username"></p>
-                                </div>
-                            </div>
-                            <span class="text-[9px] px-1.5 py-0.5 rounded-md font-black" :class="u.role === 'Yönetici' ? 'bg-red-200 text-red-900' : 'bg-indigo-100 text-indigo-900'" x-text="u.role"></span>
+            <!-- Şifre Formu -->
+            <form @submit.prevent="login()" class="space-y-4 pt-1">
+                <div>
+                    <label class="text-xs font-black text-black block mb-1.5 flex items-center justify-between">
+                        <span>🔑 Şifrenizi Giriniz:</span>
+                        <button type="button" @click="isPasswordVisible = !isPasswordVisible" class="text-[11px] text-slate-500 hover:text-black font-bold">
+                            <span x-text="isPasswordVisible ? 'Gizle 🙈' : 'Göster 👁️'"></span>
                         </button>
-                    </template>
-                </div>
-            </div>
-
-            <!-- Giriş Formu -->
-            <form @submit.prevent="login()" class="space-y-3 pt-1 border-t border-slate-200">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="text-xs font-black text-black block mb-1">
-                            <span>Kullanıcı Adı:</span>
-                        </label>
-                        <input type="text" x-model="loginUsername" placeholder="Kullanıcı adı..." class="w-full px-3.5 py-2.5 bg-slate-100 border-2 border-slate-300 rounded-xl text-xs font-black text-black placeholder-slate-400 focus:outline-none focus:border-red-600 focus:bg-white transition shadow-sm">
-                    </div>
-
-                    <div>
-                        <label class="text-xs font-black text-black block mb-1 flex items-center justify-between">
-                            <span>Şifre:</span>
-                            <button type="button" @click="isPasswordVisible = !isPasswordVisible" class="text-[10px] text-slate-500 hover:text-black font-bold">
-                                <span x-text="isPasswordVisible ? 'Gizle 🙈' : 'Göster 👁️'"></span>
-                            </button>
-                        </label>
-                        <input :type="isPasswordVisible ? 'text' : 'password'" x-model="loginPassword" placeholder="Şifrenizi yazınız..." autofocus class="w-full px-3.5 py-2.5 bg-slate-100 border-2 border-slate-300 rounded-xl text-xs font-black text-black placeholder-slate-400 focus:outline-none focus:border-red-600 focus:bg-white transition shadow-sm">
+                    </label>
+                    <div class="relative">
+                        <input :type="isPasswordVisible ? 'text' : 'password'" x-model="loginPassword" placeholder="Şifrenizi yazınız (örn: admin, 1111, 2222...)" autofocus class="w-full px-4 py-3.5 bg-slate-100 border-2 border-slate-300 rounded-xl text-sm font-black text-black placeholder-slate-400 focus:outline-none focus:border-red-600 focus:bg-white transition shadow-inner">
                     </div>
                 </div>
 
                 <!-- Hata Uyarısı -->
-                <div x-show="loginError" class="p-2.5 bg-red-100 border border-red-300 rounded-xl text-xs font-black text-red-800 flex items-center gap-2">
+                <div x-show="loginError" class="p-3 bg-red-100 border border-red-300 rounded-xl text-xs font-black text-red-800 flex items-center gap-2">
                     <span>⚠️</span>
                     <span x-text="loginError"></span>
                 </div>
 
                 <!-- Giriş Butonu -->
-                <button type="submit" class="w-full py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-sm transition shadow-lg shadow-red-600/30 flex items-center justify-center gap-2 active:scale-95">
+                <button type="submit" class="w-full py-3.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-sm transition shadow-lg shadow-red-600/30 flex items-center justify-center gap-2 active:scale-95">
                     <span>Giriş Yap</span>
                     <i data-lucide="arrow-right" class="w-4 h-4"></i>
                 </button>
             </form>
 
-            <!-- Hızlı Giriş & İzolasyon Bilgisi -->
-            <div class="p-2.5 bg-slate-50 rounded-2xl border border-slate-200 text-[11px] text-slate-600 space-y-1">
-                <div class="font-bold flex items-center gap-1 text-slate-800">
-                    <span>🔒 Katı Veri İzolasyonu:</span>
-                    <span class="font-medium text-slate-600">Her öğretmenin ders programı, sınıfları ve öğrenci listesi tamamen kendine özeldir.</span>
+            <!-- Hızlı Giriş Çipleri (Tek Tıkla Giriş) -->
+            <div class="space-y-2 pt-2 border-t border-slate-200">
+                <span class="text-[11px] font-black text-slate-700 block">⚡ Hızlı Giriş Şifreleri (Tıklayıp Girebilirsiniz):</span>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                    <template x-for="u in (users || [])" :key="u.id">
+                        <button type="button" @click="quickLoginWithPassword(u.displayPassword)" class="p-2 rounded-xl bg-slate-50 hover:bg-red-50 hover:border-red-300 border border-slate-200 text-left transition flex items-center justify-between gap-1.5 text-xs active:scale-95">
+                            <div class="flex items-center gap-1.5 min-w-0">
+                                <span class="text-xs" x-text="u.role === 'Yönetici' ? '👑' : '👨‍🏫'"></span>
+                                <span class="font-black text-slate-900 truncate text-[11px]" x-text="u.name"></span>
+                            </div>
+                            <span class="px-1.5 py-0.5 rounded bg-slate-200 text-slate-800 font-mono text-[10px] font-black" x-text="u.displayPassword"></span>
+                        </button>
+                    </template>
                 </div>
-                <div class="text-[10px] text-slate-500 flex items-center justify-between pt-1 border-t border-slate-200">
-                    <span>👑 Yönetici Şifresi: <strong class="text-slate-800">admin</strong></span>
-                    <span>👨‍🏫 Öğretmen Şifreleri: <strong class="text-slate-800">123</strong></span>
-                </div>
+            </div>
+
+            <!-- İzolasyon Bilgi Notu -->
+            <div class="text-center pt-2 text-[10px] text-slate-500 font-medium">
+                🔒 Her şifre doğrudan o öğretmenin izole ders programı ve öğrenci listesine açılır.
             </div>
 
         </div>

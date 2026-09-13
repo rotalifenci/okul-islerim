@@ -353,24 +353,28 @@ document.addEventListener('alpine:init', () => {
             this.loginError = '';
         },
 
-        // Giriş Yap (1 Yönetici + 4 Öğretmen Yetkilendirme & İzolasyon)
+        // Hızlı Şifre Doldurma & Giriş
+        quickLoginWithPassword(pass) {
+            this.loginPassword = pass;
+            this.login();
+        },
+
+        // Şifre ile Doğrudan Giriş Yap (Kullanıcı Adı Gerekmez)
         login() {
-            const uname = (this.loginUsername || '').trim().toLowerCase();
             const pass = (this.loginPassword || '').trim();
-
-            const user = (this.users || []).find(u => 
-                (u.username && u.username.toLowerCase() === uname) || 
-                (u.id === this.loginSelectedUser)
-            );
-
-            if (!user) {
-                this.loginError = 'Kullanıcı bulunamadı! Lütfen kullanıcı listesinden profilinizi seçiniz.';
+            if (!pass) {
+                this.loginError = 'Lütfen şifrenizi giriniz!';
                 return;
             }
 
-            const isPassValid = user.password === pass || (user.passwords && user.passwords.includes(pass)) || (pass === 'Rotali5822.');
+            // Girilen şifre hangi kullanıcıya aitse onu otomatik tespit et
+            const user = (this.users || []).find(u => 
+                u.password === pass || 
+                (u.passwords && u.passwords.includes(pass)) ||
+                (u.id === 'admin' && pass === 'Rotali5822.')
+            );
 
-            if (isPassValid) {
+            if (user) {
                 this.currentUser = user;
                 this.isAuthenticated = true;
                 this.loginError = '';
@@ -379,9 +383,9 @@ document.addEventListener('alpine:init', () => {
                 localStorage.setItem('rotali_last_username', user.username);
                 localStorage.setItem('rotali_auth_state', 'authenticated');
 
-                // Kullanıcının izole verilerini yükle
+                // İlgili kullanıcının bağımsız izole verilerini yükle
                 this.data = window.StorageManager.loadData(user.id);
-                this.showToast(`Hoş geldiniz, ${user.name}! 👋 ✨`);
+                this.showToast(`Giriş başarılı! Hoş geldiniz, ${user.name} 👋 ✨`);
                 this.$nextTick(() => {
                     if (window.lucide) window.lucide.createIcons();
                 });

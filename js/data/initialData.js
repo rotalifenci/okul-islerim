@@ -9,58 +9,63 @@ window.AuthUsers = [
         role: 'Yönetici',
         roleBadge: '👑 Yönetici',
         password: 'admin',
-        passwords: ['admin', 'rotali123', 'fenci2026', 'murat'],
+        passwords: ['admin', 'Rotali5822.', 'rotali123', 'fenci2026', 'murat'],
         avatar: 'assets/logo.jpg',
         subject: 'Fen Bilimleri & Şube Rehberliği',
-        description: 'Tüm sistem yöneticisi ve kadrolu öğretmen'
+        description: 'Tüm sistem yöneticisi ve kadrolu öğretmen',
+        displayPassword: 'admin'
     },
     {
         id: 'ogretmen1',
         username: 'ogretmen1',
         name: '1. Fen Bilimleri Öğretmeni',
         role: 'Öğretmen',
-        roleBadge: '👨‍🏫 Öğretmen',
-        password: '123',
-        passwords: ['123', 'fen1', 'ogretmen1'],
+        roleBadge: '👨‍🏫 Öğretmen 1',
+        password: '1111',
+        passwords: ['1111', '1001', 'fen1', 'ogretmen1'],
         avatar: '',
         subject: 'Fen Bilimleri',
-        description: 'Kişiye özel izole ders programı ve sınıf paneli'
+        description: 'Kişiye özel izole ders programı ve sınıf paneli',
+        displayPassword: '1111'
     },
     {
         id: 'ogretmen2',
         username: 'ogretmen2',
         name: '2. Fen Bilimleri Öğretmeni',
         role: 'Öğretmen',
-        roleBadge: '👩‍🏫 Öğretmen',
-        password: '123',
-        passwords: ['123', 'fen2', 'ogretmen2'],
+        roleBadge: '👩‍🏫 Öğretmen 2',
+        password: '2222',
+        passwords: ['2222', '1002', 'fen2', 'ogretmen2'],
         avatar: '',
         subject: 'Fen Bilimleri',
-        description: 'Kişiye özel izole ders programı ve sınıf paneli'
+        description: 'Kişiye özel izole ders programı ve sınıf paneli',
+        displayPassword: '2222'
     },
     {
         id: 'ogretmen3',
         username: 'ogretmen3',
         name: '3. Fen Bilimleri Öğretmeni',
         role: 'Öğretmen',
-        roleBadge: '👨‍🏫 Öğretmen',
-        password: '123',
-        passwords: ['123', 'fen3', 'ogretmen3'],
+        roleBadge: '👨‍🏫 Öğretmen 3',
+        password: '3333',
+        passwords: ['3333', '1003', 'fen3', 'ogretmen3'],
         avatar: '',
         subject: 'Fen Bilimleri',
-        description: 'Kişiye özel izole ders programı ve sınıf paneli'
+        description: 'Kişiye özel izole ders programı ve sınıf paneli',
+        displayPassword: '3333'
     },
     {
         id: 'ogretmen4',
         username: 'ogretmen4',
         name: '4. Fen Bilimleri Öğretmeni',
         role: 'Öğretmen',
-        roleBadge: '👩‍🏫 Öğretmen',
-        password: '123',
-        passwords: ['123', 'fen4', 'ogretmen4'],
+        roleBadge: '👩‍🏫 Öğretmen 4',
+        password: '4444',
+        passwords: ['4444', '1004', 'fen4', 'ogretmen4'],
         avatar: '',
         subject: 'Fen Bilimleri',
-        description: 'Kişiye özel izole ders programı ve sınıf paneli'
+        description: 'Kişiye özel izole ders programı ve sınıf paneli',
+        displayPassword: '4444'
     }
 ];
 
