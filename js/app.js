@@ -262,6 +262,19 @@ document.addEventListener('alpine:init', () => {
         init() {
             // 5 Kullanıcıdan Aktif Olanı Seç
             this.users = window.AuthUsers || [];
+            try {
+                const customUsers = JSON.parse(localStorage.getItem('rotali_users_custom') || '[]');
+                if (Array.isArray(customUsers) && customUsers.length) {
+                    customUsers.forEach(cu => {
+                        const match = this.users.find(u => u.id === cu.id);
+                        if (match) {
+                            if (cu.name) match.name = cu.name;
+                            if (cu.school) match.school = cu.school;
+                        }
+                    });
+                }
+            } catch (e) {}
+
             const activeUid = localStorage.getItem('rotali_active_user_id') || 'admin';
             this.currentUser = this.users.find(u => u.id === activeUid) || this.users[0] || null;
             this.loginSelectedUser = this.currentUser ? this.currentUser.id : 'admin';
@@ -269,6 +282,10 @@ document.addEventListener('alpine:init', () => {
 
             // İlgili kullanıcının bağımsız/izole verilerini yükle
             this.data = window.StorageManager.loadData(this.currentUser ? this.currentUser.id : 'admin');
+            if (this.data && this.data.teacher && this.data.teacher.name && this.currentUser) {
+                this.currentUser.name = this.data.teacher.name;
+            }
+            this.loadAccountForm();
 
             if (this.settings.theme === 'light') {
                 document.body.classList.add('light');
@@ -455,7 +472,117 @@ document.addEventListener('alpine:init', () => {
         // Tab Değiştirme
         setTab(tab) {
             this.currentTab = tab;
+            if (tab === 'account' || tab === 'settings') {
+                this.loadAccountForm();
+            }
             window.scrollTo({ top: 0, behavior: 'smooth' });
+            this.$nextTick(() => {
+                if (window.lucide) window.lucide.createIcons();
+            });
+        },
+
+        // 👤 Hesap & Profil Bilgilerini Yükle
+        loadAccountForm() {
+            if (!this.data) return;
+            if (!this.data.teacher) {
+                this.data.teacher = {
+                    name: this.currentUser?.name || 'Murat Kundakcı (Rotalı Fenci)',
+                    title: 'Fen Bilimleri Öğretmeni',
+                    school: '',
+                    academicYear: '2026-2027',
+                    dutyDay: 'Cuma',
+                    dutyArea: 'Kat-2'
+                };
+            }
+            const t = this.data.teacher;
+            const u = this.currentUser || {};
+            this.accountForm = {
+                name: t.name || u.name || '',
+                title: t.title || 'Fen Bilimleri Öğretmeni',
+                school: t.school || u.school || '',
+                academicYear: t.academicYear || '2026-2027',
+                dutyDay: t.dutyDay || (t.dutySchedule && t.dutySchedule[0]?.day) || 'Cuma',
+                dutyArea: t.dutyArea || (t.dutySchedule && t.dutySchedule[0]?.area) || 'Kat-2',
+                newPassword: '',
+                confirmPassword: ''
+            };
+        },
+
+        // 👤 Hesap & Profil Bilgilerini Kaydet
+        saveAccountForm() {
+            if (!this.accountForm.name || !this.accountForm.name.trim()) {
+                alert('Lütfen adınızı ve soyadınızı giriniz!');
+                return;
+            }
+
+            const trimmedName = this.accountForm.name.trim();
+            const trimmedTitle = (this.accountForm.title || '').trim();
+            const trimmedSchool = (this.accountForm.school || '').trim();
+            const trimmedYear = (this.accountForm.academicYear || '2026-2027').trim();
+            const dutyDay = this.accountForm.dutyDay || 'Cuma';
+            const dutyArea = this.accountForm.dutyArea || 'Kat-2';
+
+            // Şifre Değiştirme Kontrolü
+            if (this.accountForm.newPassword || this.accountForm.confirmPassword) {
+                if (this.accountForm.newPassword !== this.accountForm.confirmPassword) {
+                    alert('Girdiğiniz yeni şifreler birbiriyle eşleşmiyor! Lütfen kontrol ediniz.');
+                    return;
+                }
+                if (this.accountForm.newPassword.length < 3) {
+                    alert('Şifreniz en az 3 karakter olmalıdır!');
+                    return;
+                }
+
+                const uid = this.currentUser ? this.currentUser.id : 'admin';
+                let customPasswords = {};
+                try {
+                    customPasswords = JSON.parse(localStorage.getItem('rotali_custom_user_passwords') || '{}');
+                } catch (e) {}
+                customPasswords[uid] = this.accountForm.newPassword;
+                localStorage.setItem('rotali_custom_user_passwords', JSON.stringify(customPasswords));
+
+                if (this.currentUser) {
+                    this.currentUser.password = this.accountForm.newPassword;
+                }
+            }
+
+            // this.data.teacher nesnesini güncelle
+            if (!this.data.teacher) this.data.teacher = {};
+            this.data.teacher.name = trimmedName;
+            this.data.teacher.title = trimmedTitle;
+            this.data.teacher.school = trimmedSchool;
+            this.data.teacher.academicYear = trimmedYear;
+            this.data.teacher.dutyDay = dutyDay;
+            this.data.teacher.dutyArea = dutyArea;
+
+            // currentUser nesnesini güncelle
+            if (this.currentUser) {
+                this.currentUser.name = trimmedName;
+                this.currentUser.school = trimmedSchool;
+            }
+
+            // AuthUsers listesini güncelle ve localStorage'a kaydet
+            if (this.users && Array.isArray(this.users)) {
+                const u = this.users.find(x => x.id === (this.currentUser ? this.currentUser.id : 'admin'));
+                if (u) {
+                    u.name = trimmedName;
+                    u.school = trimmedSchool;
+                }
+                try {
+                    localStorage.setItem('rotali_users_custom', JSON.stringify(this.users));
+                } catch (e) {}
+            }
+
+            // Kullanıcıya özel anahtarla verileri kaydet
+            const uid = this.currentUser ? this.currentUser.id : 'admin';
+            window.StorageManager.saveData(this.data, uid);
+
+            // Şifre form alanlarını temizle
+            this.accountForm.newPassword = '';
+            this.accountForm.confirmPassword = '';
+
+            this.showToast('👤 Hesap ve profil bilgileriniz başarıyla kaydedildi! ✅');
+
             this.$nextTick(() => {
                 if (window.lucide) window.lucide.createIcons();
             });

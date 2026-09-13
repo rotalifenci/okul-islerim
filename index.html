@@ -2222,6 +2222,151 @@
 
             </div>
 
+            <!-- ================= TAB: 👤 HESAP & PROFİL BİLGİLERİM ================= -->
+            <div x-show="currentTab === 'account'" class="space-y-6">
+                
+                <!-- Başlık Banner -->
+                <div class="bg-gradient-to-r from-red-600 via-rose-700 to-slate-900 p-5 sm:p-6 rounded-3xl text-white shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="flex items-center gap-3.5">
+                        <div class="p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 text-white">
+                            <i data-lucide="user-check" class="w-8 h-8"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h2 class="text-xl sm:text-2xl font-black brand-font text-white">👤 Hesap & Profil Bilgilerim</h2>
+                                <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-white/20 text-white border border-white/30" x-text="currentUser?.role || 'Öğretmen'"></span>
+                            </div>
+                            <p class="text-xs text-rose-100 font-medium mt-0.5">Kişisel bilgilerinizi, okul, nöbet bilgilerinizi ve giriş şifrenizi yöneticiden bağımsız olarak güncelleyin.</p>
+                        </div>
+                    </div>
+
+                    <button @click="saveAccountForm()" class="px-6 py-3 rounded-2xl bg-white hover:bg-slate-100 text-red-700 font-black text-xs sm:text-sm shadow-lg transition flex items-center justify-center gap-2 active:scale-95 flex-shrink-0">
+                        <i data-lucide="save" class="w-4 h-4"></i>
+                        <span>💾 Bilgileri Kaydet</span>
+                    </button>
+                </div>
+
+                <!-- Form Kartı -->
+                <div class="bg-white p-6 sm:p-7 rounded-3xl border-2 border-slate-300 shadow-md space-y-6">
+                    <div class="flex items-center justify-between border-b-2 border-slate-100 pb-4">
+                        <div>
+                            <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+                                <span>📋 Kişisel & Kurumsal Bilgiler</span>
+                            </h3>
+                            <p class="text-xs text-slate-500 font-medium">Bu bilgiler ders programınızda, raporlarınızda ve panonuzda kullanılır.</p>
+                        </div>
+                        <span class="text-xs font-bold text-slate-400 font-mono" x-text="'Kullanıcı ID: ' + (currentUser?.id || 'admin')"></span>
+                    </div>
+
+                    <form @submit.prevent="saveAccountForm()" class="space-y-6 text-xs">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                            <!-- Ad Soyad -->
+                            <div class="space-y-1.5">
+                                <label class="font-black text-slate-800 flex items-center gap-1.5">
+                                    <i data-lucide="user" class="w-3.5 h-3.5 text-red-600"></i>
+                                    <span>Ad Soyad *</span>
+                                </label>
+                                <input type="text" x-model="accountForm.name" placeholder="Örn: Murat Kundakcı" class="w-full p-3 bg-slate-50 border-2 border-slate-300 rounded-xl font-bold text-slate-900 focus:border-red-600 focus:outline-none focus:bg-white shadow-xs transition">
+                            </div>
+
+                            <!-- Unvan / Branş -->
+                            <div class="space-y-1.5">
+                                <label class="font-black text-slate-800 flex items-center gap-1.5">
+                                    <i data-lucide="award" class="w-3.5 h-3.5 text-red-600"></i>
+                                    <span>Unvan & Branş</span>
+                                </label>
+                                <input type="text" x-model="accountForm.title" placeholder="Örn: Fen Bilimleri Öğretmeni" class="w-full p-3 bg-slate-50 border-2 border-slate-300 rounded-xl font-bold text-slate-900 focus:border-red-600 focus:outline-none focus:bg-white shadow-xs transition">
+                            </div>
+
+                            <!-- Okul Adı -->
+                            <div class="space-y-1.5">
+                                <label class="font-black text-slate-800 flex items-center gap-1.5">
+                                    <i data-lucide="building" class="w-3.5 h-3.5 text-red-600"></i>
+                                    <span>Okul / Kurum Adı</span>
+                                </label>
+                                <input type="text" x-model="accountForm.school" placeholder="Örn: Atatürk Ortaokulu" class="w-full p-3 bg-slate-50 border-2 border-slate-300 rounded-xl font-bold text-slate-900 focus:border-red-600 focus:outline-none focus:bg-white shadow-xs transition">
+                            </div>
+
+                            <!-- Öğretim Yılı -->
+                            <div class="space-y-1.5">
+                                <label class="font-black text-slate-800 flex items-center gap-1.5">
+                                    <i data-lucide="calendar" class="w-3.5 h-3.5 text-red-600"></i>
+                                    <span>Öğretim Yılı</span>
+                                </label>
+                                <input type="text" x-model="accountForm.academicYear" placeholder="2026-2027" class="w-full p-3 bg-slate-50 border-2 border-slate-300 rounded-xl font-bold text-slate-900 focus:border-red-600 focus:outline-none focus:bg-white shadow-xs transition">
+                            </div>
+
+                            <!-- Nöbet Günü -->
+                            <div class="space-y-1.5">
+                                <label class="font-black text-slate-800 flex items-center gap-1.5">
+                                    <i data-lucide="shield" class="w-3.5 h-3.5 text-red-600"></i>
+                                    <span>Nöbet Günü</span>
+                                </label>
+                                <select x-model="accountForm.dutyDay" class="w-full p-3 bg-slate-50 border-2 border-slate-300 rounded-xl font-bold text-slate-900 focus:border-red-600 focus:outline-none focus:bg-white shadow-xs transition">
+                                    <option value="Pazartesi">Pazartesi</option>
+                                    <option value="Salı">Salı</option>
+                                    <option value="Çarşamba">Çarşamba</option>
+                                    <option value="Perşembe">Perşembe</option>
+                                    <option value="Cuma">Cuma</option>
+                                    <option value="Belirlenmedi">Yok / Seçilmedi</option>
+                                </select>
+                            </div>
+
+                            <!-- Nöbet Yeri -->
+                            <div class="space-y-1.5">
+                                <label class="font-black text-slate-800 flex items-center gap-1.5">
+                                    <i data-lucide="map-pin" class="w-3.5 h-3.5 text-red-600"></i>
+                                    <span>Nöbet Yeri</span>
+                                </label>
+                                <select x-model="accountForm.dutyArea" class="w-full p-3 bg-slate-50 border-2 border-slate-300 rounded-xl font-bold text-slate-900 focus:border-red-600 focus:outline-none focus:bg-white shadow-xs transition">
+                                    <option value="Bahçe">Bahçe</option>
+                                    <option value="Zemin">Zemin</option>
+                                    <option value="Kat-1">Kat-1</option>
+                                    <option value="Kat-2">Kat-2</option>
+                                    <option value="Kat-3">Kat-3</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Şifre Değiştirme Alanı -->
+                        <div class="p-5 bg-gradient-to-br from-red-50 to-rose-50/60 rounded-2xl border-2 border-red-200 space-y-4">
+                            <div class="flex items-center gap-2 pb-2 border-b border-red-200">
+                                <div class="p-1.5 bg-red-600 text-white rounded-lg">
+                                    <i data-lucide="key" class="w-4 h-4"></i>
+                                </div>
+                                <div>
+                                    <span class="font-black text-sm text-red-950 uppercase tracking-wide">🔑 Kişisel Giriş Şifrenizi Değiştirin</span>
+                                    <p class="text-[11px] text-slate-600 font-medium">Şifrenizi değiştirmek istemiyorsanız bu alanları boş bırakınız.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="space-y-1.5">
+                                    <label class="font-black text-slate-800 block">Yeni Giriş Şifresi</label>
+                                    <input type="text" x-model="accountForm.newPassword" class="w-full p-3 bg-white border-2 border-red-300 rounded-xl font-black text-slate-900 focus:border-red-600 focus:outline-none shadow-xs transition" placeholder="Yeni şifrenizi yazınız">
+                                </div>
+                                <div class="space-y-1.5">
+                                    <label class="font-black text-slate-800 block">Yeni Şifre (Tekrar)</label>
+                                    <input type="text" x-model="accountForm.confirmPassword" class="w-full p-3 bg-white border-2 border-red-300 rounded-xl font-black text-slate-900 focus:border-red-600 focus:outline-none shadow-xs transition" placeholder="Yeni şifrenizi tekrar yazınız">
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 text-[11px] text-red-700 font-bold bg-white/80 p-2.5 rounded-xl border border-red-200">
+                                <i data-lucide="info" class="w-4 h-4 flex-shrink-0"></i>
+                                <span>Şifrenizi değiştirdiğiniz andan itibaren giriş ekranında sadece yeni belirlediğiniz şifrenizle giriş yapabileceksiniz.</span>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end pt-2">
+                            <button type="submit" class="px-8 py-3.5 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black text-sm shadow-xl shadow-red-600/30 transition flex items-center gap-2 active:scale-95">
+                                <i data-lucide="check-circle" class="w-4 h-4"></i>
+                                <span>💾 Tüm Bilgileri Kaydet</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+
             <!-- ================= TAB 9: AYARLAR & YEDEKLEME ================= -->
             <div x-show="currentTab === 'settings'" class="space-y-6">
                 

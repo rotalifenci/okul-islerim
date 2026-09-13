@@ -81,6 +81,21 @@ window.StorageManager = {
                             this.saveData(parsed, uid);
                         }
                         if (!parsed.lessonPeriods) parsed.lessonPeriods = JSON.parse(JSON.stringify(window.InitialData.lessonPeriods || []));
+
+                        if (parsed.navSections && Array.isArray(parsed.navSections)) {
+                            const hasAccount = parsed.navSections.some(s => s.id === 'account');
+                            if (!hasAccount) {
+                                const accSec = { id: 'account', title: '👤 Hesap & Profil Bilgilerim', icon: 'user-check', color: 'red', visible: true, isSystem: true, badge: 'Kişisel' };
+                                const setIdx = parsed.navSections.findIndex(s => s.id === 'settings');
+                                if (setIdx !== -1) {
+                                    parsed.navSections.splice(setIdx, 0, accSec);
+                                } else {
+                                    parsed.navSections.push(accSec);
+                                }
+                                this.saveData(parsed, uid);
+                            }
+                        }
+
                     }
                 } else {
                     // Öğretmen kullanıcısı için garanti alanlar
@@ -93,6 +108,21 @@ window.StorageManager = {
                     if (!parsed.customSections) parsed.customSections = [];
                     if (!parsed.navSections) parsed.navSections = JSON.parse(JSON.stringify(window.InitialData.navSections || []));
                     if (!parsed.lessonPeriods) parsed.lessonPeriods = JSON.parse(JSON.stringify(window.InitialData.lessonPeriods || []));
+
+                        if (parsed.navSections && Array.isArray(parsed.navSections)) {
+                            const hasAccount = parsed.navSections.some(s => s.id === 'account');
+                            if (!hasAccount) {
+                                const accSec = { id: 'account', title: '👤 Hesap & Profil Bilgilerim', icon: 'user-check', color: 'red', visible: true, isSystem: true, badge: 'Kişisel' };
+                                const setIdx = parsed.navSections.findIndex(s => s.id === 'settings');
+                                if (setIdx !== -1) {
+                                    parsed.navSections.splice(setIdx, 0, accSec);
+                                } else {
+                                    parsed.navSections.push(accSec);
+                                }
+                                this.saveData(parsed, uid);
+                            }
+                        }
+
                 }
 
                 return parsed;
