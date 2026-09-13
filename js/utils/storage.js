@@ -82,6 +82,24 @@ window.StorageManager = {
                         }
                         if (!parsed.lessonPeriods) parsed.lessonPeriods = JSON.parse(JSON.stringify(window.InitialData.lessonPeriods || []));
 
+                        if (parsed.navSections && Array.isArray(parsed.navSections)) {
+                            const hasMaarif = parsed.navSections.some(s => s.id === 'maarif-works');
+                            if (!hasMaarif) {
+                                const mSec = { id: 'maarif-works', title: '🎨 Maarif Çalışmaları', icon: 'palette', color: 'emerald', visible: true, isSystem: true, badge: 'Fotoğraflı' };
+                                const dpIdx = parsed.navSections.findIndex(s => s.id === 'daily-plan');
+                                if (dpIdx !== -1) {
+                                    parsed.navSections.splice(dpIdx + 1, 0, mSec);
+                                } else {
+                                    parsed.navSections.push(mSec);
+                                }
+                                this.saveData(parsed, uid);
+                            }
+                        }
+                        if (!parsed.maarifWorks) {
+                            parsed.maarifWorks = JSON.parse(JSON.stringify(window.InitialData.maarifWorks || []));
+                        }
+
+
                         if (parsed.weeklySchedule) {
                             Object.keys(parsed.weeklySchedule).forEach(day => {
                                 if (Array.isArray(parsed.weeklySchedule[day])) {
@@ -121,6 +139,24 @@ window.StorageManager = {
                     if (!parsed.customSections) parsed.customSections = [];
                     if (!parsed.navSections) parsed.navSections = JSON.parse(JSON.stringify(window.InitialData.navSections || []));
                     if (!parsed.lessonPeriods) parsed.lessonPeriods = JSON.parse(JSON.stringify(window.InitialData.lessonPeriods || []));
+
+                        if (parsed.navSections && Array.isArray(parsed.navSections)) {
+                            const hasMaarif = parsed.navSections.some(s => s.id === 'maarif-works');
+                            if (!hasMaarif) {
+                                const mSec = { id: 'maarif-works', title: '🎨 Maarif Çalışmaları', icon: 'palette', color: 'emerald', visible: true, isSystem: true, badge: 'Fotoğraflı' };
+                                const dpIdx = parsed.navSections.findIndex(s => s.id === 'daily-plan');
+                                if (dpIdx !== -1) {
+                                    parsed.navSections.splice(dpIdx + 1, 0, mSec);
+                                } else {
+                                    parsed.navSections.push(mSec);
+                                }
+                                this.saveData(parsed, uid);
+                            }
+                        }
+                        if (!parsed.maarifWorks) {
+                            parsed.maarifWorks = JSON.parse(JSON.stringify(window.InitialData.maarifWorks || []));
+                        }
+
 
                         if (parsed.weeklySchedule) {
                             Object.keys(parsed.weeklySchedule).forEach(day => {

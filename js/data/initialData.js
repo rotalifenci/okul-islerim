@@ -113,12 +113,43 @@ window.InitialData = {
         { id: 'school-tasks', title: '📌 Okul Görevlerim', icon: 'check-square', color: 'red', visible: true, isSystem: true, badge: '' },
         { id: 'annual-plan', title: '📋 Maarif Yıllık Planı', icon: 'book-open', color: 'emerald', visible: true, isSystem: true, badge: '5, 6, 7, 8' },
         { id: 'daily-plan', title: '📑 Günlük Plan', icon: 'file-text', color: 'teal', visible: true, isSystem: true, badge: 'Maarif Modeli' },
+        { id: 'maarif-works', title: '🎨 Maarif Çalışmaları', icon: 'palette', color: 'emerald', visible: true, isSystem: true, badge: 'Fotoğraflı' },
         { id: 'account', title: '👤 Hesap Bilgilerim', icon: 'user-check', color: 'red', visible: true, isSystem: true, badge: 'Kişisel' },
         { id: 'project-calendar', title: 'Proje Takvimi', icon: 'calendar-range', color: 'emerald', visible: true, isSystem: true, badge: '' },
         { id: 'certificates', title: 'Sertifika / Belge Üretici', icon: 'award', color: 'yellow', visible: true, isSystem: true, badge: '' },
         { id: 'social', title: 'Sosyal Medya & Bülten', icon: 'share-2', color: 'pink', visible: true, isSystem: true, badge: '' },
         { id: 'ai-assistant', title: 'AI Öğretmen Asistanı', icon: 'sparkles', color: 'red', visible: true, isSystem: true, badge: '' },
         { id: 'settings', title: 'Ayarlar & Yedekleme', icon: 'settings', color: 'slate', visible: true, isSystem: true, badge: '' }
+    ],
+    maarifWorks: [
+        {
+            id: "mw-1",
+            title: "Güneş, Dünya ve Ay Modelleri Sergisi & Simülasyonu",
+            classes: ["5/D", "5/A"],
+            grade: 5,
+            date: "2026-09-18",
+            category: "Model & Sergi",
+            outcomeCode: "FB.5.1.4",
+            outcomeTitle: "Güneş, Dünya ve Ay’ın Göreli Hareketleri ve Büyüklükleri",
+            description: "5/D ve 5/A sınıfları ile atık malzemeler, strafor küreler ve LED aydınlatmalar kullanılarak Güneş-Dünya-Ay dönme ve dolanma modelleri yapıldı ve okul koridorunda sergilendi.",
+            photos: [
+                "assets/logo.jpg"
+            ]
+        },
+        {
+            id: "mw-2",
+            title: "Hücre ve Organeller Mikroskop İnceleme Laboratuvarı",
+            classes: ["7/A", "7/B"],
+            grade: 7,
+            date: "2026-09-22",
+            category: "Laboratuvar & Deney",
+            outcomeCode: "FB.7.2.1.1",
+            outcomeTitle: "Bitki ve Hayvan Hücrelerinin Karşılaştırılması",
+            description: "Soğan zarı (bitki) ve ağız içi epitel (hayvan) hücreleri metilen mavisi ve lügol damlatılarak ışık mikroskobunda 400x büyütmeyle incelendi, öğrencilerimiz çizimlerini tamamladı.",
+            photos: [
+                "assets/logo.jpg"
+            ]
+        }
     ],
     meetings: [
         {

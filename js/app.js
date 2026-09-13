@@ -58,6 +58,28 @@ document.addEventListener('alpine:init', () => {
             confirmPassword: ''
         },
         // 👥 Okul Toplantılarım Durumu
+        
+        // 🎨 Maarif Çalışmaları & Çoklu Fotoğraf Durumu
+        selectedMaarifClass: 'Hepsi',
+        selectedMaarifCategory: 'all',
+        maarifSearchQuery: '',
+        isMaarifModalOpen: false,
+        isEditMaarif: false,
+        maarifForm: {
+            id: '',
+            title: '',
+            classes: ['5/A'],
+            grade: 5,
+            date: new Date().toISOString().slice(0, 10),
+            category: 'Model & Deney',
+            outcomeCode: '',
+            outcomeTitle: '',
+            description: '',
+            photos: []
+        },
+        isLightboxOpen: false,
+        lightboxImages: [],
+        lightboxActiveIndex: 0,
         isMeetingModalOpen: false,
         isLessonPeriodsModalOpen: false,
         tempLessonPeriods: [],
@@ -2686,6 +2708,181 @@ document.addEventListener('alpine:init', () => {
             `;
             printWin.document.write(html);
             printWin.document.close();
+        },
+
+        
+        // ================= 🎨 MAARİF ÇALIŞMALARI & ÇOKLU FOTOĞRAF GALERİSİ =================
+        getFilteredMaarifWorks() {
+            let list = this.data.maarifWorks || [];
+            if (this.selectedMaarifClass && this.selectedMaarifClass !== 'Hepsi') {
+                list = list.filter(w => (w.classes || []).includes(this.selectedMaarifClass) || (w.grade && (w.grade + '. Sınıf' === this.selectedMaarifClass)));
+            }
+            if (this.selectedMaarifCategory && this.selectedMaarifCategory !== 'all') {
+                list = list.filter(w => w.category === this.selectedMaarifCategory);
+            }
+            if (this.maarifSearchQuery && this.maarifSearchQuery.trim()) {
+                const q = this.maarifSearchQuery.toLowerCase().trim();
+                list = list.filter(w => 
+                    (w.title && w.title.toLowerCase().includes(q)) ||
+                    (w.description && w.description.toLowerCase().includes(q)) ||
+                    (w.outcomeCode && w.outcomeCode.toLowerCase().includes(q)) ||
+                    (w.outcomeTitle && w.outcomeTitle.toLowerCase().includes(q)) ||
+                    (w.category && w.category.toLowerCase().includes(q)) ||
+                    ((w.classes || []).some(c => c.toLowerCase().includes(q)))
+                );
+            }
+            return list;
+        },
+
+        openNewMaarifModal() {
+            this.isEditMaarif = false;
+            this.maarifForm = {
+                id: 'mw-' + Date.now(),
+                title: '',
+                classes: ['5/D'],
+                grade: 5,
+                date: new Date().toISOString().slice(0, 10),
+                category: 'Model & Sergi',
+                outcomeCode: 'FB.5.1.1',
+                outcomeTitle: '',
+                description: '',
+                photos: []
+            };
+            this.isMaarifModalOpen = true;
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+
+        openEditMaarifModal(work) {
+            this.isEditMaarif = true;
+            this.maarifForm = JSON.parse(JSON.stringify(work));
+            if (!this.maarifForm.photos) this.maarifForm.photos = [];
+            if (!this.maarifForm.classes) this.maarifForm.classes = [];
+            this.isMaarifModalOpen = true;
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+
+        toggleMaarifClass(className) {
+            if (!this.maarifForm.classes) this.maarifForm.classes = [];
+            const idx = this.maarifForm.classes.indexOf(className);
+            if (idx > -1) {
+                this.maarifForm.classes.splice(idx, 1);
+            } else {
+                this.maarifForm.classes.push(className);
+            }
+        },
+
+        handleMaarifPhotosUpload(event) {
+            const files = event.target.files;
+            if (!files || !files.length) return;
+
+            Array.from(files).forEach(file => {
+                // Sadece resim dosyalarını oku
+                if (!file.type.startsWith('image/')) return;
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    // Resim verisini base64 olarak al
+                    const img = new Image();
+                    img.onload = () => {
+                        // Canvas ile hafifçe optimize et (maksimum 1200px genişlik/yükseklik)
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        const maxDim = 1200;
+                        if (width > maxDim || height > maxDim) {
+                            if (width > height) {
+                                height = Math.round((height * maxDim) / width);
+                                width = maxDim;
+                            } else {
+                                width = Math.round((width * maxDim) / height);
+                                height = maxDim;
+                            }
+                        }
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        const optimizedBase64 = canvas.toDataURL('image/jpeg', 0.85);
+
+                        if (!this.maarifForm.photos) this.maarifForm.photos = [];
+                        this.maarifForm.photos.push(optimizedBase64);
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+
+            this.showToast(`${files.length} fotoğraf eklendi! 📸`);
+        },
+
+        removeMaarifPhoto(index) {
+            if (this.maarifForm.photos) {
+                this.maarifForm.photos.splice(index, 1);
+            }
+        },
+
+        saveMaarifWork() {
+            if (!this.maarifForm.title || !this.maarifForm.title.trim()) {
+                alert('Lütfen çalışmanın adını / konusunu giriniz!');
+                return;
+            }
+            if (!this.maarifForm.classes || !this.maarifForm.classes.length) {
+                alert('Lütfen çalışmanın yapıldığı en az bir sınıf seçiniz!');
+                return;
+            }
+
+            if (!this.data.maarifWorks) this.data.maarifWorks = [];
+
+            if (this.isEditMaarif) {
+                const idx = this.data.maarifWorks.findIndex(w => w.id === this.maarifForm.id);
+                if (idx !== -1) {
+                    this.data.maarifWorks[idx] = { ...this.maarifForm };
+                } else {
+                    this.data.maarifWorks.push({ ...this.maarifForm });
+                }
+                this.showToast('Maarif çalışması güncellendi! 🎨');
+            } else {
+                this.data.maarifWorks.unshift({ ...this.maarifForm });
+                this.showToast('Yeni Maarif çalışması eklendi! 🎨');
+            }
+
+            const uid = this.currentUser ? this.currentUser.id : 'admin';
+            window.StorageManager.saveData(this.data, uid);
+            this.isMaarifModalOpen = false;
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+
+        deleteMaarifWork(workId) {
+            if (confirm('Bu Maarif çalışmasını ve ekli tüm fotoğrafları silmek istediğinize emin misiniz?')) {
+                this.data.maarifWorks = (this.data.maarifWorks || []).filter(w => w.id !== workId);
+                const uid = this.currentUser ? this.currentUser.id : 'admin';
+                window.StorageManager.saveData(this.data, uid);
+                this.showToast('Maarif çalışması silindi. 🗑️');
+            }
+        },
+
+        // 🔍 Fotoğraf Tam Ekran Lightbox
+        openPhotoLightbox(photos, startIndex = 0) {
+            if (!photos || !photos.length) return;
+            this.lightboxImages = photos;
+            this.lightboxActiveIndex = startIndex;
+            this.isLightboxOpen = true;
+        },
+
+        nextLightboxPhoto() {
+            if (this.lightboxActiveIndex < this.lightboxImages.length - 1) {
+                this.lightboxActiveIndex++;
+            } else {
+                this.lightboxActiveIndex = 0;
+            }
+        },
+
+        prevLightboxPhoto() {
+            if (this.lightboxActiveIndex > 0) {
+                this.lightboxActiveIndex--;
+            } else {
+                this.lightboxActiveIndex = this.lightboxImages.length - 1;
+            }
         },
 
         exportBackup() {
