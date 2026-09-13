@@ -106,16 +106,16 @@ window.InitialData = {
         freeLessons: 14
     },
     navSections: [
-        { id: 'calendar-tasks', title: '📅 Ders Programı', icon: 'calendar', color: 'amber', visible: true, isSystem: true, badge: 'Günde 7 Ders' },
+        { id: 'calendar-tasks', title: '📅 Ders Programı', icon: 'calendar', color: 'amber', visible: true, isSystem: true, badge: '' },
         { id: 'students', title: '📝 Öğrenci Ödev Kontrolü', icon: 'clipboard-check', color: 'sky', visible: true, isSystem: true, badge: '' },
         { id: 'assignments', title: '📚 Ödevler', icon: 'book-marked', color: 'purple', visible: true, isSystem: true, badge: '' },
         { id: 'school-meetings', title: '👥 Okul Toplantılarım', icon: 'users', color: 'indigo', visible: true, isSystem: true, badge: '' },
         { id: 'school-tasks', title: '📌 Okul Görevlerim', icon: 'check-square', color: 'red', visible: true, isSystem: true, badge: '' },
         { id: 'student-list', title: '👨‍🎓 Öğrenci Listesi', icon: 'graduation-cap', color: 'blue', visible: true, isSystem: true, badge: '' },
-        { id: 'annual-plan', title: '📋 Maarif Yıllık Planı', icon: 'book-open', color: 'emerald', visible: true, isSystem: true, badge: '5, 6, 7, 8' },
-        { id: 'daily-plan', title: '📑 Günlük Plan', icon: 'file-text', color: 'teal', visible: true, isSystem: true, badge: 'Maarif Modeli' },
-        { id: 'maarif-works', title: '🎨 Maarif Çalışmaları', icon: 'palette', color: 'emerald', visible: true, isSystem: true, badge: 'Fotoğraflı' },
-        { id: 'account', title: '👤 Hesap Bilgilerim', icon: 'user-check', color: 'red', visible: true, isSystem: true, badge: 'Kişisel' },
+        { id: 'annual-plan', title: '📋 Maarif Yıllık Planı', icon: 'book-open', color: 'emerald', visible: true, isSystem: true, badge: '' },
+        { id: 'daily-plan', title: '📑 Günlük Plan', icon: 'file-text', color: 'teal', visible: true, isSystem: true, badge: '' },
+        { id: 'maarif-works', title: '🎨 Maarif Çalışmaları', icon: 'palette', color: 'emerald', visible: true, isSystem: true, badge: '' },
+        { id: 'account', title: '👤 Hesap Bilgilerim', icon: 'user-check', color: 'red', visible: true, isSystem: true, badge: '' },
         { id: 'project-calendar', title: 'Proje Takvimi', icon: 'calendar-range', color: 'emerald', visible: true, isSystem: true, badge: '' },
         { id: 'certificates', title: 'Sertifika / Belge Üretici', icon: 'award', color: 'yellow', visible: true, isSystem: true, badge: '' },
         { id: 'social', title: 'Sosyal Medya & Bülten', icon: 'share-2', color: 'pink', visible: true, isSystem: true, badge: '' },
@@ -210,7 +210,7 @@ window.InitialData = {
             color: 'teal',
             visible: true,
             isSystem: false,
-            badge: 'Özel Bölüm',
+            badge: '',
             description: 'Fen laboratuvarı deney malzemeleri, kimyasal ve mikroskop stok takibi.',
             items: [
                 { id: 'item-1', title: 'Işık Mikroskobu (4 Adet)', category: 'Cihaz', count: '4 Adet', status: 'Faal', note: 'Lam ve lamel setleri yenilendi.', date: '2026-09-10' },
@@ -224,7 +224,7 @@ window.InitialData = {
             color: 'blue',
             visible: true,
             isSystem: false,
-            badge: 'Rehberlik',
+            badge: '',
             description: '5/D Şube Rehberliği ve diğer sınıfların veli görüşme notları ve randevuları.',
             items: [
                 { id: 'parent-1', title: '5/D Ahmet Berat Velisi Görüşmesi', category: 'Akademik Takip', count: 'Görüşüldü', status: 'Tamamlandı', note: 'Ders içi katılım ve ödev disiplini hakkında bilgilendirme yapıldı.', date: '2026-09-12' }

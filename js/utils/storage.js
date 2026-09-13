@@ -56,6 +56,7 @@ window.StorageManager = {
                         }
                         if (!parsed._school_meetings_tab_v1) {
                             if (parsed.navSections && Array.isArray(parsed.navSections)) {
+                            parsed.navSections.forEach(s => { s.badge = ''; });
                                 const hasMeetings = parsed.navSections.some(s => s.id === 'school-meetings');
                                 if (!hasMeetings) {
                                     const taskIdx = parsed.navSections.findIndex(s => s.id === 'school-tasks');
@@ -83,9 +84,10 @@ window.StorageManager = {
                         if (!parsed.lessonPeriods) parsed.lessonPeriods = JSON.parse(JSON.stringify(window.InitialData.lessonPeriods || []));
 
                         if (parsed.navSections && Array.isArray(parsed.navSections)) {
+                            parsed.navSections.forEach(s => { s.badge = ''; });
                             const hasMaarif = parsed.navSections.some(s => s.id === 'maarif-works');
                             if (!hasMaarif) {
-                                const mSec = { id: 'maarif-works', title: '🎨 Maarif Çalışmaları', icon: 'palette', color: 'emerald', visible: true, isSystem: true, badge: 'Fotoğraflı' };
+                                const mSec = { id: 'maarif-works', title: '🎨 Maarif Çalışmaları', icon: 'palette', color: 'emerald', visible: true, isSystem: true, badge: '' };
                                 const dpIdx = parsed.navSections.findIndex(s => s.id === 'daily-plan');
                                 if (dpIdx !== -1) {
                                     parsed.navSections.splice(dpIdx + 1, 0, mSec);
@@ -96,6 +98,7 @@ window.StorageManager = {
                             }
                         }
                                                 if (parsed.navSections && Array.isArray(parsed.navSections)) {
+                            parsed.navSections.forEach(s => { s.badge = ''; });
                             const hasStudentList = parsed.navSections.some(s => s.id === 'student-list');
                             if (!hasStudentList) {
                                 const slSec = { id: 'student-list', title: '👨‍🎓 Öğrenci Listesi', icon: 'graduation-cap', color: 'blue', visible: true, isSystem: true, badge: '' };
@@ -128,9 +131,10 @@ window.StorageManager = {
 
 
                         if (parsed.navSections && Array.isArray(parsed.navSections)) {
+                            parsed.navSections.forEach(s => { s.badge = ''; });
                             const hasAccount = parsed.navSections.some(s => s.id === 'account');
                             if (!hasAccount) {
-                                const accSec = { id: 'account', title: '👤 Hesap Bilgilerim', icon: 'user-check', color: 'red', visible: true, isSystem: true, badge: 'Kişisel' };
+                                const accSec = { id: 'account', title: '👤 Hesap Bilgilerim', icon: 'user-check', color: 'red', visible: true, isSystem: true, badge: '' };
                                 const setIdx = parsed.navSections.findIndex(s => s.id === 'settings');
                                 if (setIdx !== -1) {
                                     parsed.navSections.splice(setIdx, 0, accSec);
@@ -155,9 +159,10 @@ window.StorageManager = {
                     if (!parsed.lessonPeriods) parsed.lessonPeriods = JSON.parse(JSON.stringify(window.InitialData.lessonPeriods || []));
 
                         if (parsed.navSections && Array.isArray(parsed.navSections)) {
+                            parsed.navSections.forEach(s => { s.badge = ''; });
                             const hasMaarif = parsed.navSections.some(s => s.id === 'maarif-works');
                             if (!hasMaarif) {
-                                const mSec = { id: 'maarif-works', title: '🎨 Maarif Çalışmaları', icon: 'palette', color: 'emerald', visible: true, isSystem: true, badge: 'Fotoğraflı' };
+                                const mSec = { id: 'maarif-works', title: '🎨 Maarif Çalışmaları', icon: 'palette', color: 'emerald', visible: true, isSystem: true, badge: '' };
                                 const dpIdx = parsed.navSections.findIndex(s => s.id === 'daily-plan');
                                 if (dpIdx !== -1) {
                                     parsed.navSections.splice(dpIdx + 1, 0, mSec);
@@ -168,6 +173,7 @@ window.StorageManager = {
                             }
                         }
                                                 if (parsed.navSections && Array.isArray(parsed.navSections)) {
+                            parsed.navSections.forEach(s => { s.badge = ''; });
                             const hasStudentList = parsed.navSections.some(s => s.id === 'student-list');
                             if (!hasStudentList) {
                                 const slSec = { id: 'student-list', title: '👨‍🎓 Öğrenci Listesi', icon: 'graduation-cap', color: 'blue', visible: true, isSystem: true, badge: '' };
@@ -200,9 +206,10 @@ window.StorageManager = {
 
 
                         if (parsed.navSections && Array.isArray(parsed.navSections)) {
+                            parsed.navSections.forEach(s => { s.badge = ''; });
                             const hasAccount = parsed.navSections.some(s => s.id === 'account');
                             if (!hasAccount) {
-                                const accSec = { id: 'account', title: '👤 Hesap Bilgilerim', icon: 'user-check', color: 'red', visible: true, isSystem: true, badge: 'Kişisel' };
+                                const accSec = { id: 'account', title: '👤 Hesap Bilgilerim', icon: 'user-check', color: 'red', visible: true, isSystem: true, badge: '' };
                                 const setIdx = parsed.navSections.findIndex(s => s.id === 'settings');
                                 if (setIdx !== -1) {
                                     parsed.navSections.splice(setIdx, 0, accSec);
@@ -217,6 +224,7 @@ window.StorageManager = {
 
                 
                         if (parsed.navSections && Array.isArray(parsed.navSections)) {
+                            parsed.navSections.forEach(s => { s.badge = ''; });
                             parsed.navSections.forEach(sec => {
                                 if (sec.id === 'account') {
                                     sec.title = '👤 Hesap Bilgilerim';

@@ -320,6 +320,7 @@ document.addEventListener('alpine:init', () => {
             // Menü başlıklarını garantiye al
             if (this.data && this.data.navSections && Array.isArray(this.data.navSections)) {
                 this.data.navSections.forEach(sec => {
+                    sec.badge = '';
                     if (sec.id === 'account') {
                         sec.title = '👤 Hesap Bilgilerim';
                     }
@@ -648,6 +649,7 @@ document.addEventListener('alpine:init', () => {
             // Menü başlıklarını garantiye al
             if (this.data && this.data.navSections && Array.isArray(this.data.navSections)) {
                 this.data.navSections.forEach(sec => {
+                    sec.badge = '';
                     if (sec.id === 'account') {
                         sec.title = '👤 Hesap Bilgilerim';
                     }
@@ -698,6 +700,7 @@ document.addEventListener('alpine:init', () => {
             // Menü başlıklarını garantiye al
             if (this.data && this.data.navSections && Array.isArray(this.data.navSections)) {
                 this.data.navSections.forEach(sec => {
+                    sec.badge = '';
                     if (sec.id === 'account') {
                         sec.title = '👤 Hesap Bilgilerim';
                     }
