@@ -1786,6 +1786,90 @@ document.addEventListener('alpine:init', () => {
         },
 
 
+        
+        // ==========================================
+        // 📎 GÜNLÜK PLAN DOSYA EKLEME & MAARİF BİLGİ ÇEKME
+        // ==========================================
+        getWeekKey(grade = null, weekIdx = null) {
+            const g = grade || this.selectedDailyPlanGrade || 5;
+            const w = this.getDailyPlanCurrentWeek(g);
+            const wNo = w?.weekNo || ((weekIdx !== null ? weekIdx : this.selectedDailyPlanWeekIndex) + 1);
+            return `dp_${g}_${wNo}`;
+        },
+        getWeekAttachedFiles(grade = null, weekIdx = null) {
+            const key = this.getWeekKey(grade, weekIdx);
+            return (this.customDailyPlans[key] && this.customDailyPlans[key].attachedFiles) || [];
+        },
+        handleDailyPlanFileUpload(event) {
+            const files = event.target.files;
+            if (!files || !files.length) return;
+            const key = this.getWeekKey();
+            if (!this.customDailyPlans[key]) {
+                this.customDailyPlans[key] = {};
+            }
+            if (!this.customDailyPlans[key].attachedFiles) {
+                this.customDailyPlans[key].attachedFiles = [];
+            }
+
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.customDailyPlans[key].attachedFiles.push({
+                        id: 'file_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 4),
+                        name: file.name,
+                        size: (file.size / 1024).toFixed(1) + ' KB',
+                        type: file.type || 'application/octet-stream',
+                        dataUrl: e.target.result,
+                        uploadDate: new Date().toISOString().slice(0, 10)
+                    });
+                    localStorage.setItem('rotali_custom_daily_plans', JSON.stringify(this.customDailyPlans));
+                    this.showToast(`"${file.name}" günlük plana eklendi! 📎`);
+                    this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+                };
+                reader.readAsDataURL(file);
+            });
+            event.target.value = '';
+        },
+        deleteAttachedFile(fileId) {
+            if (!confirm("Bu ekli dosyayı silmek istediğinize emin misiniz?")) return;
+            const key = this.getWeekKey();
+            if (this.customDailyPlans[key] && this.customDailyPlans[key].attachedFiles) {
+                this.customDailyPlans[key].attachedFiles = this.customDailyPlans[key].attachedFiles.filter(f => f.id !== fileId);
+                localStorage.setItem('rotali_custom_daily_plans', JSON.stringify(this.customDailyPlans));
+                this.showToast("Dosya kaldırıldı. 🗑️");
+            }
+        },
+        downloadAttachedFile(file) {
+            const a = document.createElement('a');
+            a.href = file.dataUrl;
+            a.download = file.name;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        },
+        pullFromAnnualPlanToDailyPlan() {
+            const w = this.getDailyPlanCurrentWeek();
+            if (!w) return;
+            const g = this.selectedDailyPlanGrade;
+            const key = this.getWeekKey();
+            if (!this.customDailyPlans[key]) this.customDailyPlans[key] = {};
+
+            const outc = (w.outcomesList && w.outcomesList[0]) || { code: w.outcomeCode || `FB.${g}.`, desc: w.outcome || '' };
+            const proc = (w.processList && w.processList.length) ? w.processList.join(' ') : (w.process || '');
+
+            this.customDailyPlans[key].methods = 'Model Oluşturma, Deney & Gözlem, Soru-Cevap, Akran Öğrenmesi';
+            this.customDailyPlans[key].materials = `Ders Kitabı, Etkinlik Defteri, Akıllı Tahta, ${w.topic} Deney Seti`;
+            this.customDailyPlans[key].l1_intro = `Derse ${w.topic} ile ilgili günlük yaşamdan problem durumu ve merak uyandırıcı soru/video ile başlanır.`;
+            this.customDailyPlans[key].l2_act = proc ? `Süreç Bileşeni: ${proc}` : `${outc.code} kapsamında grup deney ve modelleme çalışması yürütülür.`;
+            this.customDailyPlans[key].l3_act = `${w.topic} konusundaki temel bilimsel kavramlar yapılandırılır, kavram haritası ve özet çıkarılır.`;
+            this.customDailyPlans[key].evaluation = `Çıkış kartı değerlendirmesi ve ${w.topic} etkinlik defteri ödevi tamamlanır.`;
+            this.customDailyPlans[key].notes = `Yıllık plandan çekildi: ${w.values ? 'Değerler: ' + w.values : ''} ${w.skills ? 'Beceriler: ' + w.skills : ''}`;
+
+            localStorage.setItem('rotali_custom_daily_plans', JSON.stringify(this.customDailyPlans));
+            this.showToast("📋 Maarif Yıllık Plan bilgileri günlük plana aktarıldı! ✨");
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+
         // 📱 MOBİL & YÖNETİM MENÜSÜ YÖNETİCİSİ (CRUD)
         // ==========================================
         get navSectionsList() {
