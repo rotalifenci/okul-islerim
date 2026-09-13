@@ -197,7 +197,18 @@ document.addEventListener('alpine:init', () => {
         studentListSearch: '',
         isAddClassModalOpen: false,
         newClassForm: { name: '', grade: 5, advisor: '' },
-        // Güvenlik & 5 Kullanıcılı Giriş Sistemi (1 Yönetici + 4 Öğretmen)
+        // ⚠️ Hata & Sorun Bildirimi Durumu
+        bugReports: [],
+        bugFilterStatus: 'ALL',
+        bugReportForm: {
+            section: '📝 Öğrenci Ödev Kontrolü',
+            errorType: 'Açılmayan İçerik / Boş Ekran',
+            device: '',
+            description: '',
+            urgency: 'Normal',
+            screenshot: ''
+        },
+        // Güvenlik & 4 Kullanıcılı Giriş Sistemi (1 Yönetici + 3 Öğretmen)
         users: window.AuthUsers || [],
         currentUser: null,
         isAuthenticated: false,
@@ -316,6 +327,7 @@ document.addEventListener('alpine:init', () => {
             }
             this.loadAccountForm();
             this.isAuthenticated = false;
+            this.initBugReports();
 
             // Menü başlıklarını garantiye al
             if (this.data && this.data.navSections && Array.isArray(this.data.navSections)) {

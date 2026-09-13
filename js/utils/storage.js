@@ -130,6 +130,20 @@ window.StorageManager = {
                         }
 
 
+                                                if (parsed.navSections && Array.isArray(parsed.navSections)) {
+                            const hasBugReports = parsed.navSections.some(s => s.id === 'bug-reports');
+                            if (!hasBugReports) {
+                                const bugSec = { id: 'bug-reports', title: '⚠️ Hatalar & Sorun Bildir', icon: 'alert-triangle', color: 'rose', visible: true, isSystem: true, badge: '' };
+                                const setIdx = parsed.navSections.findIndex(s => s.id === 'settings');
+                                if (setIdx !== -1) {
+                                    parsed.navSections.splice(setIdx, 0, bugSec);
+                                } else {
+                                    parsed.navSections.push(bugSec);
+                                }
+                                this.saveData(parsed, uid);
+                            }
+                        }
+
                         if (parsed.navSections && Array.isArray(parsed.navSections)) {
                             parsed.navSections.forEach(s => { s.badge = ''; });
                             const hasAccount = parsed.navSections.some(s => s.id === 'account');
@@ -204,6 +218,20 @@ window.StorageManager = {
                             });
                         }
 
+
+                                                if (parsed.navSections && Array.isArray(parsed.navSections)) {
+                            const hasBugReports = parsed.navSections.some(s => s.id === 'bug-reports');
+                            if (!hasBugReports) {
+                                const bugSec = { id: 'bug-reports', title: '⚠️ Hatalar & Sorun Bildir', icon: 'alert-triangle', color: 'rose', visible: true, isSystem: true, badge: '' };
+                                const setIdx = parsed.navSections.findIndex(s => s.id === 'settings');
+                                if (setIdx !== -1) {
+                                    parsed.navSections.splice(setIdx, 0, bugSec);
+                                } else {
+                                    parsed.navSections.push(bugSec);
+                                }
+                                this.saveData(parsed, uid);
+                            }
+                        }
 
                         if (parsed.navSections && Array.isArray(parsed.navSections)) {
                             parsed.navSections.forEach(s => { s.badge = ''; });

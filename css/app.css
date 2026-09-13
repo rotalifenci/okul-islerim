@@ -142,3 +142,33 @@ h1, h2, h3, .brand-font {
         display: none !important;
     }
 }
+
+/* ==========================================================================
+   📱 iOS & ANDROİD MOBİL KULLANILABİLİRLİK & DOKUNMATİK OPTİMİZASYONLARI
+   ========================================================================== */
+html, body {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: none;
+}
+
+/* iOS Safari Input otomatik yakınlaştırma (auto-zoom) engelleme */
+input, select, textarea {
+    font-size: 16px !important;
+}
+@media (min-width: 640px) {
+    input, select, textarea {
+        font-size: inherit !important;
+    }
+}
+
+/* iPhone Home Bar & Çentik Güvenli Alanı */
+.pb-safe {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom, 16px));
+}
+
+/* Mobil Buton Tıklama Geri Bildirimi */
+button:active {
+    transform: scale(0.97);
+}

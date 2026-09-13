@@ -2,7 +2,10 @@
 <html lang="tr" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#090d16">
     <title>Rotalı Fenci — Okul İşlerim & Proje Takvimi</title>
     
     <!-- Tailwind CSS CDN -->
@@ -2588,6 +2591,209 @@
                             </button>
                         </div>
                     </form>
+                </div>
+
+            </div>
+
+            
+            <!-- ================= TAB: ⚠️ HATA & SORUN BİLDİRİMİ ================= -->
+            <div x-show="currentTab === 'bug-reports'" x-cloak class="space-y-6">
+                
+                <!-- Başlık Banner -->
+                <div class="bg-gradient-to-r from-rose-600 via-red-600 to-slate-900 p-5 sm:p-6 rounded-3xl text-white shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="flex items-center gap-3.5">
+                        <div class="p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 text-white">
+                            <i data-lucide="alert-triangle" class="w-8 h-8 text-yellow-300"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h2 class="text-xl sm:text-2xl font-black brand-font text-white">⚠️ Hatalar & Sorun Bildirimi</h2>
+                                <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-white/20 text-white border border-white/30">Destek & Çözüm</span>
+                            </div>
+                            <p class="text-xs text-rose-100 font-medium mt-0.5">Açılmayan içerikleri, veri kaydetme veya mobil görünüm sorunlarını buradan seçip yöneticiye iletebilirsiniz.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <span class="px-3 py-1.5 rounded-xl bg-white/10 border border-white/20 text-xs font-black text-white" x-text="'Cihaz: ' + (bugReportForm.device || 'Mobil / Web')"></span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    
+                    <!-- Sol: Hata Bildirim Formu -->
+                    <div class="lg:col-span-7 bg-white p-5 sm:p-7 rounded-3xl border-2 border-slate-300 shadow-md space-y-5">
+                        <div class="border-b-2 border-slate-100 pb-3">
+                            <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+                                <span>📝 Yeni Hata / Sorun Bildir</span>
+                            </h3>
+                            <p class="text-xs text-slate-500 font-medium">Lütfen yaşadığınız teknik aksaklığı veya açılmayan menüyü seçiniz.</p>
+                        </div>
+
+                        <form @submit.prevent="submitBugReport()" class="space-y-4 text-xs">
+                            
+                            <!-- 1. Sorun Yaşanan Bölüm Seçimi -->
+                            <div class="space-y-1.5">
+                                <label class="font-black text-slate-800 block">📌 Sorun Yaşanan Bölüm / Menü *</label>
+                                <select x-model="bugReportForm.section" class="w-full p-3 bg-slate-50 border-2 border-slate-300 rounded-xl font-bold text-slate-900 focus:border-red-600 focus:outline-none focus:bg-white shadow-xs transition">
+                                    <option value="📅 Ders Programı & Saatler">📅 Ders Programı & Saatler</option>
+                                    <option value="📝 Öğrenci Ödev Kontrolü">📝 Öğrenci Ödev Kontrolü</option>
+                                    <option value="📚 Sınıf Seviyeli Ödevler & Takvim">📚 Sınıf Seviyeli Ödevler & Takvim</option>
+                                    <option value="👥 Okul Toplantılarım & Ajanda">👥 Okul Toplantılarım & Ajanda</option>
+                                    <option value="📌 Okul Görevlerim & Nöbet">📌 Okul Görevlerim & Nöbet</option>
+                                    <option value="👨‍🎓 Öğrenci Listesi & Şube Mevcutları">👨‍🎓 Öğrenci Listesi & Şube Mevcutları</option>
+                                    <option value="📋 Maarif Yıllık Planı">📋 Maarif Yıllık Planı</option>
+                                    <option value="📑 Günlük Plan Modülü">📑 Günlük Plan Modülü</option>
+                                    <option value="🎨 Maarif Çalışmaları & Fotoğraf Yükleme">🎨 Maarif Çalışmaları & Fotoğraf Yükleme</option>
+                                    <option value="👤 Hesap Bilgilerim & Giriş Şifresi">👤 Hesap Bilgilerim & Giriş Şifresi</option>
+                                    <option value="💾 Veri Kaydetme / Excel & PDF Rapor Alma">💾 Veri Kaydetme / Excel & PDF Rapor Alma</option>
+                                    <option value="📱 Mobil (iOS / Android) Görünüm Hatası">📱 Mobil (iOS / Android) Görünüm Hatası</option>
+                                    <option value="🌐 Açılmayan Sayfa / İçerik Yüklenmiyor">🌐 Açılmayan Sayfa / İçerik Yüklenmiyor</option>
+                                    <option value="Diğer Sorunlar">Diğer Sorunlar</option>
+                                </select>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <!-- Hata Türü -->
+                                <div class="space-y-1.5">
+                                    <label class="font-black text-slate-800 block">🔍 Hata Türü</label>
+                                    <select x-model="bugReportForm.errorType" class="w-full p-2.5 bg-slate-50 border-2 border-slate-300 rounded-xl font-bold text-slate-900 focus:border-red-600 focus:outline-none focus:bg-white shadow-xs transition">
+                                        <option value="Açılmayan İçerik / Boş Ekran">Açılmayan İçerik / Boş Ekran</option>
+                                        <option value="Buton / Tıklama Çalışmıyor">Buton / Tıklama Çalışmıyor</option>
+                                        <option value="Veri Kaydedilmiyor / Silinmiyor">Veri Kaydedilmiyor / Silinmiyor</option>
+                                        <option value="Yanlış / Eksik Bilgi Görünüyor">Yanlış / Eksik Bilgi Görünüyor</option>
+                                        <option value="Mobil Ekran Kayması / Buton Sığmıyor">Mobil Ekran Kayması / Buton Sığmıyor</option>
+                                        <option value="Şifre / Giriş Problemi">Şifre / Giriş Problemi</option>
+                                    </select>
+                                </div>
+
+                                <!-- Aciliyet -->
+                                <div class="space-y-1.5">
+                                    <label class="font-black text-slate-800 block">⚡ Aciliyet Durumu</label>
+                                    <select x-model="bugReportForm.urgency" class="w-full p-2.5 bg-slate-50 border-2 border-slate-300 rounded-xl font-bold text-slate-900 focus:border-red-600 focus:outline-none focus:bg-white shadow-xs transition">
+                                        <option value="Normal">🟢 Normal</option>
+                                        <option value="Yüksek">🟡 Yüksek Öncelikli</option>
+                                        <option value="Acil">🔴 Acil (Dersi / İşi Engelliyor)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Cihaz / Tarayıcı -->
+                            <div class="space-y-1.5">
+                                <label class="font-black text-slate-800 block">📱 Kullanılan Cihaz & Tarayıcı</label>
+                                <input type="text" x-model="bugReportForm.device" class="w-full p-2.5 bg-slate-50 border-2 border-slate-300 rounded-xl font-bold text-slate-900 focus:border-red-600 focus:outline-none focus:bg-white shadow-xs" placeholder="Örn: iPhone 13 (Safari), Android (Chrome) veya Windows PC">
+                            </div>
+
+                            <!-- Açıklama -->
+                            <div class="space-y-1.5">
+                                <label class="font-black text-slate-800 block">📝 Sorunun Detaylı Açıklaması *</label>
+                                <textarea x-model="bugReportForm.description" rows="4" required class="w-full p-3 bg-slate-50 border-2 border-slate-300 rounded-xl font-bold text-slate-900 focus:border-red-600 focus:outline-none focus:bg-white shadow-xs transition" placeholder="Örn: 7/A sınıfı ödev kontrolüne girdiğimde puanlar kaydet butonuna basınca siliniyor..."></textarea>
+                            </div>
+
+                            <!-- Ekran Görüntüsü Yükleme (İsteğe Bağlı) -->
+                            <div class="space-y-1.5">
+                                <label class="font-black text-slate-800 block">📸 Ekran Görüntüsü / Fotoğraf (İsteğe Bağlı):</label>
+                                <div class="flex items-center gap-3">
+                                    <input type="file" accept="image/*" @change="handleBugScreenshot($event)" class="text-xs file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-red-50 file:text-red-700 hover:file:bg-red-100 cursor-pointer">
+                                    <template x-if="bugReportForm.screenshot">
+                                        <div class="relative">
+                                            <img :src="bugReportForm.screenshot" class="w-12 h-12 rounded-lg object-cover border border-slate-300 shadow-sm">
+                                            <button type="button" @click="removeBugScreenshot()" class="absolute -top-1.5 -right-1.5 bg-red-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px]">✕</button>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- Gönder Butonları -->
+                            <div class="pt-2 flex flex-col sm:flex-row sm:items-center justify-end gap-2.5">
+                                <button type="submit" class="px-6 py-3 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black text-xs shadow-lg shadow-red-600/30 transition flex items-center justify-center gap-2 active:scale-95">
+                                    <i data-lucide="send" class="w-4 h-4"></i>
+                                    <span>Yöneticiye Bildir</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Sağ: Bildirilen Hatalar Listesi & Takip Paneli -->
+                    <div class="lg:col-span-5 space-y-4">
+                        <div class="bg-slate-100/95 p-4 sm:p-5 rounded-3xl border-2 border-slate-300 shadow-md space-y-3">
+                            <div class="flex items-center justify-between pb-2 border-b border-slate-300">
+                                <div>
+                                    <h4 class="font-black text-slate-900 text-sm flex items-center gap-1.5">
+                                        <i data-lucide="list-checks" class="w-4 h-4 text-red-600"></i>
+                                        <span x-text="currentUser?.role === 'Yönetici' ? '👑 Tüm Hata Bildirimleri' : '📋 Bildirdiğim Sorunlar'"></span>
+                                    </h4>
+                                    <p class="text-[11px] text-slate-500 font-bold" x-text="currentUser?.role === 'Yönetici' ? 'Öğretmenlerin bildirdiği tüm teknik aksaklıklar' : 'İlettiğiniz sorunların inceleme durumları'"></p>
+                                </div>
+                                <span class="px-2 py-0.5 rounded-lg bg-red-100 text-red-800 font-black text-xs border border-red-200" x-text="getFilteredBugReports().length + ' Kayıt'"></span>
+                            </div>
+
+                            <!-- Durum Filtre Butonları -->
+                            <div class="flex items-center gap-1 text-[11px]">
+                                <button @click="bugFilterStatus = 'ALL'" :class="bugFilterStatus === 'ALL' ? 'bg-red-600 text-white font-black' : 'bg-white text-slate-700 font-bold border border-slate-300'" class="px-2.5 py-1 rounded-lg transition">Tümü</button>
+                                <button @click="bugFilterStatus = 'Beklemede'" :class="bugFilterStatus === 'Beklemede' ? 'bg-amber-600 text-white font-black' : 'bg-white text-slate-700 font-bold border border-slate-300'" class="px-2 py-1 rounded-lg transition">⏳ Beklemede</button>
+                                <button @click="bugFilterStatus = 'Çözüldü'" :class="bugFilterStatus === 'Çözüldü' ? 'bg-emerald-600 text-white font-black' : 'bg-white text-slate-700 font-bold border border-slate-300'" class="px-2 py-1 rounded-lg transition">✅ Çözüldü</button>
+                            </div>
+
+                            <!-- Liste -->
+                            <div class="space-y-3 max-h-[550px] overflow-y-auto pr-1">
+                                <template x-for="bug in getFilteredBugReports()" :key="bug.id">
+                                    <div class="p-3.5 bg-white rounded-2xl border border-slate-300 shadow-2xs space-y-2.5 transition hover:border-red-400">
+                                        <div class="flex items-start justify-between gap-2">
+                                            <div>
+                                                <span class="font-black text-slate-900 text-xs block" x-text="bug.section"></span>
+                                                <span class="text-[10px] text-slate-500 font-bold" x-text="bug.reporterName + ' • ' + bug.date"></span>
+                                            </div>
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-black shrink-0" 
+                                                  :class="{
+                                                      'bg-amber-100 text-amber-800 border border-amber-300': bug.status === 'Beklemede',
+                                                      'bg-blue-100 text-blue-800 border border-blue-300': bug.status === 'İnceleniyor',
+                                                      'bg-emerald-100 text-emerald-800 border border-emerald-300': bug.status === 'Çözüldü'
+                                                  }" 
+                                                  x-text="bug.status">
+                                            </span>
+                                        </div>
+
+                                        <p class="text-xs text-slate-800 font-bold bg-slate-50 p-2.5 rounded-xl border border-slate-200" x-text="bug.description"></p>
+
+                                        <div class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-100 text-[11px]">
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 font-mono text-[10px]" x-text="bug.device"></span>
+                                            </div>
+                                            
+                                            <!-- WhatsApp ile Gönder & Kopyala & Yönetici İşlemleri -->
+                                            <div class="flex items-center gap-1.5">
+                                                <button @click="sendBugReportWhatsApp(bug)" title="WhatsApp ile İlet" class="p-1 px-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[10px] flex items-center gap-1 transition">
+                                                    <span>📲 WhatsApp</span>
+                                                </button>
+                                                <button @click="copyBugReport(bug)" title="Metni Kopyala" class="p-1 px-2 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-[10px] transition">
+                                                    📋 Kopyala
+                                                </button>
+                                                <template x-if="currentUser?.role === 'Yönetici'">
+                                                    <div class="flex items-center gap-1">
+                                                        <select @change="updateBugStatus(bug.id, $event.target.value)" :value="bug.status" class="p-0.5 px-1 bg-slate-100 border border-slate-300 rounded text-[10px] font-bold text-slate-800">
+                                                            <option value="Beklemede">Beklemede</option>
+                                                            <option value="İnceleniyor">İnceleniyor</option>
+                                                            <option value="Çözüldü">Çözüldü</option>
+                                                        </select>
+                                                        <button @click="deleteBugReport(bug.id)" title="Kaydı Sil" class="p-1 text-red-600 hover:text-red-800">
+                                                            <i data-lucide="trash" class="w-3.5 h-3.5"></i>
+                                                        </button>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <!-- Boş Durum -->
+                                <div x-show="getFilteredBugReports().length === 0" class="p-6 text-center text-slate-500 font-bold text-xs">
+                                    <span>🎉 Kayıtlı hata bildirimi bulunmuyor.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
             </div>

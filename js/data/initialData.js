@@ -1,5 +1,5 @@
 // ==========================================================================
-// KULLANICI VE YETKİLENDİRME LİSTESİ (1 YÖNETİCİ + 4 ÖĞRETMEN)
+// KULLANICI VE YETKİLENDİRME LİSTESİ (1 YÖNETİCİ + 3 ÖĞRETMEN)
 // ==========================================================================
 window.AuthUsers = [
     {
@@ -53,19 +53,6 @@ window.AuthUsers = [
         subject: 'Fen Bilimleri',
         description: 'Kişiye özel izole ders programı ve sınıf paneli',
         displayPassword: '3333'
-    },
-    {
-        id: 'ogretmen4',
-        username: 'ogretmen4',
-        name: '4. Fen Bilimleri Öğretmeni',
-        role: 'Öğretmen',
-        roleBadge: '👩‍🏫 Öğretmen 4',
-        password: '4444',
-        passwords: ['4444', '1004', 'fen4', 'ogretmen4'],
-        avatar: '',
-        subject: 'Fen Bilimleri',
-        description: 'Kişiye özel izole ders programı ve sınıf paneli',
-        displayPassword: '4444'
     }
 ];
 
@@ -120,6 +107,7 @@ window.InitialData = {
         { id: 'certificates', title: 'Sertifika / Belge Üretici', icon: 'award', color: 'yellow', visible: true, isSystem: true, badge: '' },
         { id: 'social', title: 'Sosyal Medya & Bülten', icon: 'share-2', color: 'pink', visible: true, isSystem: true, badge: '' },
         { id: 'ai-assistant', title: 'AI Öğretmen Asistanı', icon: 'sparkles', color: 'red', visible: true, isSystem: true, badge: '' },
+        { id: 'bug-reports', title: '⚠️ Hatalar & Sorun Bildir', icon: 'alert-triangle', color: 'rose', visible: true, isSystem: true, badge: '' },
         { id: 'settings', title: 'Ayarlar & Yedekleme', icon: 'settings', color: 'slate', visible: true, isSystem: true, badge: '' }
     ],
     maarifWorks: [
