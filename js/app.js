@@ -100,8 +100,20 @@ document.addEventListener('alpine:init', () => {
         // 📅 Türkiye Yüzyılı Maarif Modeli Yıllık Plan Modalı
         isAnnualPlanModalOpen: false,
         selectedAnnualPlanGrade: 5,
-        annualPlanViewMode: 'cards', // 'cards' veya 'table'
+        selectedAnnualPlanWeekIndex: 0,
+        annualPlanViewMode: 'interactive', // 'interactive' (Görseldeki gibi), 'cards' veya 'table'
         annualPlanSearchQuery: '',
+        annualPlanAccordion: {
+            unit: true,
+            topic: true,
+            outcomes: true,
+            process: true,
+            extra: true,
+            notes: true
+        },
+        annualPlanNotes: JSON.parse(localStorage.getItem('rotali_annual_plan_notes') || '{}'),
+        activeWeekNote: '',
+        isAddingWeekNote: false,
         annualPlanData: window.AnnualPlanData || {},
         curriculumData: window.CurriculumData || {},
 
@@ -138,6 +150,14 @@ document.addEventListener('alpine:init', () => {
                     this.isObsModalOpen = false;
                     this.isTaskModalOpen = false;
                     this.isProjCalModalOpen = false;
+                    this.isAnnualPlanModalOpen = false;
+                }
+                if (this.isAnnualPlanModalOpen && this.annualPlanViewMode === 'interactive' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+                    if (e.key === 'ArrowLeft') {
+                        this.prevAnnualPlanWeek();
+                    } else if (e.key === 'ArrowRight') {
+                        this.nextAnnualPlanWeek();
+                    }
                 }
             });
 
@@ -944,11 +964,75 @@ document.addEventListener('alpine:init', () => {
         },
 
         // ================= YILLIK PLAN & MAARİF KAZANIMLARI METODLARI =================
-        openAnnualPlanModal(grade = 5) {
+        openAnnualPlanModal(grade = 5, weekIdx = null) {
             this.selectedAnnualPlanGrade = Number(grade) || 5;
+            if (weekIdx !== null && weekIdx !== undefined) {
+                this.selectedAnnualPlanWeekIndex = Math.max(0, Math.min(Number(weekIdx), 36));
+            }
             this.annualPlanSearchQuery = '';
+            this.loadCurrentWeekNote();
             this.isAnnualPlanModalOpen = true;
             this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+
+        getCurrentAnnualPlanWeek(grade = null) {
+            const g = String(grade || this.selectedAnnualPlanGrade || 5);
+            const list = (window.AnnualPlanData && window.AnnualPlanData[g]) || (this.annualPlanData && this.annualPlanData[g]) || [];
+            if (!list.length) return null;
+            const idx = Math.max(0, Math.min(this.selectedAnnualPlanWeekIndex, list.length - 1));
+            return list[idx];
+        },
+
+        getAnnualPlanWeekAt(grade, idx) {
+            const g = String(grade || this.selectedAnnualPlanGrade || 5);
+            const list = (window.AnnualPlanData && window.AnnualPlanData[g]) || (this.annualPlanData && this.annualPlanData[g]) || [];
+            if (idx < 0 || idx >= list.length) return null;
+            return list[idx];
+        },
+
+        prevAnnualPlanWeek() {
+            if (this.selectedAnnualPlanWeekIndex > 0) {
+                this.selectedAnnualPlanWeekIndex--;
+                this.loadCurrentWeekNote();
+                this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+            }
+        },
+
+        nextAnnualPlanWeek() {
+            const g = String(this.selectedAnnualPlanGrade || 5);
+            const total = (window.AnnualPlanData && window.AnnualPlanData[g] ? window.AnnualPlanData[g].length : 37);
+            if (this.selectedAnnualPlanWeekIndex < total - 1) {
+                this.selectedAnnualPlanWeekIndex++;
+                this.loadCurrentWeekNote();
+                this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+            }
+        },
+
+        setAnnualPlanWeek(idx) {
+            this.selectedAnnualPlanWeekIndex = Number(idx);
+            this.loadCurrentWeekNote();
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+
+        toggleAnnualPlanAccordion(key) {
+            if (this.annualPlanAccordion[key] !== undefined) {
+                this.annualPlanAccordion[key] = !this.annualPlanAccordion[key];
+            } else {
+                this.annualPlanAccordion[key] = false;
+            }
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+
+        loadCurrentWeekNote() {
+            const key = `${this.selectedAnnualPlanGrade}_${this.selectedAnnualPlanWeekIndex + 1}`;
+            this.activeWeekNote = this.annualPlanNotes[key] || '';
+        },
+
+        saveCurrentWeekNote() {
+            const key = `${this.selectedAnnualPlanGrade}_${this.selectedAnnualPlanWeekIndex + 1}`;
+            this.annualPlanNotes[key] = this.activeWeekNote;
+            localStorage.setItem('rotali_annual_plan_notes', JSON.stringify(this.annualPlanNotes));
+            this.showToast(`${this.selectedAnnualPlanWeekIndex + 1}. Hafta öğretmen notu kaydedildi! 📝`);
         },
 
         getFilteredAnnualPlan(grade = null) {

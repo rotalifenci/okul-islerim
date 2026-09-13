@@ -1910,20 +1910,24 @@
 
                 <!-- Görünüm Seçici & Arama -->
                 <div class="flex flex-wrap items-center gap-2 flex-1 max-w-xl">
-                    <!-- Görünüm Modu (Kartlar / Tablo) -->
+                    <!-- Görünüm Modu (Haftalık Akıllı / Tüm Kartlar / Tablo) -->
                     <div class="flex bg-white p-1 rounded-xl border-2 border-slate-300 shadow-sm">
-                        <button @click="annualPlanViewMode = 'cards'" :class="annualPlanViewMode === 'cards' ? 'bg-emerald-600 text-white font-black shadow-sm' : 'text-slate-700 hover:text-black font-bold'" class="px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1">
-                            <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
-                            <span>Hafta Hafta Kartlar</span>
+                        <button @click="annualPlanViewMode = 'interactive'; $nextTick(() => { if (window.lucide) window.lucide.createIcons(); });" :class="annualPlanViewMode === 'interactive' ? 'bg-emerald-600 text-white font-black shadow-sm' : 'text-slate-700 hover:text-black font-bold'" class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1">
+                            <i data-lucide="smartphone" class="w-3.5 h-3.5"></i>
+                            <span>Haftalık Akıllı</span>
                         </button>
-                        <button @click="annualPlanViewMode = 'table'" :class="annualPlanViewMode === 'table' ? 'bg-emerald-600 text-white font-black shadow-sm' : 'text-slate-700 hover:text-black font-bold'" class="px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1">
+                        <button @click="annualPlanViewMode = 'cards'; $nextTick(() => { if (window.lucide) window.lucide.createIcons(); });" :class="annualPlanViewMode === 'cards' ? 'bg-emerald-600 text-white font-black shadow-sm' : 'text-slate-700 hover:text-black font-bold'" class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1">
+                            <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
+                            <span>Tüm Haftalar</span>
+                        </button>
+                        <button @click="annualPlanViewMode = 'table'; $nextTick(() => { if (window.lucide) window.lucide.createIcons(); });" :class="annualPlanViewMode === 'table' ? 'bg-emerald-600 text-white font-black shadow-sm' : 'text-slate-700 hover:text-black font-bold'" class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1">
                             <i data-lucide="table" class="w-3.5 h-3.5"></i>
                             <span>Çizelge Tablo</span>
                         </button>
                     </div>
 
                     <!-- Arama Kutusu -->
-                    <div class="relative flex-1 min-w-[200px]">
+                    <div class="relative flex-1 min-w-[180px]">
                         <input type="text" x-model="annualPlanSearchQuery" placeholder="Kazanım (FB.5.1.1), konu veya hafta ara..." class="w-full px-3.5 py-2 pl-9 bg-white border-2 border-slate-300 rounded-xl text-xs font-black text-black placeholder-slate-400 focus:outline-none focus:border-emerald-600 shadow-sm">
                         <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
                     </div>
@@ -1937,7 +1941,7 @@
             </div>
 
             <!-- İçerik Alanı (Kaydırılabilir) -->
-            <div id="printable-annual-plan-container" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+            <div id="printable-annual-plan-container" class="flex-1 overflow-y-auto p-3 sm:p-6 space-y-4">
                 
                 <!-- Üst Bilgi Başlığı -->
                 <div class="p-4 bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-100 rounded-2xl border-2 border-emerald-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
@@ -1953,7 +1957,248 @@
                     </div>
                 </div>
 
-                <!-- ================= 1. GÖRÜNÜM: HAFTA HAFTA DETAYLI KARTLAR ================= -->
+                <!-- ================= 0. GÖRÜNÜM: HAFTALIK AKILLI GÖRÜNÜM (GÖRSELDEKİ İLERİ-GERİ HAFTA CAROUSEL & AKORDİYONLAR) ================= -->
+                <div x-show="annualPlanViewMode === 'interactive'" class="space-y-4 max-w-4xl mx-auto relative pb-16">
+                    
+                    <template x-if="getCurrentAnnualPlanWeek(selectedAnnualPlanGrade)">
+                        <div class="space-y-4">
+                            
+                            <!-- 1. Hafta Carousel & Navigasyon Kartı (Görseldeki Üst Kısım) -->
+                            <div class="bg-white p-4 sm:p-5 rounded-3xl border-2 border-slate-300 shadow-sm space-y-4">
+                                
+                                <!-- Carousel Üst Satırı: Sol Buton, 3 Hafta Kartı, Sağ Buton -->
+                                <div class="flex items-center justify-between gap-2 sm:gap-4">
+                                    
+                                    <!-- Sol Buton (<) -->
+                                    <button @click="prevAnnualPlanWeek()" :disabled="selectedAnnualPlanWeekIndex === 0" title="Önceki Hafta (Sol Ok Tuşu)" class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-slate-100 hover:bg-emerald-100 disabled:opacity-20 disabled:hover:bg-slate-100 text-slate-700 hover:text-emerald-800 font-black flex items-center justify-center transition shadow-sm shrink-0 border border-slate-300">
+                                        <i data-lucide="chevron-left" class="w-6 h-6"></i>
+                                    </button>
+
+                                    <!-- Hafta Kartları (Önceki, Aktif, Sonraki) -->
+                                    <div class="flex-1 grid grid-cols-3 gap-2 sm:gap-3 items-center">
+                                        
+                                        <!-- Önceki Hafta Kartı -->
+                                        <div @click="prevAnnualPlanWeek()" :class="selectedAnnualPlanWeekIndex > 0 ? 'cursor-pointer hover:border-emerald-400 hover:bg-slate-100' : 'opacity-20 pointer-events-none'" class="p-2 sm:p-3.5 rounded-2xl bg-slate-50 border-2 border-slate-200 text-center transition flex flex-col justify-center min-h-[64px]">
+                                            <div class="text-xs sm:text-sm font-bold text-slate-600 truncate" x-text="getAnnualPlanWeekAt(selectedAnnualPlanGrade, selectedAnnualPlanWeekIndex - 1)?.week || 'Başlangıç'"></div>
+                                            <div class="text-[10px] sm:text-xs text-slate-400 font-mono truncate mt-0.5" x-text="getAnnualPlanWeekAt(selectedAnnualPlanGrade, selectedAnnualPlanWeekIndex - 1)?.date || '-'"></div>
+                                        </div>
+
+                                        <!-- Aktif Hafta Kartı (Görseldeki Yeşil Çerçeveli Vurgulu Kart) -->
+                                        <div class="p-2 sm:p-3.5 rounded-2xl bg-white border-2 border-emerald-500 shadow-md ring-4 ring-emerald-100/80 text-center flex flex-col justify-center min-h-[64px] transition transform scale-105">
+                                            <div class="text-xs sm:text-base font-black text-emerald-600" x-text="getCurrentAnnualPlanWeek(selectedAnnualPlanGrade)?.week"></div>
+                                            <div class="text-[11px] sm:text-xs font-black text-slate-800 font-mono mt-0.5" x-text="getCurrentAnnualPlanWeek(selectedAnnualPlanGrade)?.date"></div>
+                                        </div>
+
+                                        <!-- Sonraki Hafta Kartı -->
+                                        <div @click="nextAnnualPlanWeek()" :class="selectedAnnualPlanWeekIndex < 36 ? 'cursor-pointer hover:border-emerald-400 hover:bg-slate-100' : 'opacity-20 pointer-events-none'" class="p-2 sm:p-3.5 rounded-2xl bg-slate-50 border-2 border-slate-200 text-center transition flex flex-col justify-center min-h-[64px]">
+                                            <div class="text-xs sm:text-sm font-bold text-slate-600 truncate" x-text="getAnnualPlanWeekAt(selectedAnnualPlanGrade, selectedAnnualPlanWeekIndex + 1)?.week || 'Bitiş'"></div>
+                                            <div class="text-[10px] sm:text-xs text-slate-400 font-mono truncate mt-0.5" x-text="getAnnualPlanWeekAt(selectedAnnualPlanGrade, selectedAnnualPlanWeekIndex + 1)?.date || '-'"></div>
+                                        </div>
+
+                                    </div>
+
+                                    <!-- Sağ Buton (>) -->
+                                    <button @click="nextAnnualPlanWeek()" :disabled="selectedAnnualPlanWeekIndex >= 36" title="Sonraki Hafta (Sağ Ok Tuşu)" class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-slate-100 hover:bg-emerald-100 disabled:opacity-20 disabled:hover:bg-slate-100 text-slate-700 hover:text-emerald-800 font-black flex items-center justify-center transition shadow-sm shrink-0 border border-slate-300">
+                                        <i data-lucide="chevron-right" class="w-6 h-6"></i>
+                                    </button>
+
+                                </div>
+
+                                <!-- İlerleme Çubuğu & Hızlı Hafta Seçimi (Görseldeki İnce Yeşil Bar) -->
+                                <div class="pt-2 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <div class="flex items-center gap-3 flex-1">
+                                        <input type="range" min="0" max="36" x-model.number="selectedAnnualPlanWeekIndex" @input="loadCurrentWeekNote()" class="w-full accent-emerald-600 h-2 bg-slate-200 rounded-lg cursor-pointer">
+                                    </div>
+                                    <div class="flex items-center justify-between sm:justify-end gap-2 text-xs font-black text-slate-600">
+                                        <span class="px-2.5 py-1 rounded-xl bg-emerald-100 text-emerald-950 border border-emerald-300" x-text="(selectedAnnualPlanWeekIndex + 1) + ' / 37. Hafta'"></span>
+                                        <span class="px-2.5 py-1 rounded-xl bg-slate-100 text-slate-800 border border-slate-300" x-text="getCurrentAnnualPlanWeek(selectedAnnualPlanGrade)?.hours || '4 Saat'"></span>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <!-- 2. Akordiyon Kartları (Görseldeki İkonlu Bloklar) -->
+                            <div class="space-y-3">
+                                
+                                <!-- A) ÜNİTE / TEMA -->
+                                <div class="bg-white rounded-3xl border-2 border-slate-300 shadow-sm overflow-hidden">
+                                    <button @click="toggleAnnualPlanAccordion('unit')" class="w-full p-4 sm:p-5 flex items-center justify-between text-left hover:bg-slate-50 transition">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center border border-emerald-300 shrink-0">
+                                                <i data-lucide="book" class="w-5 h-5"></i>
+                                            </div>
+                                            <span class="text-base sm:text-lg font-black text-emerald-700">Ünite/Tema</span>
+                                        </div>
+                                        <div class="text-slate-400">
+                                            <i data-lucide="chevron-up" x-show="annualPlanAccordion.unit" class="w-5 h-5 text-emerald-600"></i>
+                                            <i data-lucide="chevron-down" x-show="!annualPlanAccordion.unit" class="w-5 h-5"></i>
+                                        </div>
+                                    </button>
+                                    <div x-show="annualPlanAccordion.unit" class="p-4 sm:p-5 pt-0">
+                                        <div class="p-4 bg-slate-50 rounded-2xl border-2 border-slate-200">
+                                            <h4 class="text-base sm:text-lg font-black text-slate-900 tracking-tight" x-text="getCurrentAnnualPlanWeek(selectedAnnualPlanGrade)?.unit"></h4>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- B) KONU / İÇERİK ÇERÇEVESİ -->
+                                <div class="bg-white rounded-3xl border-2 border-slate-300 shadow-sm overflow-hidden">
+                                    <button @click="toggleAnnualPlanAccordion('topic')" class="w-full p-4 sm:p-5 flex items-center justify-between text-left hover:bg-slate-50 transition">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center border border-emerald-300 shrink-0">
+                                                <i data-lucide="crosshair" class="w-5 h-5"></i>
+                                            </div>
+                                            <span class="text-base sm:text-lg font-black text-emerald-700">Konu/İçerik Çerçevesi</span>
+                                        </div>
+                                        <div class="text-slate-400">
+                                            <i data-lucide="chevron-up" x-show="annualPlanAccordion.topic" class="w-5 h-5 text-emerald-600"></i>
+                                            <i data-lucide="chevron-down" x-show="!annualPlanAccordion.topic" class="w-5 h-5"></i>
+                                        </div>
+                                    </button>
+                                    <div x-show="annualPlanAccordion.topic" class="p-4 sm:p-5 pt-0">
+                                        <div class="p-4 bg-slate-50 rounded-2xl border-2 border-slate-200">
+                                            <h4 class="text-sm sm:text-base font-extrabold text-slate-900" x-text="getCurrentAnnualPlanWeek(selectedAnnualPlanGrade)?.topic"></h4>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- C) ÖĞRENME ÇIKTILARI (Görseldeki Yeşil Arka Planlı & Noktalı Liste) -->
+                                <div class="bg-white rounded-3xl border-2 border-slate-300 shadow-sm overflow-hidden">
+                                    <button @click="toggleAnnualPlanAccordion('outcomes')" class="w-full p-4 sm:p-5 flex items-center justify-between text-left hover:bg-slate-50 transition">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center border border-emerald-300 shrink-0">
+                                                <i data-lucide="clipboard-check" class="w-5 h-5"></i>
+                                            </div>
+                                            <span class="text-base sm:text-lg font-black text-emerald-700">Öğrenme Çıktıları</span>
+                                        </div>
+                                        <div class="text-slate-400">
+                                            <i data-lucide="chevron-up" x-show="annualPlanAccordion.outcomes" class="w-5 h-5 text-emerald-600"></i>
+                                            <i data-lucide="chevron-down" x-show="!annualPlanAccordion.outcomes" class="w-5 h-5"></i>
+                                        </div>
+                                    </button>
+                                    <div x-show="annualPlanAccordion.outcomes" class="p-4 sm:p-5 pt-0">
+                                        <div class="p-4 bg-emerald-50/90 rounded-2xl border-2 border-emerald-200 space-y-3 shadow-inner">
+                                            <template x-for="(outc, oIdx) in (getCurrentAnnualPlanWeek(selectedAnnualPlanGrade)?.outcomesList && getCurrentAnnualPlanWeek(selectedAnnualPlanGrade)?.outcomesList.length ? getCurrentAnnualPlanWeek(selectedAnnualPlanGrade)?.outcomesList : [{code: 'KAZANIM', desc: getCurrentAnnualPlanWeek(selectedAnnualPlanGrade)?.outcome}])" :key="oIdx">
+                                                <div class="flex items-start gap-3">
+                                                    <span class="text-emerald-600 font-black text-xl leading-none mt-0.5">•</span>
+                                                    <div class="text-xs sm:text-sm text-slate-900 font-extrabold leading-relaxed">
+                                                        <span class="text-emerald-800 font-mono font-black mr-1" x-text="outc.code + '.'"></span>
+                                                        <span x-text="outc.desc"></span>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- D) SÜREÇ BECERİLERİ & BİLEŞENLERİ (Görseldeki Kum Saati İkonlu Blok) -->
+                                <div class="bg-white rounded-3xl border-2 border-slate-300 shadow-sm overflow-hidden">
+                                    <button @click="toggleAnnualPlanAccordion('process')" class="w-full p-4 sm:p-5 flex items-center justify-between text-left hover:bg-slate-50 transition">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center border border-emerald-300 shrink-0">
+                                                <i data-lucide="hourglass" class="w-5 h-5"></i>
+                                            </div>
+                                            <span class="text-base sm:text-lg font-black text-emerald-700">Süreç Becerileri</span>
+                                        </div>
+                                        <div class="text-slate-400">
+                                            <i data-lucide="chevron-up" x-show="annualPlanAccordion.process" class="w-5 h-5 text-emerald-600"></i>
+                                            <i data-lucide="chevron-down" x-show="!annualPlanAccordion.process" class="w-5 h-5"></i>
+                                        </div>
+                                    </button>
+                                    <div x-show="annualPlanAccordion.process" class="p-4 sm:p-5 pt-0">
+                                        <div class="p-4 bg-slate-50 rounded-2xl border-2 border-slate-200 space-y-2">
+                                            <template x-for="(pItem, pIdx) in (getCurrentAnnualPlanWeek(selectedAnnualPlanGrade)?.processList && getCurrentAnnualPlanWeek(selectedAnnualPlanGrade)?.processList.length ? getCurrentAnnualPlanWeek(selectedAnnualPlanGrade)?.processList : (getCurrentAnnualPlanWeek(selectedAnnualPlanGrade)?.process ? [getCurrentAnnualPlanWeek(selectedAnnualPlanGrade)?.process] : []))" :key="pIdx">
+                                                <div class="flex items-start gap-2.5 text-xs sm:text-sm text-slate-800 font-semibold leading-relaxed">
+                                                    <span class="text-blue-600 font-black">•</span>
+                                                    <span x-text="pItem"></span>
+                                                </div>
+                                            </template>
+                                            <div x-show="!getCurrentAnnualPlanWeek(selectedAnnualPlanGrade)?.process && (!getCurrentAnnualPlanWeek(selectedAnnualPlanGrade)?.processList || !getCurrentAnnualPlanWeek(selectedAnnualPlanGrade)?.processList.length)" class="text-xs text-slate-500 italic">
+                                                Bu hafta için tanımlı süreç becerisi bulunmamaktadır.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- E) DEĞERLER, BECERİLER & ÖLÇME -->
+                                <div class="bg-white rounded-3xl border-2 border-slate-300 shadow-sm overflow-hidden">
+                                    <button @click="toggleAnnualPlanAccordion('extra')" class="w-full p-4 sm:p-5 flex items-center justify-between text-left hover:bg-slate-50 transition">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center border border-emerald-300 shrink-0">
+                                                <i data-lucide="sparkles" class="w-5 h-5"></i>
+                                            </div>
+                                            <span class="text-base sm:text-lg font-black text-emerald-700">Değerler, Beceriler & Ölçme</span>
+                                        </div>
+                                        <div class="text-slate-400">
+                                            <i data-lucide="chevron-up" x-show="annualPlanAccordion.extra" class="w-5 h-5 text-emerald-600"></i>
+                                            <i data-lucide="chevron-down" x-show="!annualPlanAccordion.extra" class="w-5 h-5"></i>
+                                        </div>
+                                    </button>
+                                    <div x-show="annualPlanAccordion.extra" class="p-4 sm:p-5 pt-0 space-y-3">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <div x-show="getCurrentAnnualPlanWeek(selectedAnnualPlanGrade)?.values" class="p-3 bg-amber-50 rounded-2xl border border-amber-200">
+                                                <span class="text-[11px] font-black uppercase text-amber-900 block mb-1">🌟 Değerler:</span>
+                                                <p class="text-xs font-bold text-amber-950 leading-relaxed" x-text="getCurrentAnnualPlanWeek(selectedAnnualPlanGrade)?.values"></p>
+                                            </div>
+                                            <div x-show="getCurrentAnnualPlanWeek(selectedAnnualPlanGrade)?.skills" class="p-3 bg-purple-50 rounded-2xl border border-purple-200">
+                                                <span class="text-[11px] font-black uppercase text-purple-900 block mb-1">🧠 Beceriler & Okuryazarlık:</span>
+                                                <p class="text-xs font-bold text-purple-950 leading-relaxed" x-text="getCurrentAnnualPlanWeek(selectedAnnualPlanGrade)?.skills + (getCurrentAnnualPlanWeek(selectedAnnualPlanGrade)?.literacy ? ' • ' + getCurrentAnnualPlanWeek(selectedAnnualPlanGrade)?.literacy : '')"></p>
+                                            </div>
+                                        </div>
+                                        <div x-show="getCurrentAnnualPlanWeek(selectedAnnualPlanGrade)?.assessment" class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200">
+                                            <span class="text-[11px] font-black uppercase text-slate-800 block mb-1">📊 Ölçme ve Değerlendirme:</span>
+                                            <p class="text-xs font-medium text-slate-900 leading-relaxed" x-text="getCurrentAnnualPlanWeek(selectedAnnualPlanGrade)?.assessment"></p>
+                                        </div>
+                                        <div x-show="getCurrentAnnualPlanWeek(selectedAnnualPlanGrade)?.specialDays" class="p-3 bg-red-50 rounded-2xl border border-red-200">
+                                            <span class="text-[11px] font-black uppercase text-red-900 block mb-1">⭐ Belirli Gün ve Haftalar:</span>
+                                            <p class="text-xs font-black text-red-950" x-text="getCurrentAnnualPlanWeek(selectedAnnualPlanGrade)?.specialDays"></p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- F) ÖĞRETMEN NOTLARI (Görseldeki Not Ekle Butonuna Bağlı Kısım) -->
+                                <div id="teacher-notes-section" class="bg-white rounded-3xl border-2 border-slate-300 shadow-sm overflow-hidden">
+                                    <button @click="toggleAnnualPlanAccordion('notes')" class="w-full p-4 sm:p-5 flex items-center justify-between text-left hover:bg-slate-50 transition">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center border border-emerald-300 shrink-0">
+                                                <i data-lucide="edit-3" class="w-5 h-5"></i>
+                                            </div>
+                                            <div>
+                                                <span class="text-base sm:text-lg font-black text-emerald-700">Bu Haftaya Özel Öğretmen Notum</span>
+                                                <span x-show="activeWeekNote" class="ml-2 text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-bold">Dolu</span>
+                                            </div>
+                                        </div>
+                                        <div class="text-slate-400">
+                                            <i data-lucide="chevron-up" x-show="annualPlanAccordion.notes" class="w-5 h-5 text-emerald-600"></i>
+                                            <i data-lucide="chevron-down" x-show="!annualPlanAccordion.notes" class="w-5 h-5"></i>
+                                        </div>
+                                    </button>
+                                    <div x-show="annualPlanAccordion.notes" class="p-4 sm:p-5 pt-0 space-y-3">
+                                        <textarea x-model="activeWeekNote" rows="3" placeholder="Örn: Bu hafta laboratuvarda Güneş gözlemi için dürbün/teleskop hazırlanacak, deney föyleri çoğaltılacak..." class="w-full px-4 py-3 bg-slate-50 border-2 border-slate-300 rounded-2xl text-xs sm:text-sm font-bold text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white shadow-sm leading-relaxed"></textarea>
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-[11px] text-slate-500 font-semibold">Notunuz tarayıcınıza otomatik kaydedilir.</span>
+                                            <button @click="saveCurrentWeekNote()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl shadow transition flex items-center gap-1.5">
+                                                <i data-lucide="save" class="w-3.5 h-3.5"></i>
+                                                <span>Notu Kaydet</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </template>
+
+                    <!-- Görseldeki Sağ Alttaki Sabit Yeşil Yuvarlak "Not Ekle" Butonu (FAB) -->
+                    <button @click="annualPlanAccordion.notes = true; $nextTick(() => { document.getElementById('teacher-notes-section')?.scrollIntoView({ behavior: 'smooth' }); })" class="fixed sm:absolute bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white shadow-2xl flex flex-col items-center justify-center gap-0.5 border-2 border-white transition transform hover:scale-105 shadow-emerald-900/40" title="Bu Haftaya Not Ekle">
+                        <i data-lucide="edit-2" class="w-5 h-5"></i>
+                        <span class="text-[9px] font-black leading-none tracking-tight">Not Ekle</span>
+                    </button>
+
+                </div>
+
+                <!-- ================= 1. GÖRÜNÜM: TÜM HAFTALAR KARTLAR ================= -->
                 <div x-show="annualPlanViewMode === 'cards'" class="space-y-4">
                     <div class="grid grid-cols-1 gap-4">
                         <template x-for="(w, idx) in getFilteredAnnualPlan(selectedAnnualPlanGrade)" :key="idx">
