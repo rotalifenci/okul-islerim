@@ -192,6 +192,11 @@ document.addEventListener('alpine:init', () => {
             room: '5/A Sınıfı'
         },
 
+        // 👨‍🎓 Öğrenci Listesi & Sınıf Yönetimi Durumu
+        selectedStudentListClass: 'ALL',
+        studentListSearch: '',
+        isAddClassModalOpen: false,
+        newClassForm: { name: '', grade: 5, advisor: '' },
         // Güvenlik & 5 Kullanıcılı Giriş Sistemi (1 Yönetici + 4 Öğretmen)
         users: window.AuthUsers || [],
         currentUser: null,
@@ -436,6 +441,176 @@ document.addEventListener('alpine:init', () => {
             } catch (e) {}
             const u = (this.users || []).find(x => x.id === userId);
             return u ? u.password : '';
+        },
+
+
+        // =========================================================================
+        // 🏫 SINIF YÖNETİMİ & 👨‍🎓 ÖĞRENCİ LİSTESİ MODÜLÜ
+        // =========================================================================
+        openAddClassModal() {
+            this.newClassForm = { name: '', grade: 5, advisor: '' };
+            this.isAddClassModalOpen = true;
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+
+        addNewClass() {
+            let rawName = (this.newClassForm.name || '').trim();
+            if (!rawName) {
+                alert('Lütfen sınıf adını (Örn: 8/A veya 6/B) giriniz.');
+                return;
+            }
+            // Standart sınıf formatı oluştur (Örn: 8-a -> 8/A, 8a -> 8/A)
+            rawName = rawName.toUpperCase().replace(/\s+/g, '').replace('-', '/');
+            if (!rawName.includes('/') && rawName.length >= 2) {
+                rawName = rawName.slice(0, rawName.length - 1) + '/' + rawName.slice(rawName.length - 1);
+            }
+            const classId = rawName.replace('/', '').toUpperCase();
+
+            if (!this.data.classes) this.data.classes = [];
+            const exists = this.data.classes.find(c => (c.id && c.id.toUpperCase() === classId) || (c.name && c.name.toUpperCase() === rawName));
+            if (exists) {
+                alert(`"${rawName}" sınıfı zaten listenizde mevcut!`);
+                return;
+            }
+
+            const matchGrade = rawName.match(/^(\d+)/);
+            const grade = matchGrade ? parseInt(matchGrade[1]) : (parseInt(this.newClassForm.grade) || 5);
+
+            const newCls = {
+                id: classId,
+                name: rawName,
+                grade: grade,
+                studentCount: 0,
+                advisor: (this.newClassForm.advisor || '').trim()
+            };
+
+            this.data.classes.push(newCls);
+            window.StorageManager.saveData(this.data);
+            this.selectedClassId = classId;
+            this.selectedStudentListClass = classId;
+            this.isAddClassModalOpen = false;
+            this.showToast(`"${rawName}" sınıfı başarıyla eklendi! 🎉`);
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+
+        deleteClass(cls) {
+            const studentCount = (this.data.students || []).filter(s => s.classId === cls.id).length;
+            if (confirm(`"${cls.name}" sınıfını silmek istediğinize emin misiniz?${studentCount > 0 ? '\n\n⚠️ Bu sınıfa ait ' + studentCount + ' öğrenci de silinecektir!' : ''}`)) {
+                this.data.classes = (this.data.classes || []).filter(c => c.id !== cls.id);
+                if (studentCount > 0) {
+                    this.data.students = (this.data.students || []).filter(s => s.classId !== cls.id);
+                }
+                if (this.selectedClassId === cls.id && this.data.classes.length > 0) {
+                    this.selectedClassId = this.data.classes[0].id;
+                }
+                if (this.selectedStudentListClass === cls.id) {
+                    this.selectedStudentListClass = 'ALL';
+                }
+                window.StorageManager.saveData(this.data);
+                this.showToast(`"${cls.name}" sınıfı ve öğrencileri silindi.`);
+                this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+            }
+        },
+
+        getClassName(classId) {
+            if (!classId) return '';
+            const found = (this.data.classes || []).find(c => c.id === classId || c.name === classId);
+            return found ? found.name : classId;
+        },
+
+        getFilteredStudentList() {
+            let list = this.data.students || [];
+            if (this.selectedStudentListClass && this.selectedStudentListClass !== 'ALL') {
+                list = list.filter(s => s.classId === this.selectedStudentListClass);
+            }
+            const query = (this.studentListSearch || '').trim().toLowerCase();
+            if (query) {
+                list = list.filter(s => 
+                    (s.name || '').toLowerCase().includes(query) ||
+                    (s.no || '').toString().includes(query) ||
+                    this.getClassName(s.classId).toLowerCase().includes(query)
+                );
+            }
+            return list.slice().sort((a, b) => {
+                if (a.classId !== b.classId) {
+                    return (a.classId || '').localeCompare(b.classId || '');
+                }
+                return (Number(a.no) || 0) - (Number(b.no) || 0);
+            });
+        },
+
+        exportStudentListToExcel() {
+            const list = this.getFilteredStudentList();
+            if (!list.length) {
+                this.showToast("Dışa aktarılacak öğrenci bulunamadı!", "warning");
+                return;
+            }
+            const clsName = this.selectedStudentListClass === 'ALL' ? 'Tum_Siniflar' : this.getClassName(this.selectedStudentListClass);
+            const headers = ['Sıra No', 'Okul No', 'Öğrenci Adı Soyadı', 'Sınıf / Şube', 'Notlar / Durum'];
+            const rows = list.map((st, idx) => [
+                idx + 1,
+                st.no || '',
+                st.name || '',
+                this.getClassName(st.classId),
+                st.notes || ''
+            ]);
+            window.Exporter.exportHtmlTableToExcel(
+                `Ogrenci_Listesi_${clsName}`,
+                `Rotalı Fenci - Öğrenci Listesi (${this.selectedStudentListClass === 'ALL' ? 'Tüm Sınıflar' : this.getClassName(this.selectedStudentListClass)})`,
+                headers,
+                rows
+            );
+            this.showToast("Öğrenci listesi Excel olarak başarıyla indirildi! 📊");
+        },
+
+        printStudentList() {
+            const list = this.getFilteredStudentList();
+            if (!list.length) {
+                this.showToast("Yazdırılacak öğrenci bulunamadı!", "warning");
+                return;
+            }
+            const clsTitle = this.selectedStudentListClass === 'ALL' ? 'Tüm Sınıflar' : `${this.getClassName(this.selectedStudentListClass)} Sınıfı`;
+            let tableRows = '';
+            list.forEach((st, idx) => {
+                tableRows += `
+                    <tr style="${idx % 2 === 0 ? 'background-color:#ffffff;' : 'background-color:#f8fafc;'}">
+                        <td style="padding:6px; border:1px solid #cbd5e1; text-align:center; font-weight:bold; color:#64748b;">${idx + 1}</td>
+                        <td style="padding:6px; border:1px solid #cbd5e1; text-align:center; font-weight:900; color:#dc2626; font-size:11pt;">${st.no || ''}</td>
+                        <td style="padding:6px; border:1px solid #cbd5e1; font-weight:bold; color:#0f172a; font-size:10.5pt;">${st.name || ''}</td>
+                        <td style="padding:6px; border:1px solid #cbd5e1; text-align:center; font-weight:900;">${this.getClassName(st.classId)}</td>
+                        <td style="padding:6px; border:1px solid #cbd5e1; font-size:9pt; color:#475569;">${st.notes || ''}</td>
+                    </tr>
+                `;
+            });
+
+            const html = `
+                <div style="font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+                    <div style="text-align:center; padding-bottom:12px; border-bottom:2px solid #0f172a; margin-bottom:12px;">
+                        <h1 style="font-size:18pt; font-weight:900; color:#0f172a; margin:0; text-transform:uppercase;">ÖĞRENCİ LİSTESİ & ŞUBE MEVCUDU</h1>
+                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:9pt; font-weight:bold; color:#475569; margin-top:8px;">
+                            <span><strong>Öğretmen:</strong> ${this.data.teacher?.name || this.currentUser?.name || 'Murat Kundakcı'}</span>
+                            <span style="padding:2px 8px; background-color:#fee2e2; color:#991b1b; border:1px solid #f87171; border-radius:4px; font-weight:900;">${clsTitle}</span>
+                            <span><strong>Toplam Öğrenci:</strong> ${list.length}</span>
+                            <span><strong>Tarih:</strong> ${new Date().toLocaleDateString('tr-TR')}</span>
+                        </div>
+                    </div>
+                    <table style="width:100%; border-collapse:collapse; border:1px solid #cbd5e1; font-size:10pt;">
+                        <thead>
+                            <tr style="background-color:#dc2626; color:#ffffff; font-weight:900; font-size:9pt; text-transform:uppercase;">
+                                <th style="padding:8px; border:1px solid #94a3b8; width:45px; text-align:center;">Sıra</th>
+                                <th style="padding:8px; border:1px solid #94a3b8; width:80px; text-align:center;">Okul No</th>
+                                <th style="padding:8px; border:1px solid #94a3b8; text-align:left;">Öğrenci Adı Soyadı</th>
+                                <th style="padding:8px; border:1px solid #94a3b8; width:80px; text-align:center;">Sınıf</th>
+                                <th style="padding:8px; border:1px solid #94a3b8; text-align:left;">Notlar / Açıklama</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tableRows}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            window.Exporter.printContent(`Öğrenci Listesi - ${clsTitle}`, html);
         },
 
         // Şifre ile Doğrudan Giriş Yap (Kullanıcı Adı Gerekmez)

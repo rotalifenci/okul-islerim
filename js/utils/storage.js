@@ -95,6 +95,20 @@ window.StorageManager = {
                                 this.saveData(parsed, uid);
                             }
                         }
+                                                if (parsed.navSections && Array.isArray(parsed.navSections)) {
+                            const hasStudentList = parsed.navSections.some(s => s.id === 'student-list');
+                            if (!hasStudentList) {
+                                const slSec = { id: 'student-list', title: '👨‍🎓 Öğrenci Listesi', icon: 'graduation-cap', color: 'blue', visible: true, isSystem: true, badge: '' };
+                                const stIdx = parsed.navSections.findIndex(s => s.id === 'school-tasks');
+                                if (stIdx !== -1) {
+                                    parsed.navSections.splice(stIdx + 1, 0, slSec);
+                                } else {
+                                    parsed.navSections.push(slSec);
+                                }
+                                this.saveData(parsed, uid);
+                            }
+                        }
+
                         if (!parsed.maarifWorks) {
                             parsed.maarifWorks = JSON.parse(JSON.stringify(window.InitialData.maarifWorks || []));
                         }
@@ -153,6 +167,20 @@ window.StorageManager = {
                                 this.saveData(parsed, uid);
                             }
                         }
+                                                if (parsed.navSections && Array.isArray(parsed.navSections)) {
+                            const hasStudentList = parsed.navSections.some(s => s.id === 'student-list');
+                            if (!hasStudentList) {
+                                const slSec = { id: 'student-list', title: '👨‍🎓 Öğrenci Listesi', icon: 'graduation-cap', color: 'blue', visible: true, isSystem: true, badge: '' };
+                                const stIdx = parsed.navSections.findIndex(s => s.id === 'school-tasks');
+                                if (stIdx !== -1) {
+                                    parsed.navSections.splice(stIdx + 1, 0, slSec);
+                                } else {
+                                    parsed.navSections.push(slSec);
+                                }
+                                this.saveData(parsed, uid);
+                            }
+                        }
+
                         if (!parsed.maarifWorks) {
                             parsed.maarifWorks = JSON.parse(JSON.stringify(window.InitialData.maarifWorks || []));
                         }
