@@ -60,12 +60,21 @@ document.addEventListener('alpine:init', () => {
         homeworkViewMode: 'daily',
         isHwHistoryModalOpen: false,
         selectedHwStudent: null,
+        isAddStudentModalOpen: false,
+        addStudentMode: 'single', // 'single' veya 'bulk'
+        newStudent: {
+            classId: '5D',
+            no: '',
+            name: '',
+            notes: ''
+        },
+        bulkStudentText: '',
         scoringLegend: [
-            { score: '0', label: 'Yok / Yapmadı', pts: '0 Puan', color: 'red', desc: 'Ödev getirilmedi veya hiç yapılmadı (0p)' },
-            { score: '1', label: 'Yarım / Eksik', pts: '1 Puan', color: 'amber', desc: 'Kısmen / eksik yapıldı (+/-) (1p)' },
-            { score: '2', label: 'Tam / Artı', pts: '2 Puan', color: 'emerald', desc: 'Eksiksiz ve doğru tamamlandı (+) (2p)' },
-            { score: '4', label: 'Yıldız', pts: '4 Puan', color: 'yellow', desc: 'Üstün başarı ve özenli çalışma (★) (4p)' },
-            { score: 'G', label: 'Gelmedi', pts: 'Devamsız', color: 'slate', desc: 'Öğrenci o gün okula gelmedi' }
+            { score: '0', label: '0: Yok (0p)', pts: '0 Puan', color: 'red', desc: 'Ödev getirilmedi veya hiç yapılmadı (0p)' },
+            { score: '1', label: '1: Yarım (1p)', pts: '1 Puan', color: 'amber', desc: 'Kısmen / eksik yapıldı (+/-) (1p)' },
+            { score: '2', label: '2: Tam (+2p)', pts: '2 Puan', color: 'emerald', desc: 'Eksiksiz ve doğru tamamlandı (+) (2p)' },
+            { score: '4', label: '4: Yıldız (+4p)', pts: '4 Puan', color: 'yellow', desc: 'Üstün başarı ve özenli çalışma (★) (4p)' },
+            { score: 'G', label: 'G: Gelmedi', pts: 'Devamsız', color: 'slate', desc: 'Öğrenci o gün okula gelmedi' }
         ],
 
         // Yeni Proje Takvimi Kaydı Modalı
@@ -176,6 +185,7 @@ document.addEventListener('alpine:init', () => {
                     this.isTaskModalOpen = false;
                     this.isProjCalModalOpen = false;
                     this.isAnnualPlanModalOpen = false;
+                    this.isAddStudentModalOpen = false;
                 }
                 if ((this.currentTab === 'annual-plan' || this.isAnnualPlanModalOpen) && this.annualPlanViewMode === 'interactive' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
                     if (e.key === 'ArrowLeft') {
@@ -348,13 +358,13 @@ document.addEventListener('alpine:init', () => {
             this.data = JSON.parse(JSON.stringify(this.data));
 
             const labels = {
-                '0': '❌ 0 - Yok (0p)',
-                '1': '⚠️ 1 - Yarım (1p)',
-                '2': '✅ 2 - Tam (+2p)',
-                '4': '⭐ 4 - Yıldız (★ +4p)',
-                'G': '🚫 G - Gelmedi'
+                '0': '0: Yok (0p)',
+                '1': '1: Yarım (1p)',
+                '2': '2: Tam (+2p)',
+                '4': '4: Yıldız (+4p)',
+                'G': 'G: Gelmedi'
             };
-            this.showToast(`Ödev Durumu: ${labels[score] || score} kaydedildi.`);
+            this.showToast(`Ödev: ${labels[score] || score} seçildi.`);
         },
 
         setStudentHomeworkNote(studentId, note) {
@@ -363,6 +373,98 @@ document.addEventListener('alpine:init', () => {
             const curScore = session.grades[studentId]?.score || '';
             session.grades[studentId] = { score: curScore, note: note };
             this.data = JSON.parse(JSON.stringify(this.data));
+        },
+
+        saveHomeworkData() {
+            window.StorageManager.saveData(this.data);
+            this.showToast("Ödev puanları ve öğretmen notları başarıyla kaydedildi! 💾");
+        },
+
+        openAddStudentModal() {
+            this.newStudent.classId = this.selectedClassId || '5D';
+            this.newStudent.name = '';
+            this.newStudent.no = '';
+            this.newStudent.notes = '';
+            this.bulkStudentText = '';
+            this.addStudentMode = 'single';
+            this.isAddStudentModalOpen = true;
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+
+        addSingleStudent() {
+            if (!this.newStudent.name || !this.newStudent.no) {
+                alert("Lütfen öğrenci okul numarasını ve adını soyadını giriniz.");
+                return;
+            }
+            const clsId = this.newStudent.classId || this.selectedClassId || '5D';
+            const newSt = {
+                id: 's_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                name: this.newStudent.name.trim(),
+                no: parseInt(this.newStudent.no) || this.newStudent.no,
+                classId: clsId,
+                avatar: '👨‍🎓',
+                notes: this.newStudent.notes ? this.newStudent.notes.trim() : '',
+                tags: ['⭐ Kayıtlı']
+            };
+            if (!this.data.students) this.data.students = [];
+            this.data.students.push(newSt);
+            this.data.students.sort((a, b) => (Number(a.no) || 0) - (Number(b.no) || 0));
+            window.StorageManager.saveData(this.data);
+            this.newStudent.name = '';
+            this.newStudent.no = '';
+            this.newStudent.notes = '';
+            this.isAddStudentModalOpen = false;
+            this.showToast(`${newSt.name} (${clsId}) başarıyla eklendi! 🎉`);
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+
+        addBulkStudents() {
+            if (!this.bulkStudentText || !this.bulkStudentText.trim()) {
+                alert("Lütfen eklenecek öğrenci listesini kutuya yapıştırınız.");
+                return;
+            }
+            const clsId = this.newStudent.classId || this.selectedClassId || '5D';
+            const lines = this.bulkStudentText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            let addedCount = 0;
+            if (!this.data.students) this.data.students = [];
+
+            lines.forEach((line, idx) => {
+                const match = line.match(/^(\d+)[\s\-\,\.\t]+(.+)$/);
+                let no = (this.data.students.filter(s => s.classId === clsId).length + 1) * 5;
+                let name = line;
+                if (match) {
+                    no = parseInt(match[1]);
+                    name = match[2].trim();
+                }
+                if (name) {
+                    this.data.students.push({
+                        id: 's_' + Date.now() + '_' + idx + '_' + Math.floor(Math.random() * 1000),
+                        name: name,
+                        no: no,
+                        classId: clsId,
+                        avatar: '👨‍🎓',
+                        notes: '',
+                        tags: ['⭐ Kayıtlı']
+                    });
+                    addedCount++;
+                }
+            });
+
+            this.data.students.sort((a, b) => (Number(a.no) || 0) - (Number(b.no) || 0));
+            window.StorageManager.saveData(this.data);
+            this.bulkStudentText = '';
+            this.isAddStudentModalOpen = false;
+            this.showToast(`${clsId} sınıfına ${addedCount} öğrenci başarıyla eklendi! 🚀`);
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+
+        deleteStudent(st) {
+            if (confirm(`"${st.name}" (${st.classId} - No: ${st.no}) isimli öğrenciyi silmek istediğinize emin misiniz?`)) {
+                this.data.students = this.data.students.filter(s => s.id !== st.id);
+                window.StorageManager.saveData(this.data);
+                this.showToast(`${st.name} listeden silindi.`);
+                this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+            }
         },
 
         bulkSetClassHomework(score) {

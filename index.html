@@ -986,7 +986,7 @@
             <!-- ================= TAB 2: ÖDEV TAKİP SİSTEMİ ================= -->
             <div x-show="currentTab === 'students'" class="space-y-6">
                 
-                <!-- Üst Başlık ve Sınıf Seçimi -->
+                <!-- Üst Başlık, Sınıf Seçimi ve Aksiyonlar -->
                 <div class="bg-slate-100/95 p-5 rounded-3xl border-2 border-slate-300 shadow-md space-y-4">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
@@ -997,20 +997,41 @@
                             <p class="text-xs text-slate-700 font-bold">Öğrencilerin ödevlerini takvime göre günbegün işleme, puanlama ve sınıf başarı takibi</p>
                         </div>
                         
-                        <div class="relative min-w-[240px]">
-                            <input type="text" x-model="searchQuery" placeholder="Öğrenci ara (İsim veya No)..." class="w-full px-3.5 py-2 pl-9 bg-white border-2 border-slate-300 rounded-xl text-xs text-black font-black placeholder-slate-500 focus:outline-none focus:border-red-500 shadow-sm">
-                            <i data-lucide="search" class="w-4 h-4 text-slate-500 absolute left-3 top-2.5"></i>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <!-- ➕ Öğrenci Ekle / Liste Aktar Butonu -->
+                            <button @click="openAddStudentModal()" class="px-3.5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-xs shadow-md flex items-center gap-1.5 transition transform hover:scale-105">
+                                <i data-lucide="user-plus" class="w-4 h-4"></i>
+                                <span>➕ Öğrenci Ekle / Liste Aktar</span>
+                            </button>
+
+                            <!-- 💾 Değişiklikleri Kaydet Butonu -->
+                            <button @click="saveHomeworkData()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-md flex items-center gap-1.5 transition transform hover:scale-105">
+                                <span>💾</span>
+                                <span>Değişiklikleri Kaydet</span>
+                            </button>
+
+                            <!-- Arama Kutusu -->
+                            <div class="relative min-w-[200px]">
+                                <input type="text" x-model="searchQuery" placeholder="Öğrenci ara..." class="w-full px-3 py-2 pl-8 bg-white border-2 border-slate-300 rounded-xl text-xs text-black font-black placeholder-slate-500 focus:outline-none focus:border-red-500 shadow-sm">
+                                <i data-lucide="search" class="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-2.5"></i>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Sınıf Butonları -->
-                    <div class="flex flex-wrap gap-2 pt-2 border-t border-slate-300">
-                        <template x-for="cls in data.classes" :key="cls.id">
-                            <button @click="selectedClassId = cls.id" :class="selectedClassId === cls.id ? 'bg-red-600 text-white font-black shadow-md border-2 border-red-700 ring-2 ring-red-300' : 'bg-white text-black font-black hover:bg-red-50 border border-slate-300 shadow-sm'" class="px-4 py-2 rounded-xl text-xs transition flex items-center gap-1.5">
-                                <span x-text="cls.name"></span>
-                                <span class="px-1.5 py-0.5 rounded-md text-[10px]" :class="selectedClassId === cls.id ? 'bg-red-800 text-white font-bold' : 'bg-slate-200 text-black font-bold'" x-text="data.students.filter(s => s.classId === cls.id).length + ' Öğrenci'"></span>
-                            </button>
-                        </template>
+                    <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-300">
+                        <div class="flex flex-wrap gap-2">
+                            <template x-for="cls in data.classes" :key="cls.id">
+                                <button @click="selectedClassId = cls.id" :class="selectedClassId === cls.id ? 'bg-red-600 text-white font-black shadow-md border-2 border-red-700 ring-2 ring-red-300' : 'bg-white text-black font-black hover:bg-red-50 border border-slate-300 shadow-sm'" class="px-4 py-2 rounded-xl text-xs transition flex items-center gap-1.5">
+                                    <span x-text="cls.name"></span>
+                                    <span class="px-1.5 py-0.5 rounded-md text-[10px]" :class="selectedClassId === cls.id ? 'bg-red-800 text-white font-bold' : 'bg-slate-200 text-black font-bold'" x-text="data.students.filter(s => s.classId === cls.id).length + ' Öğrenci'"></span>
+                                </button>
+                            </template>
+                        </div>
+
+                        <button @click="openAddStudentModal()" class="text-xs font-black text-red-700 hover:text-red-900 flex items-center gap-1 bg-white px-3 py-1.5 rounded-xl border border-red-300 shadow-sm transition">
+                            <span>+ Bu Sınıfa Öğrenci Ekle</span>
+                        </button>
                     </div>
                 </div>
 
@@ -1073,7 +1094,7 @@
                             </span>
                         </div>
 
-                        <!-- Hızlı Toplu Aksiyon Butonları -->
+                        <!-- Hızlı Toplu Aksiyon Butonları & Kaydet -->
                         <div class="flex flex-wrap items-center gap-2">
                             <button @click="bulkSetClassHomework('2')" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-sm flex items-center gap-1 transition">
                                 ⚡ Tümüne Tam (2) Ver
@@ -1081,8 +1102,11 @@
                             <button @click="bulkSetClassHomework('4')" class="px-3 py-1.5 rounded-xl bg-yellow-500 hover:bg-yellow-600 text-black font-black text-xs shadow-sm flex items-center gap-1 transition">
                                 ⭐ Tümüne Yıldız (4) Ver
                             </button>
+                            <button @click="saveHomeworkData()" class="px-3.5 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-black text-xs shadow-sm flex items-center gap-1 transition">
+                                💾 Kaydet
+                            </button>
                             <button @click="printClassHomeworkReport()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-black text-white font-black text-xs shadow-sm flex items-center gap-1 transition">
-                                🖨️ Çizelgeyi Yazdır
+                                🖨️ Yazdır
                             </button>
                             <button @click="clearHomeworkDate()" title="Seçili tarihteki ödev puanlarını temizle" class="px-2.5 py-1.5 rounded-xl bg-slate-200 hover:bg-red-100 text-red-700 font-black text-xs border border-slate-300 shadow-sm transition">
                                 🧹 Sıfırla
@@ -1121,106 +1145,106 @@
                     </div>
                 </div>
 
-                <!-- Öğrenci Ödev Tablosu (Tek Tıkla Puanlama) -->
-                <div class="bg-slate-100/95 rounded-3xl overflow-hidden border-2 border-slate-300 shadow-md">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs text-slate-900">
-                            <thead class="bg-slate-200 text-slate-900 uppercase font-black border-b-2 border-slate-300">
+                <!-- Öğrenci Ödev Tablosu (Kompakt, Kaydırmasız & Açıklamasız Düz Liste) -->
+                <div class="bg-slate-100/95 rounded-3xl border-2 border-slate-300 shadow-md overflow-hidden">
+                    <div class="w-full overflow-x-auto">
+                        <table class="w-full text-left text-xs text-slate-900 border-collapse">
+                            <thead class="bg-slate-900 text-white uppercase font-black text-[11px] tracking-wider">
                                 <tr>
-                                    <th class="p-3.5 w-12 text-center">No</th>
-                                    <th class="p-3.5">Öğrenci Bilgisi</th>
-                                    <th class="p-3.5 text-center min-w-[320px]">Bugünkü Ödev Durumu (Tıkla ve Ver)</th>
-                                    <th class="p-3.5 min-w-[200px]">Öğretmen Notu / Açıklama</th>
-                                    <th class="p-3.5 text-center">Toplam Başarı</th>
-                                    <th class="p-3.5 text-right">İşlem</th>
+                                    <th class="py-3 px-3 w-12 text-center border-r border-slate-700">No</th>
+                                    <th class="py-3 px-4 min-w-[170px] border-r border-slate-700">Öğrenci Bilgisi</th>
+                                    <th class="py-3 px-3 text-center min-w-[280px] border-r border-slate-700">Bugünkü Ödev Durumu (Tıkla ve Ver)</th>
+                                    <th class="py-3 px-3 min-w-[200px] border-r border-slate-700">Öğretmen Notu / Açıklama</th>
+                                    <th class="py-3 px-3 text-center w-28 border-r border-slate-700">Toplam Başarı</th>
+                                    <th class="py-3 px-3 text-center w-20">İşlem</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y-2 divide-slate-200 bg-white">
+                            <tbody class="divide-y divide-slate-200 bg-white">
                                 <template x-for="(st, index) in filteredStudents" :key="st.id">
-                                    <tr class="hover:bg-red-50/40 transition">
+                                    <tr class="hover:bg-red-50/50 transition">
                                         
                                         <!-- No -->
-                                        <td class="p-3.5 text-center font-mono font-black text-red-700 text-sm" x-text="st.no"></td>
+                                        <td class="py-2.5 px-3 text-center font-mono font-black text-red-700 text-sm border-r border-slate-200" x-text="st.no"></td>
 
-                                        <!-- Öğrenci -->
-                                        <td class="p-3.5">
-                                            <div class="flex items-center gap-3">
-                                                <span class="text-2xl" x-text="st.avatar"></span>
-                                                <div>
-                                                    <div class="font-black text-black text-sm" x-text="st.name"></div>
-                                                    <div class="text-[11px] text-slate-600 font-bold" x-text="st.notes"></div>
-                                                </div>
+                                        <!-- Öğrenci Bilgisi (SADECE İSİM & AVATAR - ALT AÇIKLAMA YOK) -->
+                                        <td class="py-2.5 px-4 border-r border-slate-200">
+                                            <div class="flex items-center gap-2.5">
+                                                <span class="text-xl" x-text="st.avatar || '👨‍🎓'"></span>
+                                                <span class="font-black text-slate-950 text-sm tracking-tight" x-text="st.name"></span>
                                             </div>
                                         </td>
 
-                                        <!-- 1-Tıkla Ödev Durumu Puanlama Butonları (0, 1, 2, 4, G) -->
-                                        <td class="p-3.5 text-center">
-                                            <div class="inline-flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl border border-slate-300 shadow-inner">
+                                        <!-- Bugünkü Ödev Durumu (Tıkla ve Ver) - 5 Buton: 0, yarım artı, +, yıldız, G -->
+                                        <td class="py-2 px-3 text-center border-r border-slate-200">
+                                            <div class="inline-flex items-center justify-center gap-1.5 p-1 bg-slate-100 rounded-xl border border-slate-300 shadow-inner">
                                                 
-                                                <!-- 0: Yok -->
-                                                <button @click="setStudentHomeworkGrade(st.id, '0')" :class="getStudentHomeworkGrade(st.id).score === '0' ? 'bg-red-600 text-white font-black ring-2 ring-red-400 shadow-md scale-105' : 'bg-white text-red-800 hover:bg-red-100 border border-slate-300 font-bold'" class="px-2.5 py-1.5 rounded-lg text-xs transition flex items-center gap-1" title="0: Yok / Yapmadı (0 Puan)">
-                                                    <span>❌</span>
-                                                    <span class="font-black">0</span>
+                                                <!-- 0 -->
+                                                <button @click="setStudentHomeworkGrade(st.id, '0')" :class="getStudentHomeworkGrade(st.id).score === '0' ? 'bg-red-600 text-white font-black ring-2 ring-red-400 shadow-md scale-105' : 'bg-white text-red-700 hover:bg-red-50 border border-slate-300 font-bold'" class="px-2.5 py-1 rounded-lg text-xs transition" title="0: Yok (0p)">
+                                                    <span>0</span>
                                                 </button>
 
-                                                <!-- 1: Yarım -->
-                                                <button @click="setStudentHomeworkGrade(st.id, '1')" :class="getStudentHomeworkGrade(st.id).score === '1' ? 'bg-amber-500 text-white font-black ring-2 ring-amber-300 shadow-md scale-105' : 'bg-white text-amber-900 hover:bg-amber-100 border border-slate-300 font-bold'" class="px-2.5 py-1.5 rounded-lg text-xs transition flex items-center gap-1" title="1: Yarım / Eksik (+/- 1 Puan)">
-                                                    <span>⚠️</span>
-                                                    <span class="font-black">1</span>
+                                                <!-- yarım artı -->
+                                                <button @click="setStudentHomeworkGrade(st.id, '1')" :class="getStudentHomeworkGrade(st.id).score === '1' ? 'bg-amber-500 text-white font-black ring-2 ring-amber-300 shadow-md scale-105' : 'bg-white text-amber-900 hover:bg-amber-50 border border-slate-300 font-bold'" class="px-2 py-1 rounded-lg text-[11px] transition whitespace-nowrap" title="1: Yarım (1p)">
+                                                    <span>yarım artı</span>
                                                 </button>
 
-                                                <!-- 2: Tam -->
-                                                <button @click="setStudentHomeworkGrade(st.id, '2')" :class="getStudentHomeworkGrade(st.id).score === '2' ? 'bg-emerald-600 text-white font-black ring-2 ring-emerald-400 shadow-md scale-105' : 'bg-white text-emerald-900 hover:bg-emerald-100 border border-slate-300 font-bold'" class="px-2.5 py-1.5 rounded-lg text-xs transition flex items-center gap-1" title="2: Tam / Artı (+ 2 Puan)">
-                                                    <span>✅</span>
-                                                    <span class="font-black">2</span>
+                                                <!-- + -->
+                                                <button @click="setStudentHomeworkGrade(st.id, '2')" :class="getStudentHomeworkGrade(st.id).score === '2' ? 'bg-emerald-600 text-white font-black ring-2 ring-emerald-400 shadow-md scale-105' : 'bg-white text-emerald-900 hover:bg-emerald-50 border border-slate-300 font-bold'" class="px-2.5 py-1 rounded-lg text-xs transition font-black" title="2: Tam (+2p)">
+                                                    <span>+</span>
                                                 </button>
 
-                                                <!-- 4: Yıldız -->
-                                                <button @click="setStudentHomeworkGrade(st.id, '4')" :class="getStudentHomeworkGrade(st.id).score === '4' ? 'bg-yellow-400 text-black font-black ring-2 ring-yellow-300 shadow-md scale-105' : 'bg-white text-yellow-900 hover:bg-yellow-100 border border-slate-300 font-bold'" class="px-2.5 py-1.5 rounded-lg text-xs transition flex items-center gap-1" title="4: Yıldız / Üstün Başarı (★ 4 Puan)">
-                                                    <span>⭐</span>
-                                                    <span class="font-black">4</span>
+                                                <!-- yıldız -->
+                                                <button @click="setStudentHomeworkGrade(st.id, '4')" :class="getStudentHomeworkGrade(st.id).score === '4' ? 'bg-yellow-400 text-yellow-950 font-black ring-2 ring-yellow-300 shadow-md scale-105' : 'bg-white text-yellow-900 hover:bg-yellow-50 border border-slate-300 font-bold'" class="px-2 py-1 rounded-lg text-[11px] transition whitespace-nowrap" title="4: Yıldız (+4p)">
+                                                    <span>yıldız</span>
                                                 </button>
 
-                                                <!-- G: Gelmedi -->
-                                                <button @click="setStudentHomeworkGrade(st.id, 'G')" :class="getStudentHomeworkGrade(st.id).score === 'G' ? 'bg-slate-700 text-white font-black ring-2 ring-slate-400 shadow-md scale-105' : 'bg-white text-slate-800 hover:bg-slate-200 border border-slate-300 font-bold'" class="px-2.5 py-1.5 rounded-lg text-xs transition flex items-center gap-1" title="G: Okula Gelmedi (Devamsız)">
-                                                    <span>🚫</span>
-                                                    <span class="font-black">G</span>
+                                                <!-- G -->
+                                                <button @click="setStudentHomeworkGrade(st.id, 'G')" :class="getStudentHomeworkGrade(st.id).score === 'G' ? 'bg-slate-700 text-white font-black ring-2 ring-slate-400 shadow-md scale-105' : 'bg-white text-slate-800 hover:bg-slate-100 border border-slate-300 font-bold'" class="px-2.5 py-1 rounded-lg text-xs transition font-black" title="G: Gelmedi">
+                                                    <span>G</span>
                                                 </button>
 
                                             </div>
                                         </td>
 
-                                        <!-- Öğretmen Notu -->
-                                        <td class="p-3.5">
-                                            <input type="text" :value="getStudentHomeworkGrade(st.id).note || ''" @change="setStudentHomeworkNote(st.id, $event.target.value)" placeholder="Not veya sayfa detayı..." class="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs text-black font-bold focus:outline-none focus:border-red-500 focus:bg-white shadow-inner">
+                                        <!-- Öğretmen Notu / Açıklama -->
+                                        <td class="py-2 px-3 border-r border-slate-200">
+                                            <input type="text" :value="getStudentHomeworkGrade(st.id).note || ''" @input="setStudentHomeworkNote(st.id, $event.target.value)" placeholder="Not veya sayfa detayı..." class="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs text-black font-bold focus:outline-none focus:border-red-500 focus:bg-white shadow-inner">
                                         </td>
 
-                                        <!-- Toplam Başarı İstatistiği -->
-                                        <td class="p-3.5 text-center">
-                                            <div class="space-y-1">
-                                                <span class="px-2.5 py-1 bg-red-50 text-red-900 border border-red-300 rounded-lg font-black text-xs shadow-sm inline-block" x-text="getStudentHomeworkStats(st.id).totalPoints + ' Puan'"></span>
-                                                <div class="flex justify-center gap-1.5 text-[10px] font-black text-slate-700">
-                                                    <span class="text-yellow-700" x-text="'⭐ ' + getStudentHomeworkStats(st.id).stars"></span>
-                                                    <span class="text-red-700" x-text="'❌ ' + getStudentHomeworkStats(st.id).zero"></span>
-                                                    <span class="text-slate-600" x-text="'🚫 ' + getStudentHomeworkStats(st.id).absent"></span>
-                                                </div>
+                                        <!-- Toplam Başarı -->
+                                        <td class="py-2.5 px-3 text-center border-r border-slate-200">
+                                            <span class="px-2.5 py-1 bg-red-50 text-red-900 border border-red-300 rounded-lg font-black text-xs shadow-sm inline-block whitespace-nowrap" x-text="getStudentHomeworkStats(st.id).totalPoints + ' Puan'"></span>
+                                        </td>
+
+                                        <!-- İşlem -->
+                                        <td class="py-2.5 px-3 text-center">
+                                            <div class="flex items-center justify-center gap-1">
+                                                <button @click="openStudentHomeworkHistory(st)" title="Ödev Geçmişini İncele" class="p-1.5 rounded-lg bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 transition">
+                                                    <i data-lucide="history" class="w-3.5 h-3.5"></i>
+                                                </button>
+                                                <button @click="deleteStudent(st)" title="Öğrenciyi Sil" class="p-1.5 rounded-lg bg-slate-100 hover:bg-red-50 text-slate-500 hover:text-red-700 border border-slate-200 transition">
+                                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                                </button>
                                             </div>
-                                        </td>
-
-                                        <!-- İşlemler -->
-                                        <td class="p-3.5 text-right space-x-1 whitespace-nowrap">
-                                            <button @click="openStudentHomeworkHistory(st)" title="Öğrencinin geçmiş ödev karnesini görüntüle" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-black font-black text-xs border border-slate-300 shadow-sm transition">
-                                                👁️ Geçmiş
-                                            </button>
-                                            <button @click="openCertModal(st)" title="Başarı Belgesi Oluştur" class="px-2.5 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-black text-xs shadow-sm transition">
-                                                🏆 Belge
-                                            </button>
                                         </td>
 
                                     </tr>
                                 </template>
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Alt Kaydetme Çubuğu -->
+                    <div class="p-3 bg-slate-100 border-t-2 border-slate-300 flex flex-wrap items-center justify-between gap-2">
+                        <div class="text-xs font-bold text-slate-700 flex items-center gap-2">
+                            <span>Sınıf: <strong class="text-red-700" x-text="selectedClassId"></strong></span>
+                            <span>•</span>
+                            <span>Toplam <strong class="text-black" x-text="filteredStudents.length"></strong> Öğrenci</span>
+                        </div>
+                        <button @click="saveHomeworkData()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-md flex items-center gap-1.5 transition transform hover:scale-105">
+                            <span>💾</span>
+                            <span>Tüm Değişiklikleri Kaydet</span>
+                        </button>
                     </div>
                 </div>
 
@@ -1617,6 +1641,81 @@
                     📋 Panoya Kopyala
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: YENİ ÖĞRENCİ EKLE / LİSTE AKTAR ================= -->
+    <div x-show="isAddStudentModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm" @click.self="isAddStudentModalOpen = false">
+        <div class="w-full max-w-xl bg-slate-100 p-6 rounded-3xl shadow-2xl border-2 border-slate-300 space-y-4">
+            
+            <div class="flex items-center justify-between pb-3 border-b border-slate-300">
+                <h3 class="font-black text-black text-lg brand-font flex items-center gap-2">
+                    <span>👥 Öğrenci Listesi Ekleme & Aktarma</span>
+                </h3>
+                <button @click="isAddStudentModalOpen = false" class="text-slate-400 hover:text-black font-black text-sm">✕</button>
+            </div>
+
+            <!-- Mod Değiştirme Butonları (Tek Öğrenci / Toplu Liste) -->
+            <div class="flex bg-white p-1 rounded-2xl border-2 border-slate-300 shadow-sm">
+                <button @click="addStudentMode = 'single'" :class="addStudentMode === 'single' ? 'bg-red-600 text-white font-black shadow-md' : 'text-slate-700 hover:text-black font-bold'" class="flex-1 py-2 rounded-xl text-xs transition text-center">
+                    👤 Tek Öğrenci Ekle
+                </button>
+                <button @click="addStudentMode = 'bulk'" :class="addStudentMode === 'bulk' ? 'bg-red-600 text-white font-black shadow-md' : 'text-slate-700 hover:text-black font-bold'" class="flex-1 py-2 rounded-xl text-xs transition text-center">
+                    📋 Toplu Liste Yapıştır / e-Okul Aktar
+                </button>
+            </div>
+
+            <!-- Hedef Sınıf Seçimi -->
+            <div>
+                <label class="text-xs font-black text-black block mb-1">Hedef Sınıf Seçiniz:</label>
+                <select x-model="newStudent.classId" class="w-full px-3.5 py-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-black text-black shadow-sm focus:outline-none focus:border-red-500 cursor-pointer">
+                    <template x-for="cls in data.classes" :key="cls.id">
+                        <option :value="cls.id" x-text="cls.name + ' Sınıfı'"></option>
+                    </template>
+                </select>
+            </div>
+
+            <!-- 1. GÖRÜNÜM: TEK ÖĞRENCİ EKLE -->
+            <div x-show="addStudentMode === 'single'" class="space-y-3">
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="col-span-1">
+                        <label class="text-xs font-black text-black block mb-1">Okul No:</label>
+                        <input type="number" x-model="newStudent.no" placeholder="Örn: 104" class="w-full px-3.5 py-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-black text-black focus:outline-none focus:border-red-500 shadow-sm">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="text-xs font-black text-black block mb-1">Öğrenci Adı Soyadı:</label>
+                        <input type="text" x-model="newStudent.name" placeholder="Örn: Ali Can" class="w-full px-3.5 py-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-black text-black focus:outline-none focus:border-red-500 shadow-sm">
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2 border-t border-slate-300">
+                    <button @click="isAddStudentModalOpen = false" class="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-200 text-slate-800 font-black text-xs border border-slate-300 shadow-sm">İptal</button>
+                    <button @click="addSingleStudent()" class="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-xs shadow-md">➕ Öğrenciyi Ekle</button>
+                </div>
+            </div>
+
+            <!-- 2. GÖRÜNÜM: TOPLU LİSTE AKTAR -->
+            <div x-show="addStudentMode === 'bulk'" class="space-y-3">
+                <div class="p-3 bg-amber-50 rounded-xl border border-amber-300 text-amber-950 text-xs font-bold space-y-1">
+                    <p class="font-black text-red-700">💡 Toplu Ekleme İpucu:</p>
+                    <p>Excel veya e-Okul listesinden kopyaladığınız isimleri doğrudan buraya yapıştırabilirsiniz.</p>
+                    <p class="font-mono text-[11px] text-slate-700">Format: "15 Ahmet Yağız" veya satır satır isimler</p>
+                </div>
+
+                <div>
+                    <label class="text-xs font-black text-black block mb-1">Öğrenci Listesini Yapıştırınız:</label>
+                    <textarea x-model="bulkStudentText" rows="6" placeholder="15 Ahmet Yağız&#10;24 Elif Sare&#10;32 Mustafa Efe&#10;..." class="w-full px-3.5 py-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-black focus:outline-none focus:border-red-500 shadow-sm"></textarea>
+                </div>
+
+                <div class="flex justify-between items-center pt-2 border-t border-slate-300">
+                    <span class="text-xs font-bold text-slate-600" x-text="bulkStudentText.trim() ? bulkStudentText.trim().split('\n').filter(l => l.trim().length > 0).length + ' öğrenci algılandı' : ''"></span>
+                    <div class="flex gap-2">
+                        <button @click="isAddStudentModalOpen = false" class="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-200 text-slate-800 font-black text-xs border border-slate-300 shadow-sm">İptal</button>
+                        <button @click="addBulkStudents()" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-md">🚀 Toplu Olarak Sınıfa Aktar</button>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
