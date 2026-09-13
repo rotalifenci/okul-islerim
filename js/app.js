@@ -832,6 +832,20 @@ document.addEventListener('alpine:init', () => {
             this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
         },
 
+        setDutyDay(day) {
+            if (!this.data.teacher) this.data.teacher = {};
+            this.data.teacher.dutyDay = day;
+            window.StorageManager.saveData(this.data, this.activeTeacherId);
+            this.showToast(`Nöbet günü ${day} olarak belirlendi! 🛡️`);
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+
+        saveDutyDay() {
+            window.StorageManager.saveData(this.data, this.activeTeacherId);
+            this.showToast(`Nöbet günü ${this.data.teacher?.dutyDay || 'Belirlenmedi'} olarak güncellendi! 🛡️`);
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+
         resetScheduleToEmpty() {
             if (confirm("Tüm haftalık ders programını boşaltmak istediğinize emin misiniz? (Bütün saatler 'Ders Yok' olarak ayarlanacaktır)")) {
                 const days = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma'];

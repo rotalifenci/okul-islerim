@@ -341,7 +341,7 @@
 
                 <!-- Günün Dersleri & MEB Kazanımları (7 Derslik Günlük Akış) -->
                 <div class="bg-slate-900/95 p-5 sm:p-6 rounded-3xl border-2 border-red-500/40 shadow-2xl space-y-4">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-700/80">
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-slate-700/80">
                         <div class="flex items-center gap-3">
                             <div class="p-3 bg-red-600 rounded-2xl shadow-lg shadow-red-600/30 text-white">
                                 <i data-lucide="calendar" class="w-6 h-6"></i>
@@ -355,11 +355,29 @@
                         </div>
 
                         <div class="flex flex-wrap items-center gap-2">
+                            
+                            <!-- 🛡️ Nöbet Günü Seçimi Dropdown -->
+                            <div class="flex items-center bg-slate-800/95 border-2 border-amber-500/60 rounded-xl px-2.5 py-1 text-xs gap-1.5 shadow-sm">
+                                <span class="text-amber-400 font-black flex items-center gap-1 whitespace-nowrap">
+                                    <span>🛡️</span>
+                                    <span>Nöbet:</span>
+                                </span>
+                                <select :value="data.teacher?.dutyDay || 'Cuma'" @change="setDutyDay($event.target.value)" class="bg-slate-900 text-amber-300 font-black text-xs px-2.5 py-1 rounded-lg border border-amber-500/40 focus:outline-none focus:border-amber-400 cursor-pointer shadow-inner">
+                                    <option value="Pazartesi">Pazartesi</option>
+                                    <option value="Salı">Salı</option>
+                                    <option value="Çarşamba">Çarşamba</option>
+                                    <option value="Perşembe">Perşembe</option>
+                                    <option value="Cuma">Cuma</option>
+                                    <option value="Belirlenmedi">Yok / Seçilmedi</option>
+                                </select>
+                            </div>
+
                             <!-- Gün Seçim Butonları -->
                             <div class="flex bg-slate-800 p-1 rounded-xl border border-slate-700">
                                 <template x-for="d in ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma']" :key="d">
-                                    <button @click="selectedScheduleDay = d" :class="selectedScheduleDay === d ? 'bg-red-600 text-white font-black shadow-md' : 'text-slate-300 hover:text-white font-bold'" class="px-3 py-1.5 rounded-lg text-xs transition">
+                                    <button @click="selectedScheduleDay = d" :class="selectedScheduleDay === d ? 'bg-red-600 text-white font-black shadow-md' : 'text-slate-300 hover:text-white font-bold'" class="px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1">
                                         <span x-text="d"></span>
+                                        <span x-show="data.teacher?.dutyDay === d" class="w-2 h-2 rounded-full bg-amber-400 inline-block shadow-sm" title="Nöbet Günü"></span>
                                     </button>
                                 </template>
                             </div>
@@ -369,6 +387,15 @@
                                 <span>Programı Düzenle</span>
                             </button>
                         </div>
+                    </div>
+
+                    <!-- Nöbet Günü Vurgusu (Eğer seçili gün öğretmenin nöbet günüyse) -->
+                    <div x-show="selectedScheduleDay === data.teacher?.dutyDay" class="p-3 rounded-2xl bg-amber-500/15 border-2 border-amber-500/40 text-amber-200 text-xs font-bold flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-base">🛡️</span>
+                            <span><strong>Nöbet Günü Uyarısı:</strong> Bugün nöbetçi gününüzdesiniz (<span class="text-white font-black" x-text="data.teacher?.dutyArea || 'Kat & Fen Laboratuvarı Nöbeti'"></span>).</span>
+                        </div>
+                        <span class="px-2.5 py-0.5 rounded-md bg-amber-500 text-slate-950 font-black text-[11px] shadow-sm">Aktif Nöbet</span>
                     </div>
 
                     <!-- 7 Derslik Geniş, Okunaklı ve Ferah Satır Kartları (Grid: 1-2 Sütun) -->
@@ -520,6 +547,23 @@
 
                         <!-- Üst Sağ Aksiyonlar -->
                         <div class="flex flex-wrap items-center gap-2">
+                            
+                            <!-- 🛡️ Nöbet Günü Seçici -->
+                            <div class="flex items-center bg-amber-50 border-2 border-amber-500 rounded-xl px-2.5 py-1 text-xs gap-1.5 shadow-sm">
+                                <span class="text-amber-900 font-black flex items-center gap-1 whitespace-nowrap">
+                                    <span>🛡️</span>
+                                    <span>Nöbet:</span>
+                                </span>
+                                <select :value="data.teacher?.dutyDay || 'Cuma'" @change="setDutyDay($event.target.value)" class="bg-white text-amber-950 font-black text-xs px-2.5 py-1 rounded-lg border-2 border-amber-300 focus:outline-none focus:border-amber-500 cursor-pointer shadow-inner">
+                                    <option value="Pazartesi">Pazartesi</option>
+                                    <option value="Salı">Salı</option>
+                                    <option value="Çarşamba">Çarşamba</option>
+                                    <option value="Perşembe">Perşembe</option>
+                                    <option value="Cuma">Cuma</option>
+                                    <option value="Belirlenmedi">Yok / Seçilmedi</option>
+                                </select>
+                            </div>
+
                             <!-- Görünüm Seçici (Günlük Detay Ön Planda) -->
                             <div class="flex bg-white p-1 rounded-xl border-2 border-slate-300 shadow-sm">
                                 <button @click="scheduleViewMode = 'daily'" :class="scheduleViewMode === 'daily' ? 'bg-red-600 text-white font-black shadow-md' : 'text-slate-700 hover:text-black font-bold'" class="px-3.5 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5">
@@ -559,18 +603,29 @@
                                 <button @click="selectedScheduleDay = d" :class="selectedScheduleDay === d ? 'bg-red-600 text-white font-black shadow-md border-2 border-red-700 ring-2 ring-red-300 scale-105' : 'bg-white text-black font-black hover:bg-red-50 border border-slate-300 shadow-sm'" class="px-4 py-2 rounded-xl text-xs transition flex items-center gap-1.5">
                                     <span x-text="d"></span>
                                     <span class="text-[10px] px-1.5 py-0.2 rounded-md font-bold" :class="selectedScheduleDay === d ? 'bg-red-800 text-white' : 'bg-slate-100 text-slate-700'" x-text="getDailySchedule(d).filter(l => l.classId && l.classId !== 'Boş').length + ' Ders'"></span>
+                                    <span x-show="data.teacher?.dutyDay === d" class="px-1.5 py-0.2 rounded text-[9px] font-black bg-amber-400 text-amber-950 shadow-sm" title="Nöbet Günü">🛡️ Nöbet</span>
                                 </button>
                             </template>
                         </div>
 
-                        <span class="text-xs text-slate-700 font-bold bg-white px-3 py-1.5 rounded-xl border border-slate-300 shadow-sm">
-                            Seçili Gün: <strong class="text-red-700" x-text="selectedScheduleDay"></strong>
+                        <span class="text-xs text-slate-700 font-bold bg-white px-3 py-1.5 rounded-xl border border-slate-300 shadow-sm flex items-center gap-2">
+                            <span>Seçili Gün: <strong class="text-red-700" x-text="selectedScheduleDay"></strong></span>
+                            <span x-show="selectedScheduleDay === data.teacher?.dutyDay" class="px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-black">🛡️ Nöbet Gününüz</span>
                         </span>
                     </div>
                 </div>
 
                 <!-- ================= 1. GÖRÜNÜM: GÜNLÜK DETAYLI LİSTE (ÖN PLANDA) ================= -->
                 <div x-show="scheduleViewMode === 'daily'" class="space-y-4">
+                    
+                    <!-- Nöbet Günü Vurgu Kartı -->
+                    <div x-show="selectedScheduleDay === data.teacher?.dutyDay" class="p-3.5 rounded-2xl bg-amber-50 border-2 border-amber-400 text-amber-950 text-xs font-bold flex items-center justify-between gap-2 shadow-sm">
+                        <div class="flex items-center gap-2">
+                            <span class="text-lg">🛡️</span>
+                            <span><strong>Nöbet Günü:</strong> <span x-text="selectedScheduleDay"></span> günü nöbetçi göreviniz bulunmaktadır (<span class="font-black text-amber-900" x-text="data.teacher?.dutyArea || 'Kat & Fen Laboratuvarı Nöbeti'"></span>).</span>
+                        </div>
+                        <span class="px-3 py-1 rounded-xl bg-amber-500 text-white font-black text-xs shadow-sm">Nöbetçi</span>
+                    </div>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         <template x-for="sch in getDailySchedule(selectedScheduleDay)" :key="sch.periodNo">
