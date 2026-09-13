@@ -89,7 +89,7 @@
                         </button>
                     </label>
                     <div class="relative">
-                        <input :type="isPasswordVisible ? 'text' : 'password'" x-model="loginPassword" placeholder="Şifrenizi yazınız (örn: Rotali5822., 1111, 2222...)" autofocus class="w-full px-4 py-3.5 bg-slate-100 border-2 border-slate-300 rounded-xl text-sm font-black text-black placeholder-slate-400 focus:outline-none focus:border-red-600 focus:bg-white transition shadow-inner">
+                        <input :type="isPasswordVisible ? 'text' : 'password'" x-model="loginPassword" placeholder="Şifrenizi yazınız..." autofocus class="w-full px-4 py-3.5 bg-slate-100 border-2 border-slate-300 rounded-xl text-sm font-black text-black placeholder-slate-400 focus:outline-none focus:border-red-600 focus:bg-white transition shadow-inner">
                     </div>
                 </div>
 
@@ -106,25 +106,9 @@
                 </button>
             </form>
 
-            <!-- Hızlı Giriş Çipleri (Tek Tıkla Giriş) -->
-            <div class="space-y-2 pt-2 border-t border-slate-200">
-                <span class="text-[11px] font-black text-slate-700 block">⚡ Hızlı Giriş Şifreleri (Tıklayıp Girebilirsiniz):</span>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                    <template x-for="u in (users || [])" :key="u.id">
-                        <button type="button" @click="quickLoginWithPassword(getUserPassword(u.id))" class="p-2 rounded-xl bg-slate-50 hover:bg-red-50 hover:border-red-300 border border-slate-200 text-left transition flex items-center justify-between gap-1.5 text-xs active:scale-95">
-                            <div class="flex items-center gap-1.5 min-w-0">
-                                <span class="text-xs" x-text="u.role === 'Yönetici' ? '👑' : '👨‍🏫'"></span>
-                                <span class="font-black text-slate-900 truncate text-[11px]" x-text="u.name"></span>
-                            </div>
-                            <span class="px-1.5 py-0.5 rounded font-mono text-[10px] font-black" :class="u.role === 'Yönetici' ? 'bg-red-100 text-red-900 border border-red-200' : 'bg-slate-200 text-slate-800'" x-text="getUserPassword(u.id)"></span>
-                        </button>
-                    </template>
-                </div>
-            </div>
-
             <!-- İzolasyon Bilgi Notu -->
-            <div class="text-center pt-2 text-[10px] text-slate-500 font-medium">
-                🔒 Her şifre doğrudan o öğretmenin izole ders programı ve öğrenci listesine açılır.
+            <div class="text-center pt-3 border-t border-slate-200 text-[11px] text-slate-500 font-medium">
+                🔒 Her şifre doğrudan o öğretmenin izole ders programı, sınıfları ve öğrenci listesine açılır.
             </div>
 
         </div>
