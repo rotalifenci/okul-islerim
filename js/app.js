@@ -211,10 +211,9 @@ document.addEventListener('alpine:init', () => {
                 }
             }
 
-            // Ödevler verisini başlat
-            if (!this.data.assignments || !Array.isArray(this.data.assignments) || this.data.assignments.length === 0) {
-                this.data.assignments = JSON.parse(JSON.stringify(window.InitialData.assignments || []));
-                window.StorageManager.saveData(this.data);
+            // Ödevler verisini doğrula (Kullanıcının sildiği ödevlerin geri gelmemesi için)
+            if (!this.data.assignments || !Array.isArray(this.data.assignments)) {
+                this.data.assignments = [];
             }
 
             this.loadCurrentWeekNote();

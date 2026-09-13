@@ -251,63 +251,7 @@ window.InitialData = {
             }
         }
     ],
-    assignments: [
-        {
-            id: "hw-1",
-            grade: 5,
-            targetClasses: ["5A", "5D"],
-            title: "Güneş, Dünya ve Ay Modeli Etkinlik Defteri",
-            description: "Ders kitabı sayfa 14-19 arasındaki değerlendirme soruları çözülecek ve Güneş'in katmanları renkli kalemlerle deftere çizilecek.",
-            assignedDate: "2026-09-08",
-            dueDate: "2026-09-11",
-            status: "Aktif",
-            unit: "1. Ünite: Güneş, Dünya ve Ay"
-        },
-        {
-            id: "hw-2",
-            grade: 6,
-            targetClasses: ["6G"],
-            title: "Gezegenlerin Büyüklük ve Güneş'e Uzaklık Sıralaması",
-            description: "Fen Bilimleri çalışma yaprağı No: 2 tamamlanacak, gezegen tablosu doldurulup laboratuvar panosuna asılmak üzere getirilecek.",
-            assignedDate: "2026-09-08",
-            dueDate: "2026-09-11",
-            status: "Aktif",
-            unit: "1. Ünite: Güneş Sistemi ve Tutulmalar"
-        },
-        {
-            id: "hw-3",
-            grade: 7,
-            targetClasses: ["7A", "7B"],
-            title: "Hücre ve Organeller Etkinlik Defteri (s. 18-22)",
-            description: "Bitki ve hayvan hücresi organellerinin görevleri karşılaştırmalı tabloya yazılacak ve test 2 çözülecek.",
-            assignedDate: "2026-09-08",
-            dueDate: "2026-09-11",
-            status: "Aktif",
-            unit: "2. Ünite: Hücre ve Bölünmeler"
-        },
-        {
-            id: "hw-4",
-            grade: 5,
-            targetClasses: ["5A", "5D"],
-            title: "Ay'ın Evreleri Gözlem Çizelgesi & Modeli",
-            description: "1 hafta boyunca akşamları Ay'ın gökyüzündeki görünümü gözlemlenip forma işlenecek. 4 ana evre şematize edilecek.",
-            assignedDate: "2026-09-14",
-            dueDate: "2026-09-18",
-            status: "Planlandı",
-            unit: "1. Ünite: Güneş, Dünya ve Ay"
-        },
-        {
-            id: "hw-5",
-            grade: 7,
-            targetClasses: ["7A", "7B"],
-            title: "Mitoz Bölünme Evreleri Şeması & Soru Bankası Test 3",
-            description: "Mitoz bölünme evreleri hazırlık kartları oluşturulacak, ders defterine aşamalar sırasıyla çizilecek.",
-            assignedDate: "2026-09-15",
-            dueDate: "2026-09-22",
-            status: "Planlandı",
-            unit: "2. Ünite: Hücre ve Bölünmeler"
-        }
-    ],
+    assignments: [],
     observations: [
         {
             id: "obs-1",
