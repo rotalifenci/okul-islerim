@@ -100,6 +100,7 @@ document.addEventListener('alpine:init', () => {
         // 📅 Türkiye Yüzyılı Maarif Modeli Yıllık Plan Modalı
         isAnnualPlanModalOpen: false,
         selectedAnnualPlanGrade: 5,
+        annualPlanViewMode: 'cards', // 'cards' veya 'table'
         annualPlanSearchQuery: '',
         annualPlanData: window.AnnualPlanData || {},
         curriculumData: window.CurriculumData || {},
