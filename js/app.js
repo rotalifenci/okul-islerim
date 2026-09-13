@@ -2885,6 +2885,113 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
+        
+        // ================= 📊 EXCEL & PDF RAPOR ALMA FONKSİYONLARI =================
+        exportHomeworkToExcel() {
+            const cls = (this.data.classes || []).find(c => c.id === this.selectedClassId) || { name: this.selectedClassId };
+            const students = this.filteredStudents || [];
+            const dateStr = this.selectedHomeworkDate || new Date().toISOString().slice(0, 10);
+            const title = `${cls.name} Sınıfı Ödev ve Başarı Raporu (${dateStr})`;
+            
+            const headers = ['Okul No', 'Adı Soyadı', 'Sınıf', 'Günün Ödevi', 'Puan', '⭐ Yıldız', '✅ Artı (+)', '⚠️ Yarım', '❌ Sıfır (0)', '🚫 Gelmedi', 'Toplam Puan', 'Başarı %'];
+            const rows = students.map(st => {
+                const stStats = this.getStudentStats ? this.getStudentStats(st.id) : { stars: 0, full: 0, half: 0, zero: 0, absent: 0, totalScore: 0, successPercent: 0 };
+                const todayHw = this.getStudentHomework ? this.getStudentHomework(st.id, dateStr) : { status: '-' };
+                const statusMap = { '4': '⭐ Yıldız (4p)', '2': '✅ Artı (+2p)', '1': '⚠️ Yarım (1p)', '0': '❌ Yok (0p)', 'G': '🚫 Gelmedi' };
+                return [
+                    st.no || '',
+                    st.name || '',
+                    cls.name || '',
+                    this.currentHomeworkTitle || 'Günlük Ödev',
+                    statusMap[todayHw.status] || todayHw.status || '-',
+                    stStats.stars || 0,
+                    stStats.full || 0,
+                    stStats.half || 0,
+                    stStats.zero || 0,
+                    stStats.absent || 0,
+                    stStats.totalScore || 0,
+                    '%' + (stStats.successPercent || 0)
+                ];
+            });
+
+            window.Exporter.exportHtmlTableToExcel(`${cls.name}_odev_raporu_${dateStr}`, title, headers, rows);
+            this.showToast(`${cls.name} sınıfı ödev raporu Excel olarak indirildi! 📊`);
+        },
+
+        exportAssignmentsToExcel() {
+            const list = this.filteredAssignments || this.data.assignments || [];
+            const title = `Rotalı Fenci - 2026-2027 Ödev Planlama Listesi`;
+            const headers = ['Sınıf Düzeyi', 'Hedef Şubeler', 'Ödev Başlığı', 'Başlangıç Tarihi', 'Teslim Tarihi', 'Durum', 'Açıklama'];
+            const rows = list.map(a => [
+                (a.grade || 5) + '. Sınıf',
+                (a.targetClasses || []).join(', '),
+                a.title || '',
+                a.startDate || '',
+                a.dueDate || '',
+                a.status || 'Aktif',
+                a.description || ''
+            ]);
+
+            window.Exporter.exportHtmlTableToExcel(`odev_plani_listesi`, title, headers, rows);
+            this.showToast(`Ödev planlama listesi Excel olarak indirildi! 📊`);
+        },
+
+        exportMeetingsToExcel() {
+            const list = this.getFilteredMeetings ? this.getFilteredMeetings() : (this.data.meetings || []);
+            const title = `Rotalı Fenci - Okul Toplantı Ajandası`;
+            const headers = ['Tarih', 'Saat', 'Toplantı Türü', 'Toplantı Başlığı / Konusu', 'Toplantı Yeri', 'Katılımcılar', 'Durum'];
+            const rows = list.map(m => [
+                m.date || '',
+                m.time || '',
+                m.type || '',
+                m.title || '',
+                m.location || 'Okul',
+                m.attendees || 'Tüm Kurul',
+                m.status || 'Yapılacak'
+            ]);
+
+            window.Exporter.exportHtmlTableToExcel(`toplanti_ajandasi`, title, headers, rows);
+            this.showToast(`Toplantı ajandası Excel olarak indirildi! 📊`);
+        },
+
+        exportMaarifWorksToExcel() {
+            const list = this.getFilteredMaarifWorks ? this.getFilteredMaarifWorks() : (this.data.maarifWorks || []);
+            const title = `Türkiye Yüzyılı Maarif Modeli Çalışmaları ve Etkinlik Listesi`;
+            const headers = ['Tarih', 'Kategori', 'Sınıflar', 'Çalışma / Etkinlik Adı', 'Kazanım Kodu', 'Fotoğraf Sayısı'];
+            const rows = list.map(w => [
+                w.date || '',
+                w.category || '',
+                (w.classes || []).join(', '),
+                w.title || '',
+                w.outcomeCode || '-',
+                (w.photos || []).length + ' Fotoğraf'
+            ]);
+
+            window.Exporter.exportHtmlTableToExcel(`maarif_calismalari_listesi`, title, headers, rows);
+            this.showToast(`Maarif çalışmaları listesi Excel olarak indirildi! 📊`);
+        },
+
+        exportScheduleToExcel() {
+            const title = `${this.data.teacher?.name || 'Murat Kundakcı'} - Haftalık Ders Programı (2026-2027)`;
+            const headers = ['Ders Saati', 'Zaman', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma'];
+            const periods = this.data.lessonPeriods || window.InitialData.lessonPeriods || [];
+            const rows = periods.map(p => {
+                const row = [p.label, p.time];
+                ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma'].forEach(day => {
+                    const cell = this.getScheduleCell ? this.getScheduleCell(day, p.periodNo) : null;
+                    if (cell && cell.classId && cell.classId !== 'Boş') {
+                        row.push(`${cell.classId} (${cell.subject || 'Fen'}) - ${cell.room || 'Sınıf'}`);
+                    } else {
+                        row.push('Ders Yok');
+                    }
+                });
+                return row;
+            });
+
+            window.Exporter.exportHtmlTableToExcel(`haftalik_ders_programi`, title, headers, rows);
+            this.showToast(`Ders programı Excel olarak indirildi! 📊`);
+        },
+
         exportBackup() {
             window.StorageManager.exportJSON(this.data);
             this.showToast("Yedek dosyası indirildi! 💾");

@@ -527,6 +527,10 @@
                             <span>Haftalık Matris Düzenleme: Hücreye tıklayarak dersi, sınıfı ve kazanımı değiştirebilirsiniz.</span>
                         </span>
                         <div class="flex items-center gap-2">
+                            <button @click="exportScheduleToExcel()" title="Haftalık Ders Programını Excel Olarak İndir" class="px-2.5 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-black text-xs shadow-2xs transition flex items-center gap-1">
+                                <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i>
+                                <span>Excel Program</span>
+                            </button>
                             <button @click="resetScheduleToEmpty()" title="Tüm haftalık programı temizle" class="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-800 font-black text-xs border border-rose-300 shadow-2xs transition flex items-center gap-1">
                                 <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-600"></i>
                                 <span>🧹 Programı Temizle</span>
@@ -1004,8 +1008,14 @@
                                 <span>Kaydet</span>
                             </button>
 
-                            <button @click="openPrintReportModal()" title="Yazdır" class="px-2 py-1 rounded-lg bg-slate-900 hover:bg-black text-white font-black text-xs shadow-xs transition">
+                            <button @click="exportHomeworkToExcel()" title="Sınıf Ödev Raporunu Excel Olarak İndir" class="px-2.5 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-black text-xs shadow-2xs transition flex items-center gap-1">
+                                <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i>
+                                <span>Excel Rapor</span>
+                            </button>
+
+                            <button @click="openPrintReportModal()" title="Yazdır / PDF Rapor Al" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-black text-white font-black text-xs shadow-xs transition flex items-center gap-1">
                                 <i data-lucide="printer" class="w-3.5 h-3.5 text-red-400"></i>
+                                <span class="hidden sm:inline">PDF</span>
                             </button>
                         </div>
                     </div>
@@ -2154,10 +2164,15 @@
                             </div>
                         </div>
 
-                        <div class="flex flex-wrap items-center gap-2">
-                            <button @click="openNewMaarifModal()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-md flex items-center gap-1.5 transition transform hover:scale-105 active:scale-95">
-                                <i data-lucide="plus-circle" class="w-4 h-4"></i>
-                                <span>+ Yeni Çalışma Ekle</span>
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <button @click="openNewMaarifModal()" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-xs flex items-center gap-1.5 transition transform hover:scale-105 active:scale-95">
+                                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+                                <span>+ Yeni Çalışma</span>
+                            </button>
+
+                            <button @click="exportMaarifWorksToExcel()" title="Maarif Çalışmalarını Excel Olarak İndir" class="px-2.5 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-black text-xs shadow-2xs transition flex items-center gap-1">
+                                <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i>
+                                <span>Excel Rapor</span>
                             </button>
                         </div>
                     </div>
@@ -3603,11 +3618,7 @@
                     </div>
                 </div>
 
-                <!-- Çalışma Açıklaması -->
-                <div class="space-y-1">
-                    <label class="block text-xs font-black text-slate-800">Çalışma Açıklaması & Süreç Notları</label>
-                    <textarea x-model="maarifForm.description" rows="3" placeholder="Çalışmada kullanılan malzemeler, öğrenci grupları, sergi detayları veya deney sonuçları..." class="w-full p-2.5 bg-slate-50 border-2 border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:border-emerald-600 focus:outline-none leading-relaxed"></textarea>
-                </div>
+
 
                 <!-- Çoklu Fotoğraf Yükleme Alanı -->
                 <div class="space-y-2 pt-2 border-t-2 border-slate-200">
@@ -3708,13 +3719,13 @@
                 </button>
             </div>
 
-            <!-- Form Alanı (Kaydırılabilir) -->
-            <div class="p-4 sm:p-6 overflow-y-auto space-y-4 flex-1 custom-scrollbar">
+            <!-- Form Alanı (Sade ve Kompakt Ajanda Girişi) -->
+            <div class="p-4 sm:p-6 overflow-y-auto space-y-3.5 flex-1 custom-scrollbar">
                 
                 <!-- Toplantı Başlığı -->
                 <div class="space-y-1">
                     <label class="block text-xs font-black text-slate-800">Toplantı Başlığı / Konusu *</label>
-                    <input type="text" x-model="meetingForm.title" placeholder="Örn: Fen Bilimleri 1. Dönem Zümre Toplantısı..." class="w-full p-2.5 bg-slate-50 border-2 border-slate-300 rounded-xl text-xs font-black text-slate-900 focus:border-indigo-600 focus:outline-none">
+                    <input type="text" x-model="meetingForm.title" placeholder="Örn: Fen Bilimleri Zümre Toplantısı..." class="w-full p-2.5 bg-slate-50 border-2 border-slate-300 rounded-xl text-xs font-black text-slate-900 focus:border-indigo-600 focus:outline-none">
                 </div>
 
                 <!-- Toplantı Türü ve Durumu -->
@@ -3728,7 +3739,6 @@
                             <option value="Veli Toplantısı">Veli Toplantısı</option>
                             <option value="Okul Aile Birliği">Okul Aile Birliği</option>
                             <option value="BEP / Özel Eğitim">BEP / Özel Eğitim Birimi</option>
-                            <option value="Rehberlik & Yürütme">Rehberlik & Yürütme Komisyonu</option>
                             <option value="Diğer">Diğer Toplantı</option>
                         </select>
                     </div>
@@ -3737,9 +3747,8 @@
                         <label class="block text-xs font-black text-slate-800">Toplantı Durumu</label>
                         <select x-model="meetingForm.status" class="w-full p-2.5 bg-slate-50 border-2 border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:border-indigo-600 focus:outline-none">
                             <option value="Yapılacak">⏳ Yapılacak / Planlandı</option>
-                            <option value="Tamamlandı">✅ Tamamlandı & Karara Bağlandı</option>
+                            <option value="Tamamlandı">✅ Tamamlandı</option>
                             <option value="Ertelendi">⚠️ Ertelendi</option>
-                            <option value="İptal">❌ İptal Edildi</option>
                         </select>
                     </div>
                 </div>
@@ -3764,20 +3773,8 @@
 
                 <!-- Katılımcılar -->
                 <div class="space-y-1">
-                    <label class="block text-xs font-black text-slate-800">Katılımcılar & Kurul Üyeleri</label>
-                    <input type="text" x-model="meetingForm.attendees" placeholder="Örn: Fen Bilimleri Zümresi, 5/D Şube Öğretmenleri..." class="w-full p-2.5 bg-slate-50 border-2 border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:border-indigo-600 focus:outline-none">
-                </div>
-
-                <!-- Gündem Maddeleri -->
-                <div class="space-y-1">
-                    <label class="block text-xs font-black text-slate-800">📋 Gündem Maddeleri</label>
-                    <textarea x-model="meetingForm.agenda" rows="3" placeholder="1. Açılış ve yoklama&#10;2. Yeni Maarif Modeli müfredat planı&#10;3. Laboratuvar deney setlerinin kontrolü..." class="w-full p-2.5 bg-slate-50 border-2 border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:border-indigo-600 focus:outline-none"></textarea>
-                </div>
-
-                <!-- Alınan Kararlar & Sonuç Notları -->
-                <div class="space-y-1">
-                    <label class="block text-xs font-black text-slate-800">✅ Alınan Kararlar & Tutanak Notları</label>
-                    <textarea x-model="meetingForm.decisions" rows="3" placeholder="Toplantı sonunda alınan kararlar, görev dağılımları ve takip edilecek süreçler..." class="w-full p-2.5 bg-slate-50 border-2 border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:border-indigo-600 focus:outline-none"></textarea>
+                    <label class="block text-xs font-black text-slate-800">Katılımcılar / Not</label>
+                    <input type="text" x-model="meetingForm.attendees" placeholder="Örn: Fen Bilimleri Zümresi, Tüm Öğretmenler..." class="w-full p-2.5 bg-slate-50 border-2 border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:border-indigo-600 focus:outline-none">
                 </div>
 
             </div>

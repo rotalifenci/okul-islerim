@@ -76,6 +76,59 @@ window.Exporter = {
     },
 
     // Metni Panoya Kopyala
+    
+    // Excel (.xls) Dosyası Olarak Dışa Aktar (Stilli & Türkçe Karakter Destekli)
+    exportHtmlTableToExcel(filename, title, headers, rows) {
+        let tableHtml = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+        <head><meta charset="utf-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>${title}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
+        <style>
+            th { background-color: #dc2626; color: #ffffff; font-weight: bold; border: 1px solid #999; padding: 8px; font-family: Segoe UI, Arial, sans-serif; font-size: 11pt; text-align: left; }
+            td { border: 1px solid #ccc; padding: 6px; font-family: Segoe UI, Arial, sans-serif; font-size: 10pt; }
+            h2 { font-family: Segoe UI, Arial, sans-serif; color: #1e293b; margin-bottom: 10px; }
+        </style></head><body>
+        <h2>${title}</h2>
+        <table border="1"><thead><tr>`;
+        headers.forEach(h => { tableHtml += `<th>${h}</th>`; });
+        tableHtml += `</tr></thead><tbody>`;
+        rows.forEach(r => {
+            tableHtml += `<tr>`;
+            r.forEach(c => { tableHtml += `<td>${c !== undefined && c !== null ? c : ''}</td>`; });
+            tableHtml += `</tr>`;
+        });
+        tableHtml += `</tbody></table></body></html>`;
+
+        const blob = new Blob(['\ufeff' + tableHtml], { type: 'application/vnd.ms-excel;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const cleanName = filename.toLowerCase().replace(/[^a-z0-9_]/gi, '_');
+        a.download = cleanName.endsWith('.xls') ? cleanName : `${cleanName}.xls`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    },
+
+    // CSV Formatında İndir
+    exportToCSV(filename, headers, rows) {
+        let csvContent = '\ufeff';
+        csvContent += headers.map(h => `"${(h || '').toString().replace(/"/g, '""')}"`).join(';') + '\r\n';
+        rows.forEach(row => {
+            csvContent += row.map(cell => `"${(cell !== undefined && cell !== null ? cell : '').toString().replace(/"/g, '""')}"`).join(';') + '\r\n';
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const cleanName = filename.toLowerCase().replace(/[^a-z0-9_]/gi, '_');
+        a.download = cleanName.endsWith('.csv') ? cleanName : `${cleanName}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    },
+
     copyToClipboard(text, notifyFn) {
         navigator.clipboard.writeText(text).then(() => {
             if (notifyFn) notifyFn("Metin panoya başarıyla kopyalandı! 📋");
