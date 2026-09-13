@@ -3234,7 +3234,7 @@ document.addEventListener('alpine:init', () => {
             const printDate = new Date().toLocaleDateString('tr-TR', { day: '2-digit', month: 'long', year: 'numeric' });
             const totalPhotos = list.reduce((acc, w) => acc + (w.photos || []).length, 0);
 
-            // Her fotoğraf → ayrı sayfa. Fotoğrafı olmayan çalışmalar için de bilgi sayfası oluştur.
+            // Her ÇALIŞMA → ayrı sayfa (içinde fotoğraflar kolaj halinde)
             const pages = [];
 
             list.forEach(work => {
@@ -3254,7 +3254,7 @@ document.addEventListener('alpine:init', () => {
                     </div>`;
 
                 if (!work.photos || !work.photos.length) {
-                    // Fotoğrafsız çalışma: tek bilgi sayfası
+                    // Fotoğrafsız çalışma
                     pages.push(`
                         <div class="photo-page">
                             ${headerHtml}
@@ -3262,20 +3262,31 @@ document.addEventListener('alpine:init', () => {
                                 <div style="font-size:40px;margin-bottom:8px;">📷</div>
                                 <div style="font-size:13px;font-weight:700;color:#64748b;">Bu çalışmaya fotoğraf eklenmemiş</div>
                             </div>
+                            <div class="photo-footer">${teacherName} · ${school ? school + ' · ' : ''}${academicYear} · ${printDate}</div>
                         </div>`);
                 } else {
-                    work.photos.forEach((photo, idx) => {
-                        const photoNum = work.photos.length > 1 ? `Fotoğraf ${idx + 1} / ${work.photos.length}` : '';
-                        pages.push(`
-                            <div class="photo-page">
-                                ${headerHtml}
-                                ${photoNum ? `<div class="photo-num">${photoNum}</div>` : ''}
-                                <div class="photo-frame">
-                                    <img src="${photo}" alt="Calisma Fotografi">
-                                </div>
-                                <div class="photo-footer">${teacherName} · ${school ? school + ' · ' : ''}${academicYear} · ${printDate}</div>
-                            </div>`);
-                    });
+                    // Fotoğraflı çalışma -> Kolaj Grid
+                    const pCount = work.photos.length;
+                    let gridClass = 'grid-many';
+                    if (pCount === 1) gridClass = 'grid-1';
+                    else if (pCount === 2) gridClass = 'grid-2';
+                    else if (pCount === 3) gridClass = 'grid-3';
+                    else if (pCount === 4) gridClass = 'grid-4';
+
+                    const photosHtml = work.photos.map(photo => `
+                        <div class="photo-cell">
+                            <img src="${photo}" alt="Etkinlik Fotoğrafı">
+                        </div>
+                    `).join('');
+
+                    pages.push(`
+                        <div class="photo-page">
+                            ${headerHtml}
+                            <div class="photo-grid ${gridClass}">
+                                ${photosHtml}
+                            </div>
+                            <div class="photo-footer">${teacherName} · ${school ? school + ' · ' : ''}${academicYear} · ${printDate}</div>
+                        </div>`);
                 }
             });
 
@@ -3308,11 +3319,11 @@ document.addEventListener('alpine:init', () => {
     .stat-lbl { font-size: 12px; opacity: 0.7; margin-top: 6px; text-align: center; }
     .cover-date { font-size: 11px; opacity: 0.55; }
 
-    /* HER FOTOĞRAF SAYFASI */
+    /* HER ÇALIŞMA SAYFASI */
     .photo-page {
         width: 210mm; height: 297mm;
         display: flex; flex-direction: column;
-        padding: 8mm 10mm 6mm;
+        padding: 10mm 12mm 8mm;
         page-break-after: always;
         background: #fff;
     }
@@ -3320,59 +3331,70 @@ document.addEventListener('alpine:init', () => {
     /* BAŞLIK ALANI */
     .photo-header {
         flex-shrink: 0;
-        padding: 8px 12px 8px;
+        padding: 10px 14px;
         background: #f0fdf4;
-        border-left: 5px solid #059669;
-        border-radius: 0 8px 8px 0;
-        margin-bottom: 5mm;
+        border-left: 6px solid #059669;
+        border-radius: 0 10px 10px 0;
+        margin-bottom: 8mm;
     }
-    .photo-header-top { display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap; margin-bottom: 5px; }
-    .photo-title { font-size: 15px; font-weight: 900; color: #064e3b; line-height: 1.3; flex: 1; }
-    .outcome-badge { background: #059669; color: white; font-size: 9px; font-weight: 900; padding: 3px 10px; border-radius: 999px; white-space: nowrap; font-family: monospace; align-self: center; }
-    .photo-meta { display: flex; flex-wrap: wrap; gap: 6px; }
-    .tag { font-size: 10px; font-weight: 800; padding: 2px 9px; border-radius: 6px; }
+    .photo-header-top { display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
+    .photo-title { font-size: 18px; font-weight: 900; color: #064e3b; line-height: 1.3; flex: 1; }
+    .outcome-badge { background: #059669; color: white; font-size: 11px; font-weight: 900; padding: 4px 12px; border-radius: 999px; white-space: nowrap; font-family: monospace; align-self: center; }
+    .photo-meta { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tag { font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 6px; }
     .class-tag { background: #d1fae5; color: #064e3b; border: 1px solid #6ee7b7; }
     .cat-tag { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
     .date-tag { background: #fef3c7; color: #78350f; border: 1px solid #fbbf24; }
-    .photo-desc { font-size: 10px; color: #475569; line-height: 1.5; margin-top: 5px; }
-    .photo-num { font-size: 9px; font-weight: 800; color: #94a3b8; text-align: right; margin-bottom: 2mm; flex-shrink: 0; }
+    .photo-desc { font-size: 12px; color: #475569; line-height: 1.5; margin-top: 8px; }
 
-    /* FOTOĞRAF ALANI — Sayfayı doldur */
-    .photo-frame {
+    /* KOLAJ GRID */
+    .photo-grid {
         flex: 1;
         min-height: 0;
-        border-radius: 8px;
+        display: grid;
+        gap: 12px;
+        margin-bottom: 4mm;
+    }
+    
+    /* Layouts based on photo count */
+    .grid-1 { grid-template-columns: 1fr; grid-template-rows: 1fr; }
+    .grid-2 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr; }
+    .grid-3 { grid-template-columns: repeat(3, 1fr); grid-template-rows: 1fr; }
+    .grid-4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+    .grid-many { grid-template-columns: repeat(3, 1fr); grid-auto-rows: minmax(100px, 1fr); }
+
+    .photo-cell {
+        border-radius: 10px;
         overflow: hidden;
-        border: 2px solid #d1fae5;
-        background: #f1f5f9;
+        border: 2px solid #e2e8f0;
+        background: #f8fafc;
         display: flex;
         align-items: center;
         justify-content: center;
+        padding: 4px;
     }
-    .photo-frame img {
+    .photo-cell img {
         width: 100%;
         height: 100%;
-        object-fit: contain;
-        display: block;
-        background: #f1f5f9;
+        object-fit: contain; /* Fotoğrafların kırpılmadan tam ve net görünmesini sağlar */
+        border-radius: 6px;
     }
 
     /* FOTOĞRAFSIZ KUTU */
     .no-photo-box {
         flex: 1;
         display: flex; flex-direction: column; align-items: center; justify-content: center;
-        border: 2px dashed #d1fae5; border-radius: 8px; background: #f8fafc;
+        border: 3px dashed #cbd5e1; border-radius: 12px; background: #f8fafc;
     }
 
     /* ALT BİLGİ */
     .photo-footer {
         flex-shrink: 0;
         text-align: center;
-        font-size: 8px;
+        font-size: 10px;
         color: #94a3b8;
         font-weight: 600;
-        margin-top: 3mm;
-        padding-top: 3mm;
+        padding-top: 4mm;
         border-top: 1px solid #e2e8f0;
     }
 
