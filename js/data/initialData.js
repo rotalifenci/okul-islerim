@@ -15,11 +15,11 @@ window.InitialData = {
         freeLessons: 14
     },
     classes: [
-        { id: "5A", name: "5/A", grade: 5, studentCount: 24, advisor: "Ayşe Yılmaz" },
-        { id: "5D", name: "5/D", grade: 5, studentCount: 25, advisor: "Murat Kundakcı" },
-        { id: "6G", name: "6/G", grade: 6, studentCount: 27, advisor: "Mehmet Demir" },
-        { id: "7A", name: "7/A", grade: 7, studentCount: 28, advisor: "Zeynep Kaya" },
-        { id: "7B", name: "7/B", grade: 7, studentCount: 26, advisor: "Ahmet Çelik" }
+        { id: "5A", name: "5/A", grade: 5, studentCount: 33, advisor: "Ayşe Yılmaz" },
+        { id: "5D", name: "5/D", grade: 5, studentCount: 33, advisor: "Murat Kundakcı" },
+        { id: "6G", name: "6/G", grade: 6, studentCount: 33, advisor: "Mehmet Demir" },
+        { id: "7A", name: "7/A", grade: 7, studentCount: 35, advisor: "Zeynep Kaya" },
+        { id: "7B", name: "7/B", grade: 7, studentCount: 31, advisor: "Ahmet Çelik" }
     ],
     students: [
         // 5/D (Rehberlik Sınıfı)

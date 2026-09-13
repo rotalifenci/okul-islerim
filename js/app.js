@@ -61,7 +61,7 @@ document.addEventListener('alpine:init', () => {
         isHwHistoryModalOpen: false,
         selectedHwStudent: null,
         isAddStudentModalOpen: false,
-        addStudentMode: 'single', // 'single' veya 'bulk'
+        addStudentMode: 'single', // 'single', 'bulk' veya 'delete'
         newStudent: {
             classId: '5D',
             no: '',
@@ -69,11 +69,18 @@ document.addEventListener('alpine:init', () => {
             notes: ''
         },
         bulkStudentText: '',
+        
+        // 🖨️ Detaylı Tarih Aralıklı Rapor & Yazdırma Modalı
+        isPrintReportModalOpen: false,
+        reportClassId: '5A',
+        reportStartDate: '2026-09-01',
+        reportEndDate: '2026-09-30',
+
         scoringLegend: [
             { score: '0', label: '0: Yok (0p)', pts: '0 Puan', color: 'red', desc: 'Ödev getirilmedi veya hiç yapılmadı (0p)' },
-            { score: '1', label: '1: Yarım (1p)', pts: '1 Puan', color: 'amber', desc: 'Kısmen / eksik yapıldı (+/-) (1p)' },
-            { score: '2', label: '2: Tam (+2p)', pts: '2 Puan', color: 'emerald', desc: 'Eksiksiz ve doğru tamamlandı (+) (2p)' },
-            { score: '4', label: '4: Yıldız (+4p)', pts: '4 Puan', color: 'yellow', desc: 'Üstün başarı ve özenli çalışma (★) (4p)' },
+            { score: '1', label: '1: YARIM ARTI (1p)', pts: '1 Puan', color: 'amber', desc: 'Kısmen / eksik yapıldı (+/-) (1p)' },
+            { score: '2', label: '2: + (+2p)', pts: '2 Puan', color: 'emerald', desc: 'Eksiksiz ve doğru tamamlandı (+) (2p)' },
+            { score: '4', label: '4: YILDIZ (+4p)', pts: '4 Puan', color: 'yellow', desc: 'Üstün başarı ve özenli çalışma (★) (4p)' },
             { score: 'G', label: 'G: Gelmedi', pts: 'Devamsız', color: 'slate', desc: 'Öğrenci o gün okula gelmedi' }
         ],
 
@@ -160,6 +167,21 @@ document.addEventListener('alpine:init', () => {
             }
 
             this.loadCurrentWeekNote();
+
+            // Öğrenci isimlerindeki sınıf ön eklerini temizleme
+            if (this.data && this.data.students && Array.isArray(this.data.students)) {
+                let cleanedAny = false;
+                this.data.students.forEach(st => {
+                    const cleaned = this.cleanStudentName(st.name);
+                    if (cleaned && cleaned !== st.name) {
+                        st.name = cleaned;
+                        cleanedAny = true;
+                    }
+                });
+                if (cleanedAny) {
+                    window.StorageManager.saveData(this.data);
+                }
+            }
 
             // Otomatik Maarif Modeli Kazanım Senkronizasyonu (TYMM 2026-2027)
             if (this.data && this.data.weeklySchedule && !this.data._maarif_outcomes_v4) {
@@ -342,15 +364,28 @@ document.addEventListener('alpine:init', () => {
             return { score: '', note: '' };
         },
 
+        cleanStudentName(name) {
+            if (!name) return '';
+            let res = String(name).trim();
+            // 5/A, 5-A, 5A, 6/G, 7/A, 7/B, 7-B, 5/D vb. sınıf ve no ön eklerini kaldır
+            res = res.replace(/^([5-8]\s*[\/\-\.\_]?\s*[A-Za-z]\b|\d+\s*[\.\-]?\s*sınıf|no\s*[\:\-\.\s]?\s*\d+)\s*[\-\:\,\.]?\s*/i, '');
+            res = res.replace(/^\d+[\s\.\-\:\,\t]+/i, ''); // Baştaki numara kalıntıları
+            return res.trim();
+        },
+
         setStudentHomeworkGrade(studentId, score) {
             const session = this.getTodayHomeworkSession();
             if (!session.grades) session.grades = {};
             const existingNote = session.grades[studentId]?.note || '';
             
-            // Eğer aynı skora basıldıysa ve silmek isterse
-            if (session.grades[studentId]?.score === score) {
-                // Seçili kalsın veya güncellensin
+            // Eğer aynı skora 2. kez tıklandıysa işareti kaldır (Toggle Off)
+            if (session.grades[studentId] && session.grades[studentId].score === score) {
+                delete session.grades[studentId];
+                this.data = JSON.parse(JSON.stringify(this.data));
+                this.showToast("Ödev işareti kaldırıldı.");
+                return;
             }
+
             session.grades[studentId] = { score: score, note: existingNote };
             if (this.currentHomeworkTitle && !session.title) {
                 session.title = this.currentHomeworkTitle;
@@ -358,13 +393,13 @@ document.addEventListener('alpine:init', () => {
             this.data = JSON.parse(JSON.stringify(this.data));
 
             const labels = {
-                '0': '0: Yok (0p)',
-                '1': '1: Yarım (1p)',
-                '2': '2: Tam (+2p)',
-                '4': '4: Yıldız (+4p)',
-                'G': 'G: Gelmedi'
+                '0': '0 (YOK - 0p)',
+                '1': 'YARIM ARTI (1p)',
+                '2': '+ (TAM - +2p)',
+                '4': 'YILDIZ (+4p)',
+                'G': 'G (GELMEDİ)'
             };
-            this.showToast(`Ödev: ${labels[score] || score} seçildi.`);
+            this.showToast(`Ödev Durumu: ${labels[score] || score} olarak işlendi.`);
         },
 
         setStudentHomeworkNote(studentId, note) {
@@ -380,13 +415,13 @@ document.addEventListener('alpine:init', () => {
             this.showToast("Ödev puanları ve öğretmen notları başarıyla kaydedildi! 💾");
         },
 
-        openAddStudentModal() {
+        openAddStudentModal(mode = 'single') {
             this.newStudent.classId = this.selectedClassId || '5D';
             this.newStudent.name = '';
             this.newStudent.no = '';
             this.newStudent.notes = '';
             this.bulkStudentText = '';
-            this.addStudentMode = 'single';
+            this.addStudentMode = mode;
             this.isAddStudentModalOpen = true;
             this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
         },
@@ -397,9 +432,10 @@ document.addEventListener('alpine:init', () => {
                 return;
             }
             const clsId = this.newStudent.classId || this.selectedClassId || '5D';
+            const cleanName = this.cleanStudentName(this.newStudent.name);
             const newSt = {
                 id: 's_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
-                name: this.newStudent.name.trim(),
+                name: cleanName,
                 no: parseInt(this.newStudent.no) || this.newStudent.no,
                 classId: clsId,
                 avatar: '👨‍🎓',
@@ -431,11 +467,12 @@ document.addEventListener('alpine:init', () => {
             lines.forEach((line, idx) => {
                 const match = line.match(/^(\d+)[\s\-\,\.\t]+(.+)$/);
                 let no = (this.data.students.filter(s => s.classId === clsId).length + 1) * 5;
-                let name = line;
+                let rawName = line;
                 if (match) {
                     no = parseInt(match[1]);
-                    name = match[2].trim();
+                    rawName = match[2].trim();
                 }
+                const name = this.cleanStudentName(rawName);
                 if (name) {
                     this.data.students.push({
                         id: 's_' + Date.now() + '_' + idx + '_' + Math.floor(Math.random() * 1000),
@@ -476,7 +513,7 @@ document.addEventListener('alpine:init', () => {
                 session.grades[st.id] = { score: score, note: existingNote };
             });
             this.data = JSON.parse(JSON.stringify(this.data));
-            const labels = { '0': '0 (Yok)', '1': '1 (Yarım)', '2': '2 (Tam +)', '4': '4 (Yıldız ★)', 'G': 'G (Gelmedi)' };
+            const labels = { '0': '0 (YOK)', '1': 'YARIM ARTI', '2': '+ (TAM)', '4': 'YILDIZ', 'G': 'G (GELMEDİ)' };
             this.showToast(`Tüm ${this.selectedClassId} sınıfına "${labels[score]}" ödev durumu işlendi! ⚡`);
         },
 
@@ -593,65 +630,99 @@ document.addEventListener('alpine:init', () => {
             return list.sort((a, b) => new Date(b.date) - new Date(a.date));
         },
 
+        openPrintReportModal() {
+            this.reportClassId = this.selectedClassId || '5A';
+            if (!this.reportEndDate) this.reportEndDate = new Date().toISOString().slice(0, 10);
+            if (!this.reportStartDate) {
+                this.reportStartDate = '2026-09-01';
+            }
+            this.isPrintReportModalOpen = true;
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+
+        getReportHomeworkDates() {
+            const clsId = this.reportClassId;
+            const start = this.reportStartDate;
+            const end = this.reportEndDate;
+            const list = (this.data.homeworkDays || []).filter(h => {
+                if (h.classId !== clsId) return false;
+                if (start && h.date < start) return false;
+                if (end && h.date > end) return false;
+                return true;
+            });
+            return list.sort((a, b) => a.date.localeCompare(b.date));
+        },
+
+        getReportStudents() {
+            return (this.data.students || []).filter(s => s.classId === this.reportClassId).sort((a, b) => (Number(a.no) || 0) - (Number(b.no) || 0));
+        },
+
+        getStudentGradeForDate(studentId, date) {
+            const session = (this.data.homeworkDays || []).find(h => h.classId === this.reportClassId && h.date === date);
+            if (session && session.grades && session.grades[studentId]) {
+                return session.grades[studentId];
+            }
+            return { score: '', note: '' };
+        },
+
+        getReportStudentStats(studentId) {
+            const dates = this.getReportHomeworkDates();
+            let total = 0;
+            let stars = 0, full = 0, half = 0, zero = 0, absent = 0;
+            dates.forEach(d => {
+                const g = d.grades ? d.grades[studentId] : null;
+                if (g && g.score !== undefined && g.score !== '') {
+                    const s = String(g.score).toUpperCase();
+                    if (s === '4') { stars++; total += 4; }
+                    else if (s === '2') { full++; total += 2; }
+                    else if (s === '1') { half++; total += 1; }
+                    else if (s === '0') { zero++; }
+                    else if (s === 'G') { absent++; }
+                }
+            });
+            const classPercent = dates.length > 0 ? Math.round((total / (dates.length * 4)) * 100) : 0;
+            return { total, stars, full, half, zero, absent, count: dates.length, percent: classPercent };
+        },
+
+        printDetailedReport() {
+            const printContent = document.getElementById('printableReportArea');
+            if (!printContent) return;
+            const win = window.open('', '_blank', 'width=1100,height=800');
+            win.document.write(`
+                <html>
+                <head>
+                    <title>Rotalı Fenci - Detaylı Ödev Takip Çizelgesi (${this.reportClassId})</title>
+                    <style>
+                        @page { size: landscape; margin: 10mm; }
+                        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #000; margin: 0; padding: 15px; font-size: 11px; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+                        th, td { border: 1px solid #94a3b8; padding: 5px 6px; text-align: center; }
+                        th { background: #e2e8f0; font-weight: 800; font-size: 10px; }
+                        .text-left { text-align: left; }
+                        .score-star { font-weight: bold; color: #b45309; }
+                        .score-full { font-weight: bold; color: #15803d; }
+                        .score-half { font-weight: bold; color: #d97706; }
+                        .score-zero { font-weight: bold; color: #b91c1c; }
+                        .score-absent { font-weight: bold; color: #64748b; }
+                        .header-box { text-align: center; border-bottom: 2px solid #dc2626; padding-bottom: 8px; margin-bottom: 12px; }
+                        .summary-box { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 11px; font-weight: bold; }
+                    </style>
+                </head>
+                <body>
+                    ${printContent.innerHTML}
+                </body>
+                </html>
+            `);
+            win.document.close();
+            win.focus();
+            setTimeout(() => {
+                win.print();
+                win.close();
+            }, 300);
+        },
+
         printClassHomeworkReport() {
-            const cls = this.data.classes.find(c => c.id === this.selectedClassId) || { name: this.selectedClassId };
-            const stats = this.getClassDailyStats();
-            const students = this.filteredStudents;
-            const dateFormatted = this.getFormattedHomeworkDate();
-            const session = this.getTodayHomeworkSession();
-            const title = session.title || 'Fen Bilimleri Ödev Değerlendirmesi';
-
-            let rows = students.map((st, i) => {
-                const g = this.getStudentHomeworkGrade(st.id);
-                const scoreLabels = { '4': '⭐ Yıldız (4p)', '2': '✅ Tam (2p)', '1': '⚠️ Yarım (1p)', '0': '❌ Yok (0p)', 'G': '🚫 Gelmedi' };
-                const stStats = this.getStudentHomeworkStats(st.id);
-                return `
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center; font-weight: bold;">${i+1}</td>
-                        <td style="padding: 8px; border: 1px solid #cbd5e1; font-weight: bold;">${st.no} - ${st.name}</td>
-                        <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center; font-weight: 800;">${scoreLabels[g.score] || '-'}</td>
-                        <td style="padding: 8px; border: 1px solid #cbd5e1; font-size: 11px;">${g.note || '-'}</td>
-                        <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center; font-weight: bold;">${stStats.totalPoints} p (${stStats.stars}★)</td>
-                    </tr>
-                `;
-            }).join('');
-
-            const printHtml = `
-                <div style="font-family: Arial, sans-serif; color: #0f172a; padding: 20px;">
-                    <div style="text-align: center; border-bottom: 3px solid #dc2626; padding-bottom: 12px; margin-bottom: 15px;">
-                        <h2 style="margin: 0; color: #dc2626; font-size: 22px; font-weight: 900;">ROTALI FENCİ — GÜNLÜK ÖDEV TAKİP ÇİZELGESİ</h2>
-                        <p style="margin: 5px 0 0 0; font-size: 14px; font-weight: bold; color: #334155;">${cls.name} Sınıfı | ${dateFormatted}</p>
-                        <p style="margin: 3px 0 0 0; font-size: 13px; color: #0284c7; font-weight: 600;">Ödev Konusu: ${title}</p>
-                    </div>
-                    <div style="display: flex; justify-content: space-around; background: #f8fafc; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 15px; font-size: 12px; font-weight: bold;">
-                        <span style="color: #b45309;">⭐ Yıldız (4p): ${stats.stars}</span>
-                        <span style="color: #15803d;">✅ Tam (2p): ${stats.full}</span>
-                        <span style="color: #d97706;">⚠️ Yarım (1p): ${stats.half}</span>
-                        <span style="color: #b91c1c;">❌ Yok (0p): ${stats.zero}</span>
-                        <span style="color: #64748b;">🚫 Gelmedi (G): ${stats.absent}</span>
-                        <span style="color: #1e3a8a;">📊 Sınıf Başarısı: %${stats.classPercent}</span>
-                    </div>
-                    <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
-                        <thead>
-                            <tr style="background: #e2e8f0; color: #0f172a; font-weight: 900;">
-                                <th style="padding: 8px; border: 1px solid #cbd5e1; width: 40px;">Sıra</th>
-                                <th style="padding: 8px; border: 1px solid #cbd5e1; text-align: left;">Öğrenci No & Adı Soyadı</th>
-                                <th style="padding: 8px; border: 1px solid #cbd5e1; width: 140px;">Günün Ödev Notu</th>
-                                <th style="padding: 8px; border: 1px solid #cbd5e1; text-align: left;">Öğretmen Notu / Açıklama</th>
-                                <th style="padding: 8px; border: 1px solid #cbd5e1; width: 130px;">Dönem Toplam Puan</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${rows}
-                        </tbody>
-                    </table>
-                    <div style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #cbd5e1; display: flex; justify-content: space-between; font-size: 11px; font-weight: bold; color: #64748b;">
-                        <div>Puanlama Sistemi: 0 (Yok/0p) • 1 (Yarım/1p) • 2 (Tam/2p) • 4 (Yıldız/4p) • G (Gelmedi)</div>
-                        <div>Fen Bilimleri Öğretmeni / Rotalı Fenci</div>
-                    </div>
-                </div>
-            `;
-            window.Exporter.printContent(`Ödev Çizelgesi - ${cls.name} - ${this.selectedHomeworkDate}`, printHtml);
+            this.openPrintReportModal();
         },
 
         // ================= DERS PROGRAMI YÖNETİMİ METODLARI =================

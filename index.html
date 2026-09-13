@@ -1018,20 +1018,27 @@
                         </div>
                     </div>
 
-                    <!-- Sınıf Butonları -->
+                    <!-- Sınıf Butonları & Öğrenci Yönetimi -->
                     <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-300">
                         <div class="flex flex-wrap gap-2">
                             <template x-for="cls in data.classes" :key="cls.id">
                                 <button @click="selectedClassId = cls.id" :class="selectedClassId === cls.id ? 'bg-red-600 text-white font-black shadow-md border-2 border-red-700 ring-2 ring-red-300' : 'bg-white text-black font-black hover:bg-red-50 border border-slate-300 shadow-sm'" class="px-4 py-2 rounded-xl text-xs transition flex items-center gap-1.5">
                                     <span x-text="cls.name"></span>
-                                    <span class="px-1.5 py-0.5 rounded-md text-[10px]" :class="selectedClassId === cls.id ? 'bg-red-800 text-white font-bold' : 'bg-slate-200 text-black font-bold'" x-text="data.students.filter(s => s.classId === cls.id).length + ' Öğrenci'"></span>
+                                    <span class="px-1.5 py-0.5 rounded-md text-[10px]" :class="selectedClassId === cls.id ? 'bg-red-800 text-white font-bold' : 'bg-slate-200 text-black font-bold'" x-text="(data.students.filter(s => s.classId === cls.id).length || cls.studentCount) + ' Öğrenci'"></span>
                                 </button>
                             </template>
                         </div>
 
-                        <button @click="openAddStudentModal()" class="text-xs font-black text-red-700 hover:text-red-900 flex items-center gap-1 bg-white px-3 py-1.5 rounded-xl border border-red-300 shadow-sm transition">
-                            <span>+ Bu Sınıfa Öğrenci Ekle</span>
-                        </button>
+                        <div class="flex items-center gap-2">
+                            <button @click="openAddStudentModal('single')" class="text-xs font-black text-red-700 hover:text-red-900 flex items-center gap-1.5 bg-white hover:bg-red-50 px-3.5 py-2 rounded-xl border-2 border-red-300 shadow-sm transition">
+                                <i data-lucide="user-plus" class="w-4 h-4 text-red-600"></i>
+                                <span>+ Bu Sınıfa Öğrenci Ekle</span>
+                            </button>
+                            <button @click="openAddStudentModal('delete')" class="text-xs font-black text-slate-800 hover:text-red-700 flex items-center gap-1.5 bg-white hover:bg-red-50 px-3.5 py-2 rounded-xl border-2 border-slate-300 hover:border-red-300 shadow-sm transition">
+                                <i data-lucide="trash-2" class="w-4 h-4 text-red-600"></i>
+                                <span>🗑️ Öğrenci Sil</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -1081,31 +1088,31 @@
                                 ❌ 0: Yok (0p)
                             </span>
                             <span class="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-900 border border-amber-300 font-black text-[11px]">
-                                ⚠️ 1: Yarım (1p)
+                                ⚠️ 1: YARIM ARTI (1p)
                             </span>
                             <span class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-900 border border-emerald-300 font-black text-[11px]">
-                                ✅ 2: Tam (+2p)
+                                ✅ 2: + (+2p)
                             </span>
                             <span class="px-2.5 py-1 rounded-lg bg-yellow-100 text-yellow-950 border border-yellow-300 font-black text-[11px]">
-                                ⭐ 4: Yıldız (+4p)
+                                ⭐ 4: YILDIZ (+4p)
                             </span>
                             <span class="px-2.5 py-1 rounded-lg bg-slate-200 text-slate-900 border border-slate-400 font-black text-[11px]">
-                                🚫 G: Gelmedi
+                                🚫 G: GELMEDİ
                             </span>
                         </div>
 
                         <!-- Hızlı Toplu Aksiyon Butonları & Kaydet -->
                         <div class="flex flex-wrap items-center gap-2">
                             <button @click="bulkSetClassHomework('2')" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-sm flex items-center gap-1 transition">
-                                ⚡ Tümüne Tam (2) Ver
+                                ⚡ Tümüne + (2) Ver
                             </button>
                             <button @click="bulkSetClassHomework('4')" class="px-3 py-1.5 rounded-xl bg-yellow-500 hover:bg-yellow-600 text-black font-black text-xs shadow-sm flex items-center gap-1 transition">
-                                ⭐ Tümüne Yıldız (4) Ver
+                                ⭐ Tümüne YILDIZ (4) Ver
                             </button>
                             <button @click="saveHomeworkData()" class="px-3.5 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-black text-xs shadow-sm flex items-center gap-1 transition">
                                 💾 Kaydet
                             </button>
-                            <button @click="printClassHomeworkReport()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-black text-white font-black text-xs shadow-sm flex items-center gap-1 transition">
+                            <button @click="openPrintReportModal()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-black text-white font-black text-xs shadow-sm flex items-center gap-1 transition">
                                 🖨️ Yazdır
                             </button>
                             <button @click="clearHomeworkDate()" title="Seçili tarihteki ödev puanlarını temizle" class="px-2.5 py-1.5 rounded-xl bg-slate-200 hover:bg-red-100 text-red-700 font-black text-xs border border-slate-300 shadow-sm transition">
@@ -1120,23 +1127,23 @@
                 <!-- Seçili Gün İçin Sınıf Özet İstatistikleri -->
                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                     <div class="bg-yellow-50 p-3 rounded-2xl border-2 border-yellow-300 shadow-sm text-center">
-                        <span class="text-[11px] font-black text-yellow-900 block">⭐ Yıldız (4p)</span>
+                        <span class="text-[11px] font-black text-yellow-900 block">⭐ YILDIZ (4p)</span>
                         <span class="text-xl font-black text-yellow-950" x-text="getClassDailyStats().stars"></span>
                     </div>
                     <div class="bg-emerald-50 p-3 rounded-2xl border-2 border-emerald-300 shadow-sm text-center">
-                        <span class="text-[11px] font-black text-emerald-900 block">✅ Tam (2p)</span>
+                        <span class="text-[11px] font-black text-emerald-900 block">✅ + (2p)</span>
                         <span class="text-xl font-black text-emerald-950" x-text="getClassDailyStats().full"></span>
                     </div>
                     <div class="bg-amber-50 p-3 rounded-2xl border-2 border-amber-300 shadow-sm text-center">
-                        <span class="text-[11px] font-black text-amber-900 block">⚠️ Yarım (1p)</span>
+                        <span class="text-[11px] font-black text-amber-900 block">⚠️ YARIM ARTI (1p)</span>
                         <span class="text-xl font-black text-amber-950" x-text="getClassDailyStats().half"></span>
                     </div>
                     <div class="bg-red-50 p-3 rounded-2xl border-2 border-red-300 shadow-sm text-center">
-                        <span class="text-[11px] font-black text-red-900 block">❌ Yok (0p)</span>
+                        <span class="text-[11px] font-black text-red-900 block">❌ 0 (0p)</span>
                         <span class="text-xl font-black text-red-950" x-text="getClassDailyStats().zero"></span>
                     </div>
                     <div class="bg-slate-100 p-3 rounded-2xl border-2 border-slate-300 shadow-sm text-center">
-                        <span class="text-[11px] font-black text-slate-800 block">🚫 Gelmedi (G)</span>
+                        <span class="text-[11px] font-black text-slate-800 block">🚫 GELMEDİ (G)</span>
                         <span class="text-xl font-black text-slate-900" x-text="getClassDailyStats().absent"></span>
                     </div>
                     <div class="bg-blue-50 p-3 rounded-2xl border-2 border-blue-300 shadow-sm text-center">
@@ -1174,7 +1181,7 @@
                                             </div>
                                         </td>
 
-                                        <!-- Bugünkü Ödev Durumu (Tıkla ve Ver) - 5 Buton: 0, yarım artı, +, yıldız, G -->
+                                        <!-- Bugünkü Ödev Durumu (Tıkla ve Ver) - 5 Buton: 0, YARIM ARTI, +, YILDIZ, G -->
                                         <td class="py-2 px-3 text-center border-r border-slate-200">
                                             <div class="inline-flex items-center justify-center gap-1.5 p-1 bg-slate-100 rounded-xl border border-slate-300 shadow-inner">
                                                 
@@ -1183,23 +1190,23 @@
                                                     <span>0</span>
                                                 </button>
 
-                                                <!-- yarım artı -->
-                                                <button @click="setStudentHomeworkGrade(st.id, '1')" :class="getStudentHomeworkGrade(st.id).score === '1' ? 'bg-amber-500 text-white font-black ring-2 ring-amber-300 shadow-md scale-105' : 'bg-white text-amber-900 hover:bg-amber-50 border border-slate-300 font-bold'" class="px-2 py-1 rounded-lg text-[11px] transition whitespace-nowrap" title="1: Yarım (1p)">
-                                                    <span>yarım artı</span>
+                                                <!-- YARIM ARTI -->
+                                                <button @click="setStudentHomeworkGrade(st.id, '1')" :class="getStudentHomeworkGrade(st.id).score === '1' ? 'bg-amber-500 text-white font-black ring-2 ring-amber-300 shadow-md scale-105' : 'bg-white text-amber-900 hover:bg-amber-50 border border-slate-300 font-bold'" class="px-2 py-1 rounded-lg text-[11px] font-black transition whitespace-nowrap" title="1: YARIM ARTI (1p)">
+                                                    <span>YARIM ARTI</span>
                                                 </button>
 
                                                 <!-- + -->
-                                                <button @click="setStudentHomeworkGrade(st.id, '2')" :class="getStudentHomeworkGrade(st.id).score === '2' ? 'bg-emerald-600 text-white font-black ring-2 ring-emerald-400 shadow-md scale-105' : 'bg-white text-emerald-900 hover:bg-emerald-50 border border-slate-300 font-bold'" class="px-2.5 py-1 rounded-lg text-xs transition font-black" title="2: Tam (+2p)">
+                                                <button @click="setStudentHomeworkGrade(st.id, '2')" :class="getStudentHomeworkGrade(st.id).score === '2' ? 'bg-emerald-600 text-white font-black ring-2 ring-emerald-400 shadow-md scale-105' : 'bg-white text-emerald-900 hover:bg-emerald-50 border border-slate-300 font-bold'" class="px-2.5 py-1 rounded-lg text-xs transition font-black" title="2: + (+2p)">
                                                     <span>+</span>
                                                 </button>
 
-                                                <!-- yıldız -->
-                                                <button @click="setStudentHomeworkGrade(st.id, '4')" :class="getStudentHomeworkGrade(st.id).score === '4' ? 'bg-yellow-400 text-yellow-950 font-black ring-2 ring-yellow-300 shadow-md scale-105' : 'bg-white text-yellow-900 hover:bg-yellow-50 border border-slate-300 font-bold'" class="px-2 py-1 rounded-lg text-[11px] transition whitespace-nowrap" title="4: Yıldız (+4p)">
-                                                    <span>yıldız</span>
+                                                <!-- YILDIZ -->
+                                                <button @click="setStudentHomeworkGrade(st.id, '4')" :class="getStudentHomeworkGrade(st.id).score === '4' ? 'bg-yellow-400 text-yellow-950 font-black ring-2 ring-yellow-300 shadow-md scale-105' : 'bg-white text-yellow-900 hover:bg-yellow-50 border border-slate-300 font-bold'" class="px-2 py-1 rounded-lg text-[11px] font-black transition whitespace-nowrap" title="4: YILDIZ (+4p)">
+                                                    <span>YILDIZ</span>
                                                 </button>
 
                                                 <!-- G -->
-                                                <button @click="setStudentHomeworkGrade(st.id, 'G')" :class="getStudentHomeworkGrade(st.id).score === 'G' ? 'bg-slate-700 text-white font-black ring-2 ring-slate-400 shadow-md scale-105' : 'bg-white text-slate-800 hover:bg-slate-100 border border-slate-300 font-bold'" class="px-2.5 py-1 rounded-lg text-xs transition font-black" title="G: Gelmedi">
+                                                <button @click="setStudentHomeworkGrade(st.id, 'G')" :class="getStudentHomeworkGrade(st.id).score === 'G' ? 'bg-slate-700 text-white font-black ring-2 ring-slate-400 shadow-md scale-105' : 'bg-white text-slate-800 hover:bg-slate-100 border border-slate-300 font-bold'" class="px-2.5 py-1 rounded-lg text-xs transition font-black" title="G: GELMEDİ">
                                                     <span>G</span>
                                                 </button>
 
@@ -1216,14 +1223,11 @@
                                             <span class="px-2.5 py-1 bg-red-50 text-red-900 border border-red-300 rounded-lg font-black text-xs shadow-sm inline-block whitespace-nowrap" x-text="getStudentHomeworkStats(st.id).totalPoints + ' Puan'"></span>
                                         </td>
 
-                                        <!-- İşlem -->
+                                        <!-- İşlem (Sadece Geçmiş Butonu - Silme İşlemi Sınıf Yönetimi Alanındadır) -->
                                         <td class="py-2.5 px-3 text-center">
-                                            <div class="flex items-center justify-center gap-1">
+                                            <div class="flex items-center justify-center">
                                                 <button @click="openStudentHomeworkHistory(st)" title="Ödev Geçmişini İncele" class="p-1.5 rounded-lg bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 transition">
                                                     <i data-lucide="history" class="w-3.5 h-3.5"></i>
-                                                </button>
-                                                <button @click="deleteStudent(st)" title="Öğrenciyi Sil" class="p-1.5 rounded-lg bg-slate-100 hover:bg-red-50 text-slate-500 hover:text-red-700 border border-slate-200 transition">
-                                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                                                 </button>
                                             </div>
                                         </td>
@@ -1644,33 +1648,36 @@
         </div>
     </div>
 
-    <!-- ================= MODAL: YENİ ÖĞRENCİ EKLE / LİSTE AKTAR ================= -->
+    <!-- ================= MODAL: YENİ ÖĞRENCİ EKLE / LİSTE AKTAR / SİL ================= -->
     <div x-show="isAddStudentModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm" @click.self="isAddStudentModalOpen = false">
-        <div class="w-full max-w-xl bg-slate-100 p-6 rounded-3xl shadow-2xl border-2 border-slate-300 space-y-4">
+        <div class="w-full max-w-xl bg-slate-100 p-6 rounded-3xl shadow-2xl border-2 border-slate-300 space-y-4 max-h-[90vh] flex flex-col">
             
             <div class="flex items-center justify-between pb-3 border-b border-slate-300">
                 <h3 class="font-black text-black text-lg brand-font flex items-center gap-2">
-                    <span>👥 Öğrenci Listesi Ekleme & Aktarma</span>
+                    <span>👥 Öğrenci Yönetimi, Ekleme & Silme</span>
                 </h3>
                 <button @click="isAddStudentModalOpen = false" class="text-slate-400 hover:text-black font-black text-sm">✕</button>
             </div>
 
-            <!-- Mod Değiştirme Butonları (Tek Öğrenci / Toplu Liste) -->
-            <div class="flex bg-white p-1 rounded-2xl border-2 border-slate-300 shadow-sm">
+            <!-- Mod Değiştirme Butonları (Tek Öğrenci / Toplu Liste / Öğrenci Sil) -->
+            <div class="flex bg-white p-1 rounded-2xl border-2 border-slate-300 shadow-sm gap-1">
                 <button @click="addStudentMode = 'single'" :class="addStudentMode === 'single' ? 'bg-red-600 text-white font-black shadow-md' : 'text-slate-700 hover:text-black font-bold'" class="flex-1 py-2 rounded-xl text-xs transition text-center">
                     👤 Tek Öğrenci Ekle
                 </button>
                 <button @click="addStudentMode = 'bulk'" :class="addStudentMode === 'bulk' ? 'bg-red-600 text-white font-black shadow-md' : 'text-slate-700 hover:text-black font-bold'" class="flex-1 py-2 rounded-xl text-xs transition text-center">
-                    📋 Toplu Liste Yapıştır / e-Okul Aktar
+                    📋 Toplu Liste Aktar
+                </button>
+                <button @click="addStudentMode = 'delete'" :class="addStudentMode === 'delete' ? 'bg-red-600 text-white font-black shadow-md' : 'text-slate-700 hover:text-black font-bold'" class="flex-1 py-2 rounded-xl text-xs transition text-center">
+                    🗑️ Öğrenci Sil
                 </button>
             </div>
 
             <!-- Hedef Sınıf Seçimi -->
             <div>
-                <label class="text-xs font-black text-black block mb-1">Hedef Sınıf Seçiniz:</label>
+                <label class="text-xs font-black text-black block mb-1">İşlem Yapılacak Sınıf:</label>
                 <select x-model="newStudent.classId" class="w-full px-3.5 py-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-black text-black shadow-sm focus:outline-none focus:border-red-500 cursor-pointer">
                     <template x-for="cls in data.classes" :key="cls.id">
-                        <option :value="cls.id" x-text="cls.name + ' Sınıfı'"></option>
+                        <option :value="cls.id" x-text="cls.name + ' Sınıfı (' + (data.students.filter(s => s.classId === cls.id).length || cls.studentCount) + ' Öğrenci)'"></option>
                     </template>
                 </select>
             </div>
@@ -1714,6 +1721,165 @@
                         <button @click="addBulkStudents()" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-md">🚀 Toplu Olarak Sınıfa Aktar</button>
                     </div>
                 </div>
+            </div>
+
+            <!-- 3. GÖRÜNÜM: ÖĞRENCİ SİL / LİSTEYİ DÜZENLE -->
+            <div x-show="addStudentMode === 'delete'" class="space-y-3 flex-1 overflow-y-auto">
+                <div class="p-3 bg-red-50 rounded-xl border border-red-200 text-red-950 text-xs font-bold flex items-center justify-between">
+                    <span>Silmek istediğiniz öğrencinin yanındaki çöp kutusuna tıklayınız:</span>
+                    <span class="bg-red-200 px-2 py-0.5 rounded text-red-900 font-black" x-text="data.students.filter(s => s.classId === newStudent.classId).length + ' Öğrenci'"></span>
+                </div>
+
+                <div class="max-h-60 overflow-y-auto divide-y divide-slate-200 bg-white rounded-2xl border border-slate-300">
+                    <template x-for="st in data.students.filter(s => s.classId === newStudent.classId)" :key="st.id">
+                        <div class="p-2.5 flex items-center justify-between hover:bg-slate-50 transition">
+                            <div class="flex items-center gap-2.5">
+                                <span class="font-mono font-black text-xs text-red-700 w-8" x-text="st.no"></span>
+                                <span class="text-sm font-black text-slate-900" x-text="st.name"></span>
+                            </div>
+                            <button @click="deleteStudent(st)" title="Bu Öğrenciyi Sil" class="px-2.5 py-1 rounded-lg bg-red-100 hover:bg-red-600 text-red-800 hover:text-white font-black text-xs transition flex items-center gap-1 shadow-sm">
+                                <span>🗑️ Sil</span>
+                            </button>
+                        </div>
+                    </template>
+                    <div x-show="data.students.filter(s => s.classId === newStudent.classId).length === 0" class="p-4 text-center text-xs text-slate-500 font-bold">
+                        Bu sınıfta kayıtlı öğrenci bulunamadı.
+                    </div>
+                </div>
+
+                <div class="flex justify-end pt-2 border-t border-slate-300">
+                    <button @click="isAddStudentModalOpen = false" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-black text-white font-black text-xs shadow-sm">Tamam / Kapat</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ================= MODAL: 🖨️ DETAYLI TARİH ARALIKLI ÖDEV RAPORU & YAZDIRMA ================= -->
+    <div x-show="isPrintReportModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-sm" @click.self="isPrintReportModalOpen = false">
+        <div class="w-full max-w-5xl bg-slate-100 p-5 sm:p-6 rounded-3xl shadow-2xl border-2 border-slate-300 space-y-4 max-h-[92vh] flex flex-col">
+            
+            <!-- Başlık & Kapatma -->
+            <div class="flex items-center justify-between pb-3 border-b-2 border-slate-300">
+                <div class="flex items-center gap-2.5">
+                    <div class="p-2 bg-red-600 rounded-xl text-white shadow-md">
+                        <i data-lucide="printer" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-black text-black text-lg brand-font">🖨️ Detaylı Zaman Aralıklı Ödev Raporu & Çizelgesi</h3>
+                        <p class="text-xs text-slate-600 font-bold">Tarih aralığı seçerek tüm ödev puanlarını detaylı matris halinde görün ve yazdırın.</p>
+                    </div>
+                </div>
+                <button @click="isPrintReportModalOpen = false" class="p-2 rounded-xl bg-white hover:bg-slate-200 text-black font-black text-base border border-slate-300 shadow-sm">✕</button>
+            </div>
+
+            <!-- Filtreleme Çubuğu (Sınıf, Başlangıç Tarihi, Bitiş Tarihi) -->
+            <div class="bg-white p-4 rounded-2xl border-2 border-slate-300 grid grid-cols-1 sm:grid-cols-12 gap-3 items-center shadow-sm">
+                <!-- Sınıf Seçimi -->
+                <div class="sm:col-span-4">
+                    <label class="text-[11px] font-black text-slate-800 block mb-1">Rapor Sınıfı:</label>
+                    <select x-model="reportClassId" class="w-full px-3 py-2 bg-slate-50 border-2 border-slate-300 rounded-xl text-xs font-black text-black focus:outline-none focus:border-red-500">
+                        <template x-for="cls in data.classes" :key="cls.id">
+                            <option :value="cls.id" x-text="cls.name + ' Sınıfı (' + (data.students.filter(s => s.classId === cls.id).length || cls.studentCount) + ' Öğrenci)'"></option>
+                        </template>
+                    </select>
+                </div>
+
+                <!-- Başlangıç Tarihi -->
+                <div class="sm:col-span-4">
+                    <label class="text-[11px] font-black text-slate-800 block mb-1">Başlangıç Tarihi:</label>
+                    <input type="date" x-model="reportStartDate" class="w-full px-3 py-2 bg-slate-50 border-2 border-slate-300 rounded-xl text-xs font-black text-black focus:outline-none focus:border-red-500">
+                </div>
+
+                <!-- Bitiş Tarihi -->
+                <div class="sm:col-span-4">
+                    <label class="text-[11px] font-black text-slate-800 block mb-1">Bitiş Tarihi:</label>
+                    <input type="date" x-model="reportEndDate" class="w-full px-3 py-2 bg-slate-50 border-2 border-slate-300 rounded-xl text-xs font-black text-black focus:outline-none focus:border-red-500">
+                </div>
+            </div>
+
+            <!-- Bilgilendirme ve Özet Çubuğu -->
+            <div class="flex flex-wrap items-center justify-between gap-2 px-1 text-xs font-bold text-slate-700">
+                <div>
+                    <span>Kayıtlı Ödev Günü Sayısı: <strong class="text-red-700 font-black" x-text="getReportHomeworkDates().length"></strong> Gün</span>
+                    <span class="mx-1.5">•</span>
+                    <span>Sınıf Mevcudu: <strong class="text-black font-black" x-text="getReportStudents().length"></strong> Öğrenci</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-[11px] text-slate-500 font-bold">Puan Sembolleri: ⭐ (+4p) | ✅ (+2p) | ⚠️ (+1p) | ❌ (0p) | 🚫 (G)</span>
+                </div>
+            </div>
+
+            <!-- Yazdırılabilir Alan (Tablo) -->
+            <div class="flex-1 overflow-auto bg-white rounded-2xl border-2 border-slate-300 shadow-inner p-3" id="printableReportArea">
+                <div class="header-box text-center pb-2 mb-3 border-b-2 border-red-600">
+                    <h2 class="text-base font-black text-black">ROTALI FENCİ — FEN BİLİMLERİ ÖDEV TAKİP ÇİZELGESİ</h2>
+                    <div class="text-xs font-bold text-slate-700 mt-0.5">
+                        <span>Sınıf: <strong class="text-red-700" x-text="reportClassId"></strong></span> |
+                        <span>Öğretmen: <strong>Murat Kundakcı</strong></span> |
+                        <span>Tarih Aralığı: <span x-text="reportStartDate + ' ile ' + reportEndDate + ' Arası'"></span></span>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs border-collapse border border-slate-400">
+                        <thead>
+                            <tr class="bg-slate-200 text-black font-black text-[11px]">
+                                <th class="border border-slate-400 p-2 w-10 text-center">No</th>
+                                <th class="border border-slate-400 p-2 text-left min-w-[150px]">Öğrenci Adı Soyadı</th>
+                                <template x-for="d in getReportHomeworkDates()" :key="d.date">
+                                    <th class="border border-slate-400 p-1.5 text-center min-w-[65px]" :title="d.title || d.date">
+                                        <div class="text-[10px] font-black text-red-800" x-text="d.date.slice(5)"></div>
+                                        <div class="text-[9px] text-slate-600 font-normal truncate max-w-[60px]" x-text="d.title ? d.title.slice(0, 10) : ''"></div>
+                                    </th>
+                                </template>
+                                <th class="border border-slate-400 p-2 text-center w-16 bg-red-100 text-red-950 font-black">Top. Puan</th>
+                                <th class="border border-slate-400 p-2 text-center w-16 bg-emerald-100 text-emerald-950 font-black">Başarı</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-300">
+                            <template x-for="st in getReportStudents()" :key="st.id">
+                                <tr class="hover:bg-slate-50 transition">
+                                    <td class="border border-slate-300 p-1.5 text-center font-mono font-bold text-red-700" x-text="st.no"></td>
+                                    <td class="border border-slate-300 p-1.5 font-bold text-black text-left" x-text="st.name"></td>
+                                    
+                                    <!-- Her Tarih Hücresi -->
+                                    <template x-for="d in getReportHomeworkDates()" :key="d.date">
+                                        <td class="border border-slate-300 p-1 text-center font-bold">
+                                            <span x-show="getStudentGradeForDate(st.id, d.date).score === '4'" class="text-yellow-700 font-black">⭐ +4</span>
+                                            <span x-show="getStudentGradeForDate(st.id, d.date).score === '2'" class="text-emerald-700 font-black">✅ +2</span>
+                                            <span x-show="getStudentGradeForDate(st.id, d.date).score === '1'" class="text-amber-700 font-black">⚠️ +1</span>
+                                            <span x-show="getStudentGradeForDate(st.id, d.date).score === '0'" class="text-red-700 font-black">❌ 0</span>
+                                            <span x-show="getStudentGradeForDate(st.id, d.date).score === 'G'" class="text-slate-600 font-black">🚫 G</span>
+                                            <span x-show="!getStudentGradeForDate(st.id, d.date).score" class="text-slate-300">-</span>
+                                        </td>
+                                    </template>
+
+                                    <!-- Toplam Puan -->
+                                    <td class="border border-slate-300 p-1.5 text-center font-black text-red-900 bg-red-50" x-text="getReportStudentStats(st.id).total + ' p'"></td>
+                                    <!-- Başarı Yüzdesi -->
+                                    <td class="border border-slate-300 p-1.5 text-center font-black text-emerald-900 bg-emerald-50" x-text="'%' + getReportStudentStats(st.id).percent"></td>
+                                </tr>
+                            </template>
+                            <tr x-show="getReportStudents().length === 0">
+                                <td :colspan="getReportHomeworkDates().length + 4" class="p-4 text-center text-slate-500 font-bold">
+                                    Seçili sınıfta öğrenci kaydı bulunamadı.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Alt Butonlar -->
+            <div class="flex items-center justify-between pt-2 border-t-2 border-slate-300">
+                <button @click="isPrintReportModalOpen = false" class="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-200 text-slate-800 font-black text-xs border border-slate-300 shadow-sm">
+                    Kapat
+                </button>
+                <button @click="printDetailedReport()" class="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-xs shadow-md flex items-center gap-1.5 transition transform hover:scale-105">
+                    <i data-lucide="printer" class="w-4 h-4"></i>
+                    <span>🖨️ Sayfayı Yazdır / PDF Al</span>
+                </button>
             </div>
 
         </div>
