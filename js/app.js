@@ -97,6 +97,13 @@ document.addEventListener('alpine:init', () => {
             room: 'Fen Laboratuvarı'
         },
 
+        // 📅 Türkiye Yüzyılı Maarif Modeli Yıllık Plan Modalı
+        isAnnualPlanModalOpen: false,
+        selectedAnnualPlanGrade: 5,
+        annualPlanSearchQuery: '',
+        annualPlanData: window.AnnualPlanData || {},
+        curriculumData: window.CurriculumData || {},
+
         // Güvenlik & Şifreli Yönetici Girişi
         isAuthenticated: localStorage.getItem('rotali_auth_state') === 'authenticated',
         loginPassword: '',
@@ -933,6 +940,36 @@ document.addEventListener('alpine:init', () => {
         printCertificate() {
             const certHtml = document.getElementById('printable-certificate-container').innerHTML;
             window.Exporter.printContent('Başarı Belgesi - ' + this.certStudentName, certHtml);
+        },
+
+        // ================= YILLIK PLAN & MAARİF KAZANIMLARI METODLARI =================
+        openAnnualPlanModal(grade = 5) {
+            this.selectedAnnualPlanGrade = Number(grade) || 5;
+            this.annualPlanSearchQuery = '';
+            this.isAnnualPlanModalOpen = true;
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+
+        getFilteredAnnualPlan(grade = null) {
+            const g = grade || this.selectedAnnualPlanGrade || 5;
+            const plans = window.AnnualPlanData ? window.AnnualPlanData[g] : [];
+            if (!plans || !Array.isArray(plans)) return [];
+
+            const query = (this.annualPlanSearchQuery || '').trim().toLowerCase();
+            if (!query) return plans;
+
+            return plans.filter(w => {
+                const searchStr = `${w.week} ${w.date} ${w.unit} ${w.topic} ${w.outcome} ${w.process} ${w.values || ''} ${w.specialDays || ''}`.toLowerCase();
+                return searchStr.includes(query);
+            });
+        },
+
+        printAnnualPlan(grade = null) {
+            const g = grade || this.selectedAnnualPlanGrade || 5;
+            const container = document.getElementById('printable-annual-plan-container');
+            if (container) {
+                window.Exporter.printContent(`${g}. Sınıf Fen Bilimleri Maarif Modeli Yıllık Planı`, container.innerHTML);
+            }
         },
 
         // JSON Yedek İndir
