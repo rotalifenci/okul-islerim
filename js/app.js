@@ -133,7 +133,7 @@ document.addEventListener('alpine:init', () => {
             topic: '',
             outcomeCode: '',
             outcomeDesc: '',
-            room: 'Fen Laboratuvarı'
+            room: 'Kendi Sınıfı'
         },
 
         // Güvenlik & Şifreli Yönetici Girişi
@@ -167,6 +167,33 @@ document.addEventListener('alpine:init', () => {
             show: false,
             message: ''
         },
+
+        
+        // 📱 Mobil & Yönetim Menüsü Durumu
+        isMobileMenuOpen: false,
+        isMenuManagerModalOpen: false,
+        isAddSectionModalOpen: false,
+        isEditSectionModalOpen: false,
+        editingSection: { id: '', title: '', icon: 'folder', color: 'blue', badge: '', description: '', visible: true },
+        newSectionForm: { title: '', icon: 'folder', color: 'blue', badge: '', description: '' },
+        
+        // 📦 Özel Bölüm İçerik Formu
+        isCustomItemModalOpen: false,
+        isEditCustomItem: false,
+        customItemForm: { id: '', sectionId: '', title: '', category: '', count: '', status: 'Aktif', note: '', date: '' },
+        
+        // 👨‍🎓 Öğrenci Düzenleme Modalı
+        isEditStudentModalOpen: false,
+        editingStudent: { id: '', name: '', no: '', classId: '5A', notes: '', avatar: '👨‍🎓' },
+
+        // 📅 Yıllık Plan / Kazanım Düzenleme
+        isAddCurriculumModalOpen: false,
+        isEditCurriculumModalOpen: false,
+        curriculumForm: { grade: 5, weekNo: 1, dateRange: '', unit: '', outcomeCode: '', outcomeTitle: '', activities: '', notes: '' },
+
+        // 🚀 Proje Düzenleme Modalı
+        isEditProjCalModalOpen: false,
+        editingProjCal: { id: '', title: '', category: 'TÜBİTAK', targetProject: '', startDate: '', deadline: '', status: 'Planlandı', priority: 'Yüksek', notes: '' },
 
         // Başlangıç
         init() {
@@ -955,7 +982,7 @@ document.addEventListener('alpine:init', () => {
                 topic: existing?.topic || '',
                 outcomeCode: existing?.outcomeCode || '',
                 outcomeDesc: existing?.outcomeDesc || '',
-                room: existing?.room || 'Fen Laboratuvarı'
+                room: existing?.room || (existing?.classId ? existing.classId + ' Sınıfı' : 'Kendi Sınıfı')
             };
             this.isEditLessonModalOpen = true;
         },
@@ -1046,8 +1073,8 @@ document.addEventListener('alpine:init', () => {
                 '5/A': { subject: 'Fen Bilimleri', topic: 'Güneş, Dünya ve Ay / Güneşin Yapısı', code: 'FB.5.1.1.1', desc: 'Güneş\'in yapısı, katmanları ve kendi ekseni etrafındaki dönme hareketini gözlem verileriyle modeller ve açıklar.', room: '5/A Sınıfı' },
                 '5/D': { subject: 'Fen Bilimleri', topic: 'Güneş, Dünya ve Ay / Ay\'ın Evreleri', code: 'FB.5.1.1.1', desc: 'Güneş\'in yapısı ve Ay\'ın evrelerinin oluşum sırasını Dünya etrafındaki dolanma hareketiyle modeller.', room: '5/D Sınıfı' },
                 '6/G': { subject: 'Fen Bilimleri', topic: 'Güneş Sistemi, Tutulmalar ve Denetleyici Sistemler', code: 'FB.6.1.1.1', desc: 'Güneş sistemi gezegenlerini, Güneş ve Ay tutulmalarını modeller; denetleyici ve düzenleyici sistemleri açıklar.', room: '6/G Sınıfı' },
-                '7/A': { subject: 'Fen Bilimleri', topic: 'Hücre, Organeller ve Mitoz Bölünme', code: 'FB.7.2.1.1', desc: 'Bitki ve hayvan hücrelerini organelleri bakımından karşılaştırır; hücre-doku-organ-sistem ilişkisini modeller.', room: 'Fen Laboratuvarı' },
-                '7/B': { subject: 'Fen Bilimleri', topic: 'Hücre, Organeller ve Mayoz Bölünme', code: 'FB.7.2.1.1', desc: 'Bitki ve hayvan hücrelerini karşılaştırır; mitoz ve mayoz bölünmenin canlılar için önemini açıklar.', room: 'Fen Laboratuvarı' },
+                '7/A': { subject: 'Fen Bilimleri', topic: 'Hücre, Organeller ve Mitoz Bölünme', code: 'FB.7.2.1.1', desc: 'Bitki ve hayvan hücrelerini organelleri bakımından karşılaştırır; hücre-doku-organ-sistem ilişkisini modeller.', room: 'Kendi Sınıfı' },
+                '7/B': { subject: 'Fen Bilimleri', topic: 'Hücre, Organeller ve Mayoz Bölünme', code: 'FB.7.2.1.1', desc: 'Bitki ve hayvan hücrelerini karşılaştırır; mitoz ve mayoz bölünmenin canlılar için önemini açıklar.', room: 'Kendi Sınıfı' },
                 '5/D Rehberlik': { subject: 'Rehberlik ve Yönlendirme', topic: 'Sınıf Rehberliği ve Uyum', code: 'REHB.5.1', desc: '5/D Şube Rehberliği: Okula uyum, akran iletişimi, zaman yönetimi ve verimli çalışma oturumu.', room: '5/D Sınıfı' },
                 '8/A': { subject: 'Fen Bilimleri (LGS)', topic: 'Mevsimlerin Oluşumu ve DNA/Genetik Kod', code: 'F.8.1.1.1', desc: 'Mevsimlerin oluşumuna yönelik dönme ekseni eğikliği ve Güneş etrafında dolanma hareketinin etkilerini modeller üzerinden tahmin eder ve açıklar.', room: '8/A Sınıfı' },
                 '8/B': { subject: 'Fen Bilimleri (LGS)', topic: 'İklim, Hava Hareketleri ve DNA Eşlenmesi', code: 'F.8.1.2.1', desc: 'İklim ve hava olayları arasındaki temel farkları, klimatoloji ve meteoroloji bilim dallarının çalışma yöntemlerini grafik ve harita verileriyle analiz eder.', room: '8/B Sınıfı' },
@@ -1120,8 +1147,8 @@ document.addEventListener('alpine:init', () => {
                 '5/A': { subject: 'Fen Bilimleri', topic: 'Gökyüzündeki Komşumuz: Güneş', code: 'FB.5.1.1', desc: 'Güneş’in yapısı ve dönme hareketi ile ilgili bilgi toplayabilme', room: '5/A Sınıfı' },
                 '5/D': { subject: 'Fen Bilimleri', topic: 'Gökyüzündeki Komşumuz: Güneş & Ay', code: 'FB.5.1.1', desc: 'Güneş’in yapısı ve dönme hareketi ile ilgili bilgi toplayabilme; Ay’ın evrelerini modelleme', room: '5/D Sınıfı' },
                 '6/G': { subject: 'Fen Bilimleri', topic: 'Güneş Sistemi ve Gezegenler', code: 'FB.6.1.1', desc: 'Güneş sistemindeki gezegenleri niteliklerine göre sınıflandırabilme', room: '6/G Sınıfı' },
-                '7/A': { subject: 'Fen Bilimleri', topic: 'Uzay Çağı & Uzay Araştırmaları', code: 'FB.7.1.1', desc: 'Uzay araştırmaları için geliştirilen teknolojileri karşılaştırabilme', room: 'Fen Laboratuvarı' },
-                '7/B': { subject: 'Fen Bilimleri', topic: 'Uzay Çağı & Gözlem Araçları', code: 'FB.7.1.1', desc: 'Uzay araştırmaları için geliştirilen teknolojileri karşılaştırabilme; gözlem araçlarını modelleme', room: 'Fen Laboratuvarı' },
+                '7/A': { subject: 'Fen Bilimleri', topic: 'Uzay Çağı & Uzay Araştırmaları', code: 'FB.7.1.1', desc: 'Uzay araştırmaları için geliştirilen teknolojileri karşılaştırabilme', room: 'Kendi Sınıfı' },
+                '7/B': { subject: 'Fen Bilimleri', topic: 'Uzay Çağı & Gözlem Araçları', code: 'FB.7.1.1', desc: 'Uzay araştırmaları için geliştirilen teknolojileri karşılaştırabilme; gözlem araçlarını modelleme', room: 'Kendi Sınıfı' },
                 '5/D Rehberlik': { subject: 'Rehberlik ve Yönlendirme', topic: 'Sınıf Rehberliği ve Uyum', code: 'REHB.5.1', desc: '5/D Şube Rehberliği: Okula uyum, akran iletişimi, zaman yönetimi ve verimli çalışma oturumu.', room: '5/D Sınıfı' },
                 '8/A': { subject: 'Fen Bilimleri (LGS)', topic: 'Mevsimlerin Oluşumu', code: 'F.8.1.1.1', desc: 'Mevsimlerin oluşumuna yönelik tahminlerde bulunur.', room: '8/A Sınıfı' },
                 '8/B': { subject: 'Fen Bilimleri (LGS)', topic: 'İklim ve Hava Hareketleri', code: 'F.8.1.2.1', desc: 'İklim ve hava olayları arasındaki farkı açıklar.', room: '8/B Sınıfı' },
@@ -1216,8 +1243,8 @@ document.addEventListener('alpine:init', () => {
                 '5/A': { subject: 'Fen Bilimleri', topic: 'Gökyüzündeki Komşumuz: Güneş', code: 'FB.5.1.1', desc: 'Güneş’in yapısı ve dönme hareketi ile ilgili bilgi toplayabilme', room: '5/A Sınıfı' },
                 '5/D': { subject: 'Fen Bilimleri', topic: 'Gökyüzündeki Komşumuz: Güneş & Ay', code: 'FB.5.1.1', desc: 'Güneş’in yapısı ve dönme hareketi ile ilgili bilgi toplayabilme; Ay’ın evrelerini modelleme', room: '5/D Sınıfı' },
                 '6/G': { subject: 'Fen Bilimleri', topic: 'Güneş Sistemi ve Gezegenler', code: 'FB.6.1.1', desc: 'Güneş sistemindeki gezegenleri niteliklerine göre sınıflandırabilme', room: '6/G Sınıfı' },
-                '7/A': { subject: 'Fen Bilimleri', topic: 'Uzay Çağı & Uzay Araştırmaları', code: 'FB.7.1.1', desc: 'Uzay araştırmaları için geliştirilen teknolojileri karşılaştırabilme', room: 'Fen Laboratuvarı' },
-                '7/B': { subject: 'Fen Bilimleri', topic: 'Uzay Çağı & Gözlem Araçları', code: 'FB.7.1.1', desc: 'Uzay araştırmaları için geliştirilen teknolojileri karşılaştırabilme; gözlem araçlarını modelleme', room: 'Fen Laboratuvarı' },
+                '7/A': { subject: 'Fen Bilimleri', topic: 'Uzay Çağı & Uzay Araştırmaları', code: 'FB.7.1.1', desc: 'Uzay araştırmaları için geliştirilen teknolojileri karşılaştırabilme', room: 'Kendi Sınıfı' },
+                '7/B': { subject: 'Fen Bilimleri', topic: 'Uzay Çağı & Gözlem Araçları', code: 'FB.7.1.1', desc: 'Uzay araştırmaları için geliştirilen teknolojileri karşılaştırabilme; gözlem araçlarını modelleme', room: 'Kendi Sınıfı' },
                 '5/D Rehberlik': { subject: 'Rehberlik ve Yönlendirme', topic: 'Sınıf Rehberliği ve Uyum', code: 'REHB.5.1', desc: '5/D Şube Rehberliği: Okula uyum, akran iletişimi, zaman yönetimi ve verimli çalışma oturumu.', room: '5/D Sınıfı' },
                 '8/A': { subject: 'Fen Bilimleri (LGS)', topic: 'Mevsimlerin Oluşumu', code: 'F.8.1.1.1', desc: 'Mevsimlerin oluşumuna yönelik tahminlerde bulunur.', room: '8/A Sınıfı' },
                 '8/B': { subject: 'Fen Bilimleri (LGS)', topic: 'İklim ve Hava Hareketleri', code: 'F.8.1.2.1', desc: 'İklim ve hava olayları arasındaki farkı açıklar.', room: '8/B Sınıfı' },
@@ -1233,7 +1260,7 @@ document.addEventListener('alpine:init', () => {
                 topic: '',
                 code: '',
                 desc: '',
-                room: 'Fen Laboratuvarı'
+                room: 'Kendi Sınıfı'
             };
 
             if (!this.data.weeklySchedule) this.data.weeklySchedule = {};
@@ -1515,6 +1542,346 @@ document.addEventListener('alpine:init', () => {
         },
 
         // JSON Yedek İndir
+
+        // ==========================================
+        // 📱 MOBİL & YÖNETİM MENÜSÜ YÖNETİCİSİ (CRUD)
+        // ==========================================
+        get navSectionsList() {
+            return this.data.navSections || [];
+        },
+        get visibleNavSections() {
+            return (this.data.navSections || []).filter(s => s.visible !== false);
+        },
+        toggleMobileMenu() {
+            this.isMobileMenuOpen = !this.isMobileMenuOpen;
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+        closeMobileMenu() {
+            this.isMobileMenuOpen = false;
+        },
+        openMenuManager() {
+            this.isMenuManagerModalOpen = true;
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+        moveSection(index, direction) {
+            const list = this.data.navSections;
+            if (!list) return;
+            const newIndex = index + direction;
+            if (newIndex < 0 || newIndex >= list.length) return;
+            const temp = list[index];
+            list[index] = list[newIndex];
+            list[newIndex] = temp;
+            window.StorageManager.saveData(this.data);
+            this.showToast("Menü sırası güncellendi! ↕️");
+        },
+        toggleSectionVisibility(sec) {
+            sec.visible = sec.visible === false ? true : false;
+            window.StorageManager.saveData(this.data);
+            this.showToast(sec.visible ? `${sec.title} menüde gösterildi 👁️` : `${sec.title} menüden gizlendi 🙈`);
+        },
+        openAddSection() {
+            this.newSectionForm = {
+                title: '',
+                icon: 'folder',
+                color: 'blue',
+                badge: 'Yeni',
+                description: ''
+            };
+            this.isAddSectionModalOpen = true;
+        },
+        saveNewSection() {
+            if (!this.newSectionForm.title.trim()) {
+                alert("Lütfen bölüm adını yazınız!");
+                return;
+            }
+            const secId = 'sec_' + Date.now().toString(36);
+            const newSec = {
+                id: secId,
+                title: this.newSectionForm.title.trim(),
+                icon: this.newSectionForm.icon || 'folder',
+                color: this.newSectionForm.color || 'blue',
+                badge: this.newSectionForm.badge ? this.newSectionForm.badge.trim() : '',
+                visible: true,
+                isSystem: false,
+                description: this.newSectionForm.description || ''
+            };
+            if (!this.data.navSections) this.data.navSections = [];
+            this.data.navSections.push(newSec);
+
+            if (!this.data.customSections) this.data.customSections = [];
+            this.data.customSections.push({
+                id: secId,
+                title: newSec.title,
+                icon: newSec.icon,
+                color: newSec.color,
+                badge: newSec.badge,
+                description: newSec.description,
+                items: []
+            });
+
+            window.StorageManager.saveData(this.data);
+            this.isAddSectionModalOpen = false;
+            this.currentTab = secId;
+            this.showToast(`"${newSec.title}" bölümü eklendi ve açıldı! 🎉`);
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+        openEditSection(sec) {
+            this.editingSection = JSON.parse(JSON.stringify(sec));
+            this.isEditSectionModalOpen = true;
+        },
+        saveEditSection() {
+            if (!this.editingSection.title.trim()) {
+                alert("Lütfen bölüm adını yazınız!");
+                return;
+            }
+            const sec = (this.data.navSections || []).find(s => s.id === this.editingSection.id);
+            if (sec) {
+                sec.title = this.editingSection.title.trim();
+                sec.icon = this.editingSection.icon || sec.icon;
+                sec.color = this.editingSection.color || sec.color;
+                sec.badge = this.editingSection.badge ? this.editingSection.badge.trim() : '';
+            }
+            const custom = (this.data.customSections || []).find(s => s.id === this.editingSection.id);
+            if (custom) {
+                custom.title = this.editingSection.title.trim();
+                custom.icon = this.editingSection.icon || custom.icon;
+                custom.color = this.editingSection.color || custom.color;
+                custom.description = this.editingSection.description || '';
+            }
+            window.StorageManager.saveData(this.data);
+            this.isEditSectionModalOpen = false;
+            this.showToast("Bölüm başarıyla güncellendi! ✅");
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+        deleteSection(sec) {
+            if (sec.isSystem) {
+                alert("Sistem varsayılan bölümleri silinemez, dilerseniz gizleyebilirsiniz.");
+                return;
+            }
+            if (!confirm(`"${sec.title}" bölümünü ve içindeki tüm kayıtları silmek istediğinize emin misiniz?`)) {
+                return;
+            }
+            this.data.navSections = (this.data.navSections || []).filter(s => s.id !== sec.id);
+            this.data.customSections = (this.data.customSections || []).filter(s => s.id !== sec.id);
+            if (this.currentTab === sec.id) {
+                this.currentTab = 'calendar-tasks';
+            }
+            window.StorageManager.saveData(this.data);
+            this.showToast(`"${sec.title}" bölümü silindi. 🗑️`);
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+        resetNavSections() {
+            if (!confirm("Tüm yönetim menüsü sıralaması ve varsayılan bölümler fabrika ayarlarına sıfırlansın mı?")) return;
+            this.data.navSections = JSON.parse(JSON.stringify(window.InitialData.navSections || []));
+            window.StorageManager.saveData(this.data);
+            this.showToast("Menü düzeni varsayılana sıfırlandı! 🔄");
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+
+        // ==========================================
+        // 📦 ÖZEL BÖLÜMLER İÇERİK YÖNETİCİSİ (CRUD)
+        // ==========================================
+        isCustomSection(tabId) {
+            return (this.data.customSections || []).some(s => s.id === tabId);
+        },
+        getCustomSection(tabId) {
+            return (this.data.customSections || []).find(s => s.id === tabId) || { id: tabId, title: 'Özel Bölüm', items: [] };
+        },
+        openAddCustomItem(sectionId) {
+            this.isEditCustomItem = false;
+            this.customItemForm = {
+                id: 'item_' + Date.now().toString(36),
+                sectionId: sectionId,
+                title: '',
+                category: 'Genel',
+                count: '',
+                status: 'Aktif',
+                note: '',
+                date: new Date().toISOString().slice(0, 10)
+            };
+            this.isCustomItemModalOpen = true;
+        },
+        openEditCustomItem(sectionId, item) {
+            this.isEditCustomItem = true;
+            this.customItemForm = {
+                id: item.id,
+                sectionId: sectionId,
+                title: item.title || '',
+                category: item.category || 'Genel',
+                count: item.count || '',
+                status: item.status || 'Aktif',
+                note: item.note || '',
+                date: item.date || new Date().toISOString().slice(0, 10)
+            };
+            this.isCustomItemModalOpen = true;
+        },
+        saveCustomItem() {
+            if (!this.customItemForm.title.trim()) {
+                alert("Lütfen bir başlık giriniz!");
+                return;
+            }
+            const sec = (this.data.customSections || []).find(s => s.id === this.customItemForm.sectionId);
+            if (!sec) return;
+            if (!sec.items) sec.items = [];
+
+            if (this.isEditCustomItem) {
+                const idx = sec.items.findIndex(it => it.id === this.customItemForm.id);
+                if (idx !== -1) {
+                    sec.items[idx] = { ...this.customItemForm };
+                }
+            } else {
+                sec.items.unshift({ ...this.customItemForm });
+            }
+            window.StorageManager.saveData(this.data);
+            this.isCustomItemModalOpen = false;
+            this.showToast("Kayıt başarıyla kaydedildi! 💾");
+        },
+        deleteCustomItem(sectionId, itemId) {
+            if (!confirm("Bu kaydı silmek istediğinize emin misiniz?")) return;
+            const sec = (this.data.customSections || []).find(s => s.id === sectionId);
+            if (sec && sec.items) {
+                sec.items = sec.items.filter(it => it.id !== itemId);
+                window.StorageManager.saveData(this.data);
+                this.showToast("Kayıt silindi! 🗑️");
+            }
+        },
+
+        // ==========================================
+        // 👨‍🎓 ÖĞRENCİ DÜZENLEME & SİLME (CRUD)
+        // ==========================================
+        openEditStudent(st) {
+            this.editingStudent = {
+                id: st.id,
+                name: st.name || '',
+                no: st.no || '',
+                classId: st.classId || this.selectedClassId,
+                notes: st.notes || '',
+                avatar: st.avatar || '👨‍🎓'
+            };
+            this.isEditStudentModalOpen = true;
+        },
+        saveEditStudent() {
+            if (!this.editingStudent.name.trim()) {
+                alert("Lütfen öğrenci adını giriniz!");
+                return;
+            }
+            const idx = (this.data.students || []).findIndex(s => s.id === this.editingStudent.id);
+            if (idx !== -1) {
+                this.data.students[idx].name = this.editingStudent.name.trim();
+                this.data.students[idx].no = Number(this.editingStudent.no) || this.data.students[idx].no;
+                this.data.students[idx].classId = this.editingStudent.classId;
+                this.data.students[idx].notes = this.editingStudent.notes;
+                this.data.students[idx].avatar = this.editingStudent.avatar;
+                
+                // Sırala
+                this.data.students.sort((a, b) => (Number(a.no) || 0) - (Number(b.no) || 0));
+                window.StorageManager.saveData(this.data);
+                this.isEditStudentModalOpen = false;
+                this.showToast(`${this.editingStudent.name} başarıyla güncellendi! ✅`);
+            }
+        },
+        confirmDeleteStudent(st) {
+            if (!confirm(`"${st.no} - ${st.name}" öğrencisini silmek istediğinize emin misiniz?`)) return;
+            this.deleteStudent(st);
+            this.showToast(`${st.name} silindi. 🗑️`);
+        },
+
+        // ==========================================
+        // 🚀 PROJE TAKVİMİ DÜZENLEME & SİLME (CRUD)
+        // ==========================================
+        openEditProjCal(p) {
+            this.editingProjCal = {
+                id: p.id,
+                title: p.title || '',
+                category: p.category || 'TÜBİTAK',
+                targetProject: p.targetProject || '',
+                startDate: p.startDate || '',
+                deadline: p.deadline || '',
+                status: p.status || 'Planlandı',
+                priority: p.priority || 'Yüksek',
+                notes: p.notes || ''
+            };
+            this.isEditProjCalModalOpen = true;
+        },
+        saveEditProjCal() {
+            if (!this.editingProjCal.title.trim()) {
+                alert("Lütfen proje başlığı giriniz!");
+                return;
+            }
+            const idx = (this.data.projectCalendar || []).findIndex(p => p.id === this.editingProjCal.id);
+            if (idx !== -1) {
+                this.data.projectCalendar[idx] = { ...this.editingProjCal };
+                window.StorageManager.saveData(this.data);
+                this.isEditProjCalModalOpen = false;
+                this.showToast("Proje kaydı güncellendi! ✅");
+            }
+        },
+        deleteProjCal(pId) {
+            if (!confirm("Bu projeyi takvimden silmek istediğinize emin misiniz?")) return;
+            this.data.projectCalendar = (this.data.projectCalendar || []).filter(p => p.id !== pId);
+            window.StorageManager.saveData(this.data);
+            this.showToast("Proje takvimden silindi. 🗑️");
+        },
+
+        // ==========================================
+        // 📋 MAARİF YILLIK PLAN DÜZENLEME (CRUD)
+        // ==========================================
+        openAddCurriculum(grade) {
+            this.curriculumForm = {
+                grade: grade || this.selectedAnnualPlanGrade || 5,
+                weekNo: (this.getGradeCurriculum(grade).length + 1) || 1,
+                dateRange: 'Yeni Hafta',
+                unit: 'Fen Bilimleri Ünitesi',
+                outcomeCode: `FB.${grade || 5}.`,
+                outcomeTitle: '',
+                activities: '',
+                notes: ''
+            };
+            this.isAddCurriculumModalOpen = true;
+        },
+        openEditCurriculum(grade, item) {
+            this.curriculumForm = {
+                grade: grade || this.selectedAnnualPlanGrade || 5,
+                weekNo: item.weekNo || 1,
+                dateRange: item.dateRange || '',
+                unit: item.unit || '',
+                outcomeCode: item.outcomeCode || '',
+                outcomeTitle: item.outcomeTitle || '',
+                activities: item.activities || '',
+                notes: item.notes || ''
+            };
+            this.isEditCurriculumModalOpen = true;
+        },
+        saveCurriculumWeek() {
+            if (!this.curriculumForm.outcomeTitle.trim()) {
+                alert("Lütfen kazanım veya konu başlığını giriniz!");
+                return;
+            }
+            const g = this.curriculumForm.grade;
+            if (!this.curriculumData[g]) this.curriculumData[g] = [];
+            
+            const existingIdx = this.curriculumData[g].findIndex(w => w.weekNo === this.curriculumForm.weekNo);
+            if (existingIdx !== -1) {
+                this.curriculumData[g][existingIdx] = { ...this.curriculumForm };
+            } else {
+                this.curriculumData[g].push({ ...this.curriculumForm });
+                this.curriculumData[g].sort((a, b) => a.weekNo - b.weekNo);
+            }
+            // Kaydet
+            localStorage.setItem(`rotali_curriculum_${g}`, JSON.stringify(this.curriculumData[g]));
+            this.isAddCurriculumModalOpen = false;
+            this.isEditCurriculumModalOpen = false;
+            this.showToast("Yıllık plan haftası kaydedildi! 📋");
+        },
+        deleteCurriculumWeek(grade, weekNo) {
+            if (!confirm(`${weekNo}. Hafta kazanımını silmek istediğinize emin misiniz?`)) return;
+            if (this.curriculumData[grade]) {
+                this.curriculumData[grade] = this.curriculumData[grade].filter(w => w.weekNo !== weekNo);
+                localStorage.setItem(`rotali_curriculum_${grade}`, JSON.stringify(this.curriculumData[grade]));
+                this.showToast("Kazanım planı silindi. 🗑️");
+            }
+        },
+
         exportBackup() {
             window.StorageManager.exportJSON(this.data);
             this.showToast("Yedek dosyası indirildi! 💾");

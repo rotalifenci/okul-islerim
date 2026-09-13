@@ -28,6 +28,17 @@ window.StorageManager = {
                         parsed._mai_sinif_students_v1 = true;
                         this.saveData(parsed);
                     }
+                    if (!parsed.navSections || !parsed.navSections.length) {
+                        parsed.navSections = JSON.parse(JSON.stringify(window.InitialData.navSections || []));
+                    }
+                    if (!parsed.customSections) {
+                        parsed.customSections = JSON.parse(JSON.stringify(window.InitialData.customSections || []));
+                    }
+                    if (!parsed._clean_classrooms_v1 && window.InitialData.weeklySchedule) {
+                        parsed.weeklySchedule = JSON.parse(JSON.stringify(window.InitialData.weeklySchedule));
+                        parsed._clean_classrooms_v1 = true;
+                        this.saveData(parsed);
+                    }
                     if (!parsed.lessonPeriods) parsed.lessonPeriods = JSON.parse(JSON.stringify(window.InitialData.lessonPeriods || []));
                 }
                 return parsed;

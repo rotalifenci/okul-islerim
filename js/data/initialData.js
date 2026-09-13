@@ -14,6 +14,46 @@ window.InitialData = {
         rehberLessons: 1,
         freeLessons: 14
     },
+    navSections: [
+        { id: 'calendar-tasks', title: '📅 Ders Programı', icon: 'calendar', color: 'amber', visible: true, isSystem: true, badge: 'Günde 7 Ders' },
+        { id: 'students', title: '📝 Öğrenci Ödev Kontrolü', icon: 'clipboard-check', color: 'sky', visible: true, isSystem: true, badge: '' },
+        { id: 'assignments', title: '📚 Ödevler', icon: 'book-marked', color: 'purple', visible: true, isSystem: true, badge: '' },
+        { id: 'annual-plan', title: '📋 Maarif Yıllık Planı', icon: 'book-open', color: 'emerald', visible: true, isSystem: true, badge: '5, 6, 7, 8' },
+        { id: 'project-calendar', title: 'Proje Takvimi', icon: 'calendar-range', color: 'emerald', visible: true, isSystem: true, badge: '' },
+        { id: 'certificates', title: 'Sertifika / Belge Üretici', icon: 'award', color: 'yellow', visible: true, isSystem: true, badge: '' },
+        { id: 'social', title: 'Sosyal Medya & Bülten', icon: 'share-2', color: 'pink', visible: true, isSystem: true, badge: '' },
+        { id: 'ai-assistant', title: 'AI Öğretmen Asistanı', icon: 'sparkles', color: 'red', visible: true, isSystem: true, badge: '' },
+        { id: 'settings', title: 'Ayarlar & Yedekleme', icon: 'settings', color: 'slate', visible: true, isSystem: true, badge: '' }
+    ],
+    customSections: [
+        {
+            id: 'lab-inventory',
+            title: '🧪 Laboratuvar & Deney Envanteri',
+            icon: 'flask-conical',
+            color: 'teal',
+            visible: true,
+            isSystem: false,
+            badge: 'Özel Bölüm',
+            description: 'Fen laboratuvarı deney malzemeleri, kimyasal ve mikroskop stok takibi.',
+            items: [
+                { id: 'item-1', title: 'Işık Mikroskobu (4 Adet)', category: 'Cihaz', count: '4 Adet', status: 'Faal', note: 'Lam ve lamel setleri yenilendi.', date: '2026-09-10' },
+                { id: 'item-2', title: 'Dinamometre Seti (1N, 5N, 10N)', category: 'Ölçüm', count: '10 Takım', status: 'Faal', note: 'Kuvvet ve enerji deneyleri için hazır.', date: '2026-09-11' }
+            ]
+        },
+        {
+            id: 'parent-meetings',
+            title: '📞 Veli İletişim & Randevu Defteri',
+            icon: 'phone-call',
+            color: 'blue',
+            visible: true,
+            isSystem: false,
+            badge: 'Rehberlik',
+            description: '5/D Şube Rehberliği ve diğer sınıfların veli görüşme notları ve randevuları.',
+            items: [
+                { id: 'parent-1', title: '5/D Ahmet Berat Velisi Görüşmesi', category: 'Akademik Takip', count: 'Görüşüldü', status: 'Tamamlandı', note: 'Ders içi katılım ve ödev disiplini hakkında bilgilendirme yapıldı.', date: '2026-09-12' }
+            ]
+        }
+    ],
     classes: [
         { id: "5A", name: "5/A", grade: 5, studentCount: 30, advisor: "Ayşe Yılmaz" },
         { id: "5D", name: "5/D", grade: 5, studentCount: 30, advisor: "Murat Kundakcı" },
@@ -365,11 +405,11 @@ window.InitialData = {
     ],
     weeklySchedule: {
         "Pazartesi": [
-            { periodNo: 1, classId: "7/B", subject: "Fen Bilimleri", topic: "Uzay Araştırmaları ve Uzay Teknolojileri", outcomeCode: "FB.7.1.1", outcomeDesc: "Uzay araştırmaları için geliştirilen teknolojileri karşılaştırabilme", room: "Fen Laboratuvarı" },
-            { periodNo: 2, classId: "7/B", subject: "Fen Bilimleri", topic: "Uzay Gözlem Araçları ve Teleskop Modeli", outcomeCode: "FB.7.1.2", outcomeDesc: "Uzay gözlem araçları ile ilgili bilimsel model oluşturabilme", room: "Fen Laboratuvarı" },
+            { periodNo: 1, classId: "7/B", subject: "Fen Bilimleri", topic: "Uzay Araştırmaları ve Uzay Teknolojileri", outcomeCode: "FB.7.1.1", outcomeDesc: "Uzay araştırmaları için geliştirilen teknolojileri karşılaştırabilme", room: "Kendi Sınıfı" },
+            { periodNo: 2, classId: "7/B", subject: "Fen Bilimleri", topic: "Uzay Gözlem Araçları ve Teleskop Modeli", outcomeCode: "FB.7.1.2", outcomeDesc: "Uzay gözlem araçları ile ilgili bilimsel model oluşturabilme", room: "Kendi Sınıfı" },
             { periodNo: 3, classId: "Boş", subject: "Ders Yok", topic: "", outcomeCode: "-", outcomeDesc: "Bu saatte planlanmış dersiniz bulunmamaktadır (Boş Saat / Hazırlık).", room: "Öğretmenler Odası" },
-            { periodNo: 4, classId: "7/A", subject: "Fen Bilimleri", topic: "Uzay Araştırmaları ve Uzay Teknolojileri", outcomeCode: "FB.7.1.1", outcomeDesc: "Uzay araştırmaları için geliştirilen teknolojileri karşılaştırabilme", room: "Fen Laboratuvarı" },
-            { periodNo: 5, classId: "7/A", subject: "Fen Bilimleri", topic: "Uzay Gözlem Araçları ve Teleskop Modeli", outcomeCode: "FB.7.1.2", outcomeDesc: "Uzay gözlem araçları ile ilgili bilimsel model oluşturabilme", room: "Fen Laboratuvarı" },
+            { periodNo: 4, classId: "7/A", subject: "Fen Bilimleri", topic: "Uzay Araştırmaları ve Uzay Teknolojileri", outcomeCode: "FB.7.1.1", outcomeDesc: "Uzay araştırmaları için geliştirilen teknolojileri karşılaştırabilme", room: "Kendi Sınıfı" },
+            { periodNo: 5, classId: "7/A", subject: "Fen Bilimleri", topic: "Uzay Gözlem Araçları ve Teleskop Modeli", outcomeCode: "FB.7.1.2", outcomeDesc: "Uzay gözlem araçları ile ilgili bilimsel model oluşturabilme", room: "Kendi Sınıfı" },
             { periodNo: 6, classId: "6/G", subject: "Fen Bilimleri", topic: "Güneş Sistemi ve Gezegenlerin Nitelikleri", outcomeCode: "FB.6.1.1", outcomeDesc: "Güneş sistemindeki gezegenleri niteliklerine göre sınıflandırabilme", room: "6/G Sınıfı" },
             { periodNo: 7, classId: "6/G", subject: "Fen Bilimleri", topic: "Güneş Sistemi Boyut ve Uzaklık Modeli", outcomeCode: "FB.6.1.2", outcomeDesc: "Güneş sistemi ile ilgili bilimsel model oluşturabilme", room: "6/G Sınıfı" }
         ],
@@ -388,8 +428,8 @@ window.InitialData = {
             { periodNo: 3, classId: "Boş", subject: "Ders Yok", topic: "", outcomeCode: "-", outcomeDesc: "Bu saatte planlanmış dersiniz bulunmamaktadır (Boş Saat / Hazırlık).", room: "Öğretmenler Odası" },
             { periodNo: 4, classId: "5/D", subject: "Fen Bilimleri", topic: "Ay’ın Evreleri ve Dolanma Hareketi", outcomeCode: "FB.5.1.3", outcomeDesc: "Ay’ın evrelerini temsil eden bilimsel model oluşturabilme", room: "5/D Sınıfı" },
             { periodNo: 5, classId: "5/D", subject: "Fen Bilimleri", topic: "Güneş, Dünya ve Ay’ın Göreli Hareketleri", outcomeCode: "FB.5.1.4", outcomeDesc: "Güneş, Dünya ve Ay’ın birbirlerine göre hareketlerini ve hacimsel büyüklüklerini temsil eden bilimsel model oluşturabilme", room: "5/D Sınıfı" },
-            { periodNo: 6, classId: "7/A", subject: "Fen Bilimleri", topic: "Uzay Kirliliği ve Çözüm Yolları", outcomeCode: "FB.7.1.3", outcomeDesc: "Uzay araştırmalarının yol açabileceği problemleri çözebilme", room: "Fen Laboratuvarı" },
-            { periodNo: 7, classId: "7/A", subject: "Fen Bilimleri", topic: "Yıldızların Oluşumu ve Yaşam Döngüsü", outcomeCode: "FB.7.1.4", outcomeDesc: "Yıldızların yaşamını açıklayarak yapılandırabilme", room: "Fen Laboratuvarı" }
+            { periodNo: 6, classId: "7/A", subject: "Fen Bilimleri", topic: "Uzay Kirliliği ve Çözüm Yolları", outcomeCode: "FB.7.1.3", outcomeDesc: "Uzay araştırmalarının yol açabileceği problemleri çözebilme", room: "7/A Sınıfı" },
+            { periodNo: 7, classId: "7/A", subject: "Fen Bilimleri", topic: "Yıldızların Oluşumu ve Yaşam Döngüsü", outcomeCode: "FB.7.1.4", outcomeDesc: "Yıldızların yaşamını açıklayarak yapılandırabilme", room: "7/A Sınıfı" }
         ],
         "Perşembe": [
             { periodNo: 1, classId: "Boş", subject: "Ders Yok", topic: "", outcomeCode: "-", outcomeDesc: "Bu saatte planlanmış dersiniz bulunmamaktadır (Boş Gün / Ders Dışı Hazırlık).", room: "Öğretmenler Odası" },
@@ -402,11 +442,11 @@ window.InitialData = {
         ],
         "Cuma": [
             { periodNo: 1, classId: "5/A", subject: "Fen Bilimleri", topic: "Güneş, Dünya ve Ay’ın Hareketleri", outcomeCode: "FB.5.1.4", outcomeDesc: "Güneş, Dünya ve Ay’ın birbirlerine göre hareketlerini ve hacimsel büyüklüklerini temsil eden bilimsel model oluşturabilme", room: "5/A Sınıfı" },
-            { periodNo: 2, classId: "5/A", subject: "Fen Bilimleri", topic: "Güneş-Dünya-Ay Simülasyonu", outcomeCode: "FB.5.1.4", outcomeDesc: "Güneş, Dünya ve Ay’ın uzaydaki göreli hareketlerini etkileşimli model ve simülasyonla açıklayabilme", room: "Fen Laboratuvarı" },
+            { periodNo: 2, classId: "5/A", subject: "Fen Bilimleri", topic: "Güneş-Dünya-Ay Simülasyonu", outcomeCode: "FB.5.1.4", outcomeDesc: "Güneş, Dünya ve Ay’ın uzaydaki göreli hareketlerini etkileşimli model ve simülasyonla açıklayabilme", room: "5/A Sınıfı" },
             { periodNo: 3, classId: "Boş", subject: "Ders Yok", topic: "", outcomeCode: "-", outcomeDesc: "Bu saatte dersiniz bulunmamaktadır (🛡️ Cuma Kat & Teneffüs Nöbet Görevi).", room: "Kat Koridoru" },
             { periodNo: 4, classId: "Boş", subject: "Ders Yok", topic: "", outcomeCode: "-", outcomeDesc: "Bu saatte dersiniz bulunmamaktadır (🛡️ Cuma Kat & Teneffüs Nöbet Görevi).", room: "Kat Koridoru" },
-            { periodNo: 5, classId: "7/B", subject: "Fen Bilimleri", topic: "Yıldızların Oluşumu ve Karadelikler", outcomeCode: "FB.7.1.4", outcomeDesc: "Yıldızların yaşamını açıklayarak yapılandırabilme", room: "Fen Laboratuvarı" },
-            { periodNo: 6, classId: "7/B", subject: "Fen Bilimleri", topic: "Galaksiler ve Evrenin Yapısı", outcomeCode: "FB.7.1.5", outcomeDesc: "Yıldız, galaksi ve evren kavramlarını açıklayarak yapılandırabilme", room: "Fen Laboratuvarı" },
+            { periodNo: 5, classId: "7/B", subject: "Fen Bilimleri", topic: "Yıldızların Oluşumu ve Karadelikler", outcomeCode: "FB.7.1.4", outcomeDesc: "Yıldızların yaşamını açıklayarak yapılandırabilme", room: "7/B Sınıfı" },
+            { periodNo: 6, classId: "7/B", subject: "Fen Bilimleri", topic: "Galaksiler ve Evrenin Yapısı", outcomeCode: "FB.7.1.5", outcomeDesc: "Yıldız, galaksi ve evren kavramlarını açıklayarak yapılandırabilme", room: "7/B Sınıfı" },
             { periodNo: 7, classId: "5/D", subject: "Rehberlik ve Yönlendirme", topic: "Sınıf Rehberliği, Uyum ve Verimli Çalışma", outcomeCode: "REHB.5.1", outcomeDesc: "5/D Şube Rehberliği: Okula uyum, akran ilişkileri, verimli ders çalışma teknikleri ve zaman yönetimi rehberlik oturumu.", room: "5/D Sınıfı" }
         ]
     }
