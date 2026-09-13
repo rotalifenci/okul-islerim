@@ -58,9 +58,9 @@
 </head>
 <body x-data="rotaliApp" class="bg-[#090d16] text-slate-100 min-h-screen flex flex-col selection:bg-red-600 selection:text-white">
 
-    <!-- ================= GİRİŞ PORTALI (ÇOKLU ÖĞRETMEN GİRİŞİ) ================= -->
-    <div x-show="!isAuthenticated" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#090d16] bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(220,38,38,0.35),rgba(9,13,22,0.98))] backdrop-blur-md overflow-y-auto">
-        <div class="w-full max-w-lg bg-white p-6 sm:p-8 rounded-3xl border-4 border-red-600 shadow-2xl space-y-5 text-slate-900 relative my-auto">
+    <!-- ================= GİRİŞ PORTALI ================= -->
+    <div x-show="!isAuthenticated" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#090d16] bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(220,38,38,0.35),rgba(9,13,22,0.98))] backdrop-blur-md">
+        <div class="w-full max-w-md bg-white p-7 sm:p-8 rounded-3xl border-4 border-red-600 shadow-2xl space-y-5 text-slate-900 relative">
             
             <!-- Logo ve Başlık -->
             <div class="text-center space-y-2">
@@ -71,57 +71,31 @@
                     ROTALI <span class="text-red-600">FENCİ</span>
                 </h1>
                 <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-100 text-red-800 border border-red-300 text-xs font-black">
-                    <i data-lucide="users" class="w-4 h-4 text-red-600"></i>
+                    <i data-lucide="shield-check" class="w-4 h-4 text-red-600"></i>
                     <span>Öğretmen Giriş Portalı</span>
                 </div>
                 <p class="text-xs text-slate-600 font-bold">
-                    Lütfen işlem yapacağınız öğretmen profilini seçip şifrenizle giriş yapınız.
+                    Öğretmen paneline erişmek için lütfen kullanıcı adı ve şifrenizi giriniz.
                 </p>
             </div>
 
-            <!-- Öğretmen Seçim Kartları -->
-            <div class="space-y-1.5">
-                <label class="text-xs font-black text-black block">👤 Giriş Yapılacak Profil:</label>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    <!-- 1. Öğretmen -->
-                    <button type="button" @click="selectTeacherForLogin('teacher1')" :class="loginSelectedTeacher === 'teacher1' ? 'border-red-600 bg-red-50 ring-2 ring-red-500 shadow-md' : 'border-slate-200 bg-slate-50 hover:bg-slate-100 hover:border-slate-300'" class="p-3 rounded-2xl border-2 text-left transition flex items-start gap-3 cursor-pointer">
-                        <span class="text-2xl p-1.5 bg-white rounded-xl shadow-sm border border-slate-200">👨‍🏫</span>
-                        <div class="min-w-0 flex-1">
-                            <div class="text-xs font-black text-slate-900 truncate">1. Öğretmen</div>
-                            <div class="text-[11px] font-bold text-red-700 truncate">Murat Kundakcı</div>
-                            <div class="text-[10px] text-slate-500 font-semibold mt-0.5">5/A, 5/D, 6/G, 7/A, 7/B</div>
-                        </div>
-                    </button>
-
-                    <!-- 2. Öğretmen -->
-                    <button type="button" @click="selectTeacherForLogin('teacher2')" :class="loginSelectedTeacher === 'teacher2' ? 'border-red-600 bg-red-50 ring-2 ring-red-500 shadow-md' : 'border-slate-200 bg-slate-50 hover:bg-slate-100 hover:border-slate-300'" class="p-3 rounded-2xl border-2 text-left transition flex items-start gap-3 cursor-pointer">
-                        <span class="text-2xl p-1.5 bg-white rounded-xl shadow-sm border border-slate-200">👩‍🏫</span>
-                        <div class="min-w-0 flex-1">
-                            <div class="text-xs font-black text-slate-900 truncate">2. Öğretmen</div>
-                            <div class="text-[11px] font-bold text-red-700 truncate">Fen Bilimleri Öğr.</div>
-                            <div class="text-[10px] text-slate-500 font-semibold mt-0.5">5/B, 6/B, 7/C, 8/A</div>
-                        </div>
-                    </button>
-                </div>
-            </div>
-
             <!-- Giriş Formu -->
-            <form @submit.prevent="login()" class="space-y-3.5">
+            <form @submit.prevent="login()" class="space-y-4 pt-1">
                 <div>
-                    <label class="text-xs font-black text-black block mb-1">
+                    <label class="text-xs font-black text-black block mb-1.5">
                         <span>👤 Kullanıcı Adı:</span>
                     </label>
-                    <input type="text" x-model="loginUsername" placeholder="Kullanıcı adınızı yazınız..." class="w-full px-3.5 py-2.5 bg-slate-100 border-2 border-slate-300 rounded-xl text-sm font-black text-black placeholder-slate-400 focus:outline-none focus:border-red-600 focus:bg-white transition shadow-sm">
+                    <input type="text" x-model="loginUsername" placeholder="Kullanıcı adınızı yazınız..." autofocus class="w-full px-4 py-3 bg-slate-100 border-2 border-slate-300 rounded-xl text-sm font-black text-black placeholder-slate-400 focus:outline-none focus:border-red-600 focus:bg-white transition shadow-sm">
                 </div>
 
                 <div>
-                    <label class="text-xs font-black text-black block mb-1 flex items-center justify-between">
-                        <span>🔑 Öğretmen Şifresi:</span>
+                    <label class="text-xs font-black text-black block mb-1.5 flex items-center justify-between">
+                        <span>🔑 Şifre:</span>
                         <span class="text-[10px] text-slate-500 font-bold">Güvenli Giriş</span>
                     </label>
                     <div class="relative">
-                        <input :type="isPasswordVisible ? 'text' : 'password'" x-model="loginPassword" placeholder="Şifrenizi yazınız..." autofocus class="w-full px-3.5 py-2.5 bg-slate-100 border-2 border-slate-300 rounded-xl text-sm font-black text-black placeholder-slate-400 focus:outline-none focus:border-red-600 focus:bg-white transition shadow-sm">
-                        <button type="button" @click="isPasswordVisible = !isPasswordVisible" class="absolute right-3 top-2.5 text-slate-500 hover:text-black font-black text-xs">
+                        <input :type="isPasswordVisible ? 'text' : 'password'" x-model="loginPassword" placeholder="Şifrenizi yazınız..." class="w-full px-4 py-3 bg-slate-100 border-2 border-slate-300 rounded-xl text-sm font-black text-black placeholder-slate-400 focus:outline-none focus:border-red-600 focus:bg-white transition shadow-sm">
+                        <button type="button" @click="isPasswordVisible = !isPasswordVisible" class="absolute right-3.5 top-3 text-slate-500 hover:text-black font-black text-xs">
                             <span x-text="isPasswordVisible ? 'Gizle 🙈' : 'Göster 👁️'"></span>
                         </button>
                     </div>
@@ -135,25 +109,13 @@
 
                 <!-- Giriş Butonu -->
                 <button type="submit" class="w-full py-3.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-sm transition shadow-lg shadow-red-600/30 flex items-center justify-center gap-2 active:scale-95">
-                    <span>Öğretmen Paneline Giriş Yap</span>
+                    <span>Giriş Yap</span>
                     <span>➔</span>
                 </button>
             </form>
 
-            <!-- Giriş Bilgileri Rehberi -->
-            <div class="p-3 rounded-xl bg-slate-100 border border-slate-200 text-[11px] space-y-1 text-slate-700 font-semibold">
-                <div class="font-black text-slate-900 flex items-center gap-1.5">
-                    <i data-lucide="key" class="w-3.5 h-3.5 text-red-600"></i>
-                    <span>Kayıtlı Öğretmen Giriş Bilgileri:</span>
-                </div>
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pt-1 border-t border-slate-200">
-                    <div><strong>1. Öğretmen:</strong> <code class="bg-white px-1.5 py-0.5 rounded border text-red-700 font-mono text-[10px]">rotalifenci</code> / <code class="bg-white px-1.5 py-0.5 rounded border text-red-700 font-mono text-[10px]">Rotali5822.</code></div>
-                    <div><strong>2. Öğretmen:</strong> <code class="bg-white px-1.5 py-0.5 rounded border text-red-700 font-mono text-[10px]">ogretmen2</code> / <code class="bg-white px-1.5 py-0.5 rounded border text-red-700 font-mono text-[10px]">Fen2026.</code></div>
-                </div>
-            </div>
-
             <!-- Alt Bilgi -->
-            <div class="text-center pt-1 text-[11px] text-slate-500 font-bold">
+            <div class="text-center pt-2 border-t border-slate-200 text-[11px] text-slate-500 font-bold">
                 <span>Rotalı Fenci — Kişisel Dijital Öğretmen Paneli & İşletim Sistemi</span>
             </div>
 

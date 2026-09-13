@@ -100,8 +100,7 @@ document.addEventListener('alpine:init', () => {
         // Aktif Öğretmen & Hesaplar
         teacherAccounts: window.StorageManager.getAccounts(),
         activeTeacherId: window.StorageManager.getActiveTeacherId(),
-        loginSelectedTeacher: window.StorageManager.getActiveTeacherId() || 'teacher1',
-        loginUsername: (window.StorageManager.getAccounts()[window.StorageManager.getActiveTeacherId()] || {}).username || 'rotalifenci',
+        loginUsername: '',
         loginPassword: '',
         loginError: '',
         isPasswordVisible: false,
@@ -147,12 +146,6 @@ document.addEventListener('alpine:init', () => {
                 if (!found) {
                     this.selectedClassId = this.data.classes[0].id;
                 }
-            }
-
-            // Giriş formu için seçili öğretmeni hazırla
-            if (!this.loginUsername) {
-                const acc = this.teacherAccounts[this.loginSelectedTeacher];
-                if (acc) this.loginUsername = acc.username;
             }
 
             this.loadCurrentWeekNote();
@@ -219,33 +212,25 @@ document.addEventListener('alpine:init', () => {
             };
         },
 
-        // Giriş İçin Öğretmen Seçimi
-        selectTeacherForLogin(teacherId) {
-            this.loginSelectedTeacher = teacherId;
-            const acc = this.teacherAccounts[teacherId];
-            if (acc) {
-                this.loginUsername = acc.username;
-            }
-            this.loginPassword = '';
-            this.loginError = '';
-        },
-
-        // Giriş Yap
+        // Giriş Yap (Kullanıcı Adı ve Şifreye Göre Otomatik Öğretmen Tespiti)
         login() {
             const inputUser = (this.loginUsername || '').trim().toLowerCase();
             const inputPass = (this.loginPassword || '').trim();
 
-            let targetId = this.loginSelectedTeacher;
-            let targetAcc = this.teacherAccounts[targetId];
+            if (!inputUser || !inputPass) {
+                this.loginError = 'Lütfen kullanıcı adı ve şifrenizi eksiksiz giriniz.';
+                return;
+            }
 
-            // Kullanıcı adına göre eşleştirme
-            if (inputUser) {
-                for (let key in this.teacherAccounts) {
-                    if (this.teacherAccounts[key].username.toLowerCase() === inputUser) {
-                        targetId = key;
-                        targetAcc = this.teacherAccounts[key];
-                        break;
-                    }
+            let targetId = null;
+            let targetAcc = null;
+
+            // Girilen kullanıcı adına göre öğretmeni tespit et
+            for (let key in this.teacherAccounts) {
+                if (this.teacherAccounts[key].username && this.teacherAccounts[key].username.toLowerCase() === inputUser) {
+                    targetId = key;
+                    targetAcc = this.teacherAccounts[key];
+                    break;
                 }
             }
 
@@ -262,6 +247,7 @@ document.addEventListener('alpine:init', () => {
                 this.isAuthenticated = true;
                 this.loginError = '';
                 this.loginPassword = '';
+                this.loginUsername = '';
                 localStorage.setItem('rotali_auth_state', 'authenticated');
                 this.showToast(`Hoş geldiniz, ${targetAcc.name}! 🚀`);
                 this.$nextTick(() => {
@@ -276,6 +262,7 @@ document.addEventListener('alpine:init', () => {
         logout() {
             if (confirm('Öğretmen oturumunu kapatmak istediğinize emin misiniz?')) {
                 this.isAuthenticated = false;
+                this.loginUsername = '';
                 this.loginPassword = '';
                 this.loginError = '';
                 localStorage.removeItem('rotali_auth_state');
