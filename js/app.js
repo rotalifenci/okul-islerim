@@ -373,12 +373,14 @@ document.addEventListener('alpine:init', () => {
         // Görev Tamamlama
         toggleTask(task) {
             task.done = !task.done;
+            window.StorageManager.saveData(this.data);
             this.showToast(task.done ? "Görev tamamlandı! 🎉" : "Görev aktif edildi.");
         },
 
         // Yeni Görev Ekle
         addTask() {
             if (!this.newTask.title) return;
+            if (!this.data.tasks) this.data.tasks = [];
             this.data.tasks.unshift({
                 id: 'task-' + Date.now(),
                 title: this.newTask.title,
@@ -389,7 +391,17 @@ document.addEventListener('alpine:init', () => {
             });
             this.newTask.title = '';
             this.isTaskModalOpen = false;
-            this.showToast("Yeni görev eklendi!");
+            window.StorageManager.saveData(this.data);
+            this.showToast("Yeni görev eklendi! 📋");
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+
+        // Görev Sil
+        deleteTask(taskId) {
+            if (!confirm("Bu görevi silmek istediğinize emin misiniz?")) return;
+            this.data.tasks = (this.data.tasks || []).filter(t => t.id !== taskId);
+            window.StorageManager.saveData(this.data);
+            this.showToast("Görev silindi. 🗑️");
         },
 
         // ================= ÖDEV TAKİP SİSTEMİ METODLARI =================

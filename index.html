@@ -639,9 +639,14 @@
                             </h4>
                             <div class="space-y-1.5">
                                 <template x-for="t in data.tasks.filter(t => t.priority === 'urgent')" :key="t.id">
-                                    <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
-                                        <span class="font-black text-black" :class="t.done ? 'line-through text-slate-400' : 'text-black'" x-text="t.title"></span>
-                                        <input type="checkbox" :checked="t.done" @change="toggleTask(t)" class="rounded text-red-600 focus:ring-red-500 cursor-pointer">
+                                    <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs gap-2 hover:bg-red-50/40 transition">
+                                        <div class="flex items-center gap-2 flex-1">
+                                            <input type="checkbox" :checked="t.done" @change="toggleTask(t)" class="rounded text-red-600 focus:ring-red-500 cursor-pointer w-4 h-4 flex-shrink-0">
+                                            <span class="font-black text-black leading-tight" :class="t.done ? 'line-through text-slate-400' : 'text-black'" x-text="t.title"></span>
+                                        </div>
+                                        <button @click="deleteTask(t.id)" title="Görevi Sil" class="p-1 rounded-lg hover:bg-red-100 text-slate-400 hover:text-red-600 transition flex-shrink-0">
+                                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                        </button>
                                     </div>
                                 </template>
                             </div>
@@ -654,9 +659,14 @@
                             </h4>
                             <div class="space-y-1.5">
                                 <template x-for="t in data.tasks.filter(t => t.priority === 'important')" :key="t.id">
-                                    <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
-                                        <span class="font-black text-black" :class="t.done ? 'line-through text-slate-400' : 'text-black'" x-text="t.title"></span>
-                                        <input type="checkbox" :checked="t.done" @change="toggleTask(t)" class="rounded text-red-600 focus:ring-red-500 cursor-pointer">
+                                    <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs gap-2 hover:bg-amber-50/40 transition">
+                                        <div class="flex items-center gap-2 flex-1">
+                                            <input type="checkbox" :checked="t.done" @change="toggleTask(t)" class="rounded text-amber-600 focus:ring-amber-500 cursor-pointer w-4 h-4 flex-shrink-0">
+                                            <span class="font-black text-black leading-tight" :class="t.done ? 'line-through text-slate-400' : 'text-black'" x-text="t.title"></span>
+                                        </div>
+                                        <button @click="deleteTask(t.id)" title="Görevi Sil" class="p-1 rounded-lg hover:bg-red-100 text-slate-400 hover:text-red-600 transition flex-shrink-0">
+                                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                        </button>
                                     </div>
                                 </template>
                             </div>
