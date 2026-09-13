@@ -1,3 +1,89 @@
+// ==========================================================================
+// KULLANICI VE YETKİLENDİRME LİSTESİ (1 YÖNETİCİ + 4 ÖĞRETMEN)
+// ==========================================================================
+window.AuthUsers = [
+    {
+        id: 'admin',
+        username: 'admin',
+        name: 'Murat Kundakcı (Rotalı Fenci)',
+        role: 'Yönetici',
+        roleBadge: '👑 Yönetici',
+        password: 'admin',
+        passwords: ['admin', 'rotali123', 'fenci2026', 'murat'],
+        avatar: 'assets/logo.jpg',
+        subject: 'Fen Bilimleri & Şube Rehberliği',
+        description: 'Tüm sistem yöneticisi ve kadrolu öğretmen'
+    },
+    {
+        id: 'ogretmen1',
+        username: 'ogretmen1',
+        name: '1. Fen Bilimleri Öğretmeni',
+        role: 'Öğretmen',
+        roleBadge: '👨‍🏫 Öğretmen',
+        password: '123',
+        passwords: ['123', 'fen1', 'ogretmen1'],
+        avatar: '',
+        subject: 'Fen Bilimleri',
+        description: 'Kişiye özel izole ders programı ve sınıf paneli'
+    },
+    {
+        id: 'ogretmen2',
+        username: 'ogretmen2',
+        name: '2. Fen Bilimleri Öğretmeni',
+        role: 'Öğretmen',
+        roleBadge: '👩‍🏫 Öğretmen',
+        password: '123',
+        passwords: ['123', 'fen2', 'ogretmen2'],
+        avatar: '',
+        subject: 'Fen Bilimleri',
+        description: 'Kişiye özel izole ders programı ve sınıf paneli'
+    },
+    {
+        id: 'ogretmen3',
+        username: 'ogretmen3',
+        name: '3. Fen Bilimleri Öğretmeni',
+        role: 'Öğretmen',
+        roleBadge: '👨‍🏫 Öğretmen',
+        password: '123',
+        passwords: ['123', 'fen3', 'ogretmen3'],
+        avatar: '',
+        subject: 'Fen Bilimleri',
+        description: 'Kişiye özel izole ders programı ve sınıf paneli'
+    },
+    {
+        id: 'ogretmen4',
+        username: 'ogretmen4',
+        name: '4. Fen Bilimleri Öğretmeni',
+        role: 'Öğretmen',
+        roleBadge: '👩‍🏫 Öğretmen',
+        password: '123',
+        passwords: ['123', 'fen4', 'ogretmen4'],
+        avatar: '',
+        subject: 'Fen Bilimleri',
+        description: 'Kişiye özel izole ders programı ve sınıf paneli'
+    }
+];
+
+window.createEmptyWeeklySchedule = function() {
+    const days = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma'];
+    const sched = {};
+    days.forEach(d => {
+        sched[d] = [];
+        for (let p = 1; p <= 7; p++) {
+            sched[d].push({
+                periodNo: p,
+                classId: 'Boş',
+                subject: '',
+                topic: '',
+                outcomeCode: '',
+                outcomeDesc: '',
+                room: 'Sınıf'
+            });
+        }
+    });
+    return sched;
+};
+
 // Rotalı Fenci - Başlangıç Veri Seti (Murat Kundakcı - 21 Derslik Resmi Program & Cuma Nöbeti)
 window.InitialData = {
     teacher: {

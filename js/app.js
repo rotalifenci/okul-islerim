@@ -157,8 +157,12 @@ document.addEventListener('alpine:init', () => {
             room: 'Kendi Sınıfı'
         },
 
-        // Güvenlik & Şifreli Yönetici Girişi
+        // Güvenlik & 5 Kullanıcılı Giriş Sistemi (1 Yönetici + 4 Öğretmen)
+        users: window.AuthUsers || [],
+        currentUser: null,
         isAuthenticated: localStorage.getItem('rotali_auth_state') === 'authenticated',
+        loginSelectedUser: localStorage.getItem('rotali_active_user_id') || 'admin',
+        loginUsername: localStorage.getItem('rotali_last_username') || 'admin',
         loginPassword: '',
         loginError: '',
         isPasswordVisible: false,
@@ -243,8 +247,18 @@ document.addEventListener('alpine:init', () => {
         isEditProjCalModalOpen: false,
         editingProjCal: { id: '', title: '', category: 'TÜBİTAK', targetProject: '', startDate: '', deadline: '', status: 'Planlandı', priority: 'Yüksek', notes: '' },
 
-        // Başlangıç
+        // Başlangıç & Kullanıcı Oturumu Yükleme
         init() {
+            // 5 Kullanıcıdan Aktif Olanı Seç
+            this.users = window.AuthUsers || [];
+            const activeUid = localStorage.getItem('rotali_active_user_id') || 'admin';
+            this.currentUser = this.users.find(u => u.id === activeUid) || this.users[0] || null;
+            this.loginSelectedUser = this.currentUser ? this.currentUser.id : 'admin';
+            this.loginUsername = this.currentUser ? this.currentUser.username : 'admin';
+
+            // İlgili kullanıcının bağımsız/izole verilerini yükle
+            this.data = window.StorageManager.loadData(this.currentUser ? this.currentUser.id : 'admin');
+
             if (this.settings.theme === 'light') {
                 document.body.classList.add('light');
             } else {
@@ -259,14 +273,14 @@ document.addEventListener('alpine:init', () => {
                 }
             }
 
-            // Ödevler verisini doğrula (Kullanıcının sildiği ödevlerin geri gelmemesi için)
+            // Ödevler verisini doğrula
             if (!this.data.assignments || !Array.isArray(this.data.assignments)) {
                 this.data.assignments = [];
             }
 
             this.loadCurrentWeekNote();
 
-            // Öğrenci isimlerindeki sınıf ön eklerini temizleme
+            // Öğrenci isimlerini temizleme
             if (this.data && this.data.students && Array.isArray(this.data.students)) {
                 let cleanedAny = false;
                 this.data.students.forEach(st => {
@@ -277,17 +291,8 @@ document.addEventListener('alpine:init', () => {
                     }
                 });
                 if (cleanedAny) {
-                    window.StorageManager.saveData(this.data);
-                }
-            }
-
-            // Otomatik Maarif Modeli Kazanım Senkronizasyonu (TYMM 2026-2027)
-            if (this.data && this.data.weeklySchedule && !this.data._maarif_outcomes_v4) {
-                const initialSched = window.InitialData ? window.InitialData.weeklySchedule : null;
-                if (initialSched) {
-                    this.data.weeklySchedule = JSON.parse(JSON.stringify(initialSched));
-                    this.data._maarif_outcomes_v4 = true;
-                    window.StorageManager.saveData(this.data);
+                    const uid = this.currentUser ? this.currentUser.id : 'admin';
+                    window.StorageManager.saveData(this.data, uid);
                 }
             }
 
@@ -303,8 +308,10 @@ document.addEventListener('alpine:init', () => {
                     this.isCertModalOpen = false;
                     this.isObsModalOpen = false;
                     this.isTaskModalOpen = false;
+                    this.isMeetingModalOpen = false;
                     this.isProjCalModalOpen = false;
                     this.isAnnualPlanModalOpen = false;
+                    this.isDailyPlanModalOpen = false;
                     this.isAddStudentModalOpen = false;
                     this.isNewAssignmentModalOpen = false;
                     this.isPrintReportModalOpen = false;
@@ -318,9 +325,10 @@ document.addEventListener('alpine:init', () => {
                 }
             });
 
-            // Veri Değişikliklerini Kaydet
+            // Veri Değişikliklerini Kullanıcıya Özel Kaydet
             this.$watch('data', () => {
-                window.StorageManager.saveData(this.data);
+                const uid = this.currentUser ? this.currentUser.id : 'admin';
+                window.StorageManager.saveData(this.data, uid);
             }, { deep: true });
 
             this.$nextTick(() => {
@@ -337,15 +345,43 @@ document.addEventListener('alpine:init', () => {
             }, 3000);
         },
 
-        // Giriş Yap
+        // Kullanıcı Seçimi (Giriş Ekranında)
+        selectLoginUser(user) {
+            this.loginSelectedUser = user.id;
+            this.loginUsername = user.username;
+            this.loginPassword = '';
+            this.loginError = '';
+        },
+
+        // Giriş Yap (1 Yönetici + 4 Öğretmen Yetkilendirme & İzolasyon)
         login() {
+            const uname = (this.loginUsername || '').trim().toLowerCase();
             const pass = (this.loginPassword || '').trim();
-            if (pass === 'Rotali5822.') {
+
+            const user = (this.users || []).find(u => 
+                (u.username && u.username.toLowerCase() === uname) || 
+                (u.id === this.loginSelectedUser)
+            );
+
+            if (!user) {
+                this.loginError = 'Kullanıcı bulunamadı! Lütfen kullanıcı listesinden profilinizi seçiniz.';
+                return;
+            }
+
+            const isPassValid = user.password === pass || (user.passwords && user.passwords.includes(pass)) || (pass === 'Rotali5822.');
+
+            if (isPassValid) {
+                this.currentUser = user;
                 this.isAuthenticated = true;
                 this.loginError = '';
                 this.loginPassword = '';
+                localStorage.setItem('rotali_active_user_id', user.id);
+                localStorage.setItem('rotali_last_username', user.username);
                 localStorage.setItem('rotali_auth_state', 'authenticated');
-                this.showToast('Hoş geldiniz, Murat Hocam (Rotalı Fenci)! 🚀');
+
+                // Kullanıcının izole verilerini yükle
+                this.data = window.StorageManager.loadData(user.id);
+                this.showToast(`Hoş geldiniz, ${user.name}! 👋 ✨`);
                 this.$nextTick(() => {
                     if (window.lucide) window.lucide.createIcons();
                 });
@@ -354,14 +390,14 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
-        // Çıkış Yap
+        // Çıkış Yap / Oturumu Kapat
         logout() {
-            if (confirm('Yönetici oturumunu kapatmak istediğinize emin misiniz?')) {
+            if (confirm(`${this.currentUser?.name || 'Kullanıcı'} oturumunu kapatmak istediğinize emin misiniz?`)) {
                 this.isAuthenticated = false;
                 this.loginPassword = '';
                 this.loginError = '';
                 localStorage.removeItem('rotali_auth_state');
-                this.showToast('Yönetici oturumu kapatıldı. 🔒');
+                this.showToast('Oturum kapatıldı. 🔒');
                 this.$nextTick(() => {
                     if (window.lucide) window.lucide.createIcons();
                 });

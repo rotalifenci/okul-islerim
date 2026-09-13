@@ -1,127 +1,156 @@
-// Rotalı Fenci - Yerel Depolama ve Veri Yedekleme Yöneticisi
+// Rotalı Fenci - Çoklu Kullanıcı & Katı Veri İzolasyonu Depolama Yöneticisi
 window.StorageManager = {
-    STORAGE_KEY: 'rotali_fenci_os_v1',
+    ADMIN_STORAGE_KEY: 'rotali_fenci_os_v1',
     SETTINGS_KEY: 'rotali_fenci_settings_v1',
 
-    // Verileri yükle veya başlangıç veri setiyle başlat
-    loadData() {
+    // Aktif kullanıcının storage anahtarını belirle
+    getUserStorageKey(userId = null) {
+        const uid = userId || localStorage.getItem('rotali_active_user_id') || 'admin';
+        if (uid === 'admin') {
+            return this.ADMIN_STORAGE_KEY;
+        }
+        return `rotali_fenci_user_${uid}_v1`;
+    },
+
+    // Verileri yükle veya kullanıcıya özel başlangıç veri setiyle başlat
+    loadData(userId = null) {
+        const uid = userId || localStorage.getItem('rotali_active_user_id') || 'admin';
+        const storageKey = this.getUserStorageKey(uid);
+
         try {
-            const raw = localStorage.getItem(this.STORAGE_KEY);
+            const raw = localStorage.getItem(storageKey);
             if (raw) {
                 const parsed = JSON.parse(raw);
-                if (window.InitialData) {
-                    if (!parsed._murat_kundakci_duty_v5) {
-                        if (parsed.teacher) {
-                            parsed.teacher.school = "";
-                            parsed.teacher.dutyArea = window.InitialData.teacher.dutyArea;
-                            parsed.teacher.dutyLocations = window.InitialData.teacher.dutyLocations;
-                            parsed.teacher.dutyRotation = window.InitialData.teacher.dutyRotation;
-                        } else {
-                            parsed.teacher = JSON.parse(JSON.stringify(window.InitialData.teacher));
+                
+                // Eğer yönetici ise tüm güncellemeleri ve migrationları uygula
+                if (uid === 'admin') {
+                    if (window.InitialData) {
+                        if (!parsed._murat_kundakci_duty_v5) {
+                            if (parsed.teacher) {
+                                parsed.teacher.school = "";
+                                parsed.teacher.dutyArea = window.InitialData.teacher.dutyArea;
+                                parsed.teacher.dutyLocations = window.InitialData.teacher.dutyLocations;
+                                parsed.teacher.dutyRotation = window.InitialData.teacher.dutyRotation;
+                            } else {
+                                parsed.teacher = JSON.parse(JSON.stringify(window.InitialData.teacher));
+                            }
+                            parsed._murat_kundakci_duty_v5 = true;
+                            this.saveData(parsed, uid);
                         }
-                        parsed._murat_kundakci_duty_v5 = true;
-                        this.saveData(parsed);
-                    }
-                    if (!parsed._mai_sinif_students_v1) {
-                        parsed.classes = JSON.parse(JSON.stringify(window.InitialData.classes || []));
-                        parsed.students = JSON.parse(JSON.stringify(window.InitialData.students || []));
-                        parsed._mai_sinif_students_v1 = true;
-                        this.saveData(parsed);
-                    }
-                    if (!parsed.navSections || !parsed.navSections.length) {
-                        parsed.navSections = JSON.parse(JSON.stringify(window.InitialData.navSections || []));
-                    }
-                    if (!parsed.customSections) {
-                        parsed.customSections = JSON.parse(JSON.stringify(window.InitialData.customSections || []));
-                    }
-                    if (!parsed._clean_classrooms_v1 && window.InitialData.weeklySchedule) {
-                        parsed.weeklySchedule = JSON.parse(JSON.stringify(window.InitialData.weeklySchedule));
-                        parsed._clean_classrooms_v1 = true;
-                        this.saveData(parsed);
-                    }
-                                        if (!parsed._school_tasks_tab_v1) {
-                        if (parsed.navSections && Array.isArray(parsed.navSections)) {
-                            const hasTasks = parsed.navSections.some(s => s.id === 'school-tasks');
-                            if (!hasTasks) {
-                                const assignIdx = parsed.navSections.findIndex(s => s.id === 'assignments');
-                                const taskSec = { id: 'school-tasks', title: '📌 Okul Görevlerim', icon: 'check-square', color: 'red', visible: true, isSystem: true, badge: 'Nöbet & Görev' };
-                                if (assignIdx !== -1) {
-                                    parsed.navSections.splice(assignIdx + 1, 0, taskSec);
-                                } else {
-                                    parsed.navSections.push(taskSec);
+                        if (!parsed._mai_sinif_students_v1) {
+                            parsed.classes = JSON.parse(JSON.stringify(window.InitialData.classes || []));
+                            parsed.students = JSON.parse(JSON.stringify(window.InitialData.students || []));
+                            parsed._mai_sinif_students_v1 = true;
+                            this.saveData(parsed, uid);
+                        }
+                        if (!parsed.navSections || !parsed.navSections.length) {
+                            parsed.navSections = JSON.parse(JSON.stringify(window.InitialData.navSections || []));
+                        }
+                        if (!parsed.customSections) {
+                            parsed.customSections = JSON.parse(JSON.stringify(window.InitialData.customSections || []));
+                        }
+                        if (!parsed._clean_classrooms_v1 && window.InitialData.weeklySchedule) {
+                            parsed.weeklySchedule = JSON.parse(JSON.stringify(window.InitialData.weeklySchedule));
+                            parsed._clean_classrooms_v1 = true;
+                            this.saveData(parsed, uid);
+                        }
+                        if (!parsed._school_meetings_tab_v1) {
+                            if (parsed.navSections && Array.isArray(parsed.navSections)) {
+                                const hasMeetings = parsed.navSections.some(s => s.id === 'school-meetings');
+                                if (!hasMeetings) {
+                                    const taskIdx = parsed.navSections.findIndex(s => s.id === 'school-tasks');
+                                    const meetSec = { id: 'school-meetings', title: '👥 Okul Toplantılarım', icon: 'users', color: 'indigo', visible: true, isSystem: true, badge: '' };
+                                    if (taskIdx !== -1) {
+                                        parsed.navSections.splice(taskIdx, 0, meetSec);
+                                    } else {
+                                        parsed.navSections.push(meetSec);
+                                    }
                                 }
                             }
-                        }
-                        parsed._school_tasks_tab_v1 = true;
-                        this.saveData(parsed);
-                    }
-                                                            if (!parsed._school_meetings_tab_v1) {
-                        if (parsed.navSections && Array.isArray(parsed.navSections)) {
-                            const hasMeetings = parsed.navSections.some(s => s.id === 'school-meetings');
-                            if (!hasMeetings) {
-                                const taskIdx = parsed.navSections.findIndex(s => s.id === 'school-tasks');
-                                const meetSec = { id: 'school-meetings', title: '👥 Okul Toplantılarım', icon: 'users', color: 'indigo', visible: true, isSystem: true, badge: '' };
-                                if (taskIdx !== -1) {
-                                    parsed.navSections.splice(taskIdx, 0, meetSec);
-                                } else {
-                                    parsed.navSections.push(meetSec);
-                                }
+                            if (!parsed.meetings) {
+                                parsed.meetings = JSON.parse(JSON.stringify(window.InitialData.meetings || []));
                             }
+                            parsed._school_meetings_tab_v1 = true;
+                            this.saveData(parsed, uid);
                         }
-                        if (!parsed.meetings) {
-                            parsed.meetings = JSON.parse(JSON.stringify(window.InitialData.meetings || []));
-                        }
-                        parsed._school_meetings_tab_v1 = true;
-                        this.saveData(parsed);
-                    }
-                    if (!parsed._daily_plan_tab_v1) {
-                        if (parsed.navSections && Array.isArray(parsed.navSections)) {
-                            // clean school-tasks badge
-                            const stSec = parsed.navSections.find(s => s.id === 'school-tasks');
-                            if (stSec) stSec.badge = '';
-                            
-                            const hasDaily = parsed.navSections.some(s => s.id === 'daily-plan');
-                            if (!hasDaily) {
-                                const annualIdx = parsed.navSections.findIndex(s => s.id === 'annual-plan');
-                                const dailySec = { id: 'daily-plan', title: '📑 Günlük Plan', icon: 'file-text', color: 'teal', visible: true, isSystem: true, badge: 'Maarif Modeli' };
-                                if (annualIdx !== -1) {
-                                    parsed.navSections.splice(annualIdx + 1, 0, dailySec);
-                                } else {
-                                    parsed.navSections.push(dailySec);
-                                }
+                        if (!parsed._daily_plan_tab_v1) {
+                            if (!parsed.dailyPlans) {
+                                parsed.dailyPlans = JSON.parse(JSON.stringify(window.InitialData.dailyPlans || []));
                             }
+                            parsed._daily_plan_tab_v1 = true;
+                            this.saveData(parsed, uid);
                         }
-                        if (!parsed.dailyPlans) {
-                            parsed.dailyPlans = JSON.parse(JSON.stringify(window.InitialData.dailyPlans || []));
-                        }
-                        parsed._daily_plan_tab_v1 = true;
-                        this.saveData(parsed);
+                        if (!parsed.lessonPeriods) parsed.lessonPeriods = JSON.parse(JSON.stringify(window.InitialData.lessonPeriods || []));
                     }
+                } else {
+                    // Öğretmen kullanıcısı için garanti alanlar
+                    if (!parsed.weeklySchedule) parsed.weeklySchedule = window.createEmptyWeeklySchedule ? window.createEmptyWeeklySchedule() : {};
+                    if (!parsed.classes) parsed.classes = [];
+                    if (!parsed.students) parsed.students = [];
+                    if (!parsed.assignments) parsed.assignments = [];
+                    if (!parsed.tasks) parsed.tasks = [];
+                    if (!parsed.meetings) parsed.meetings = [];
+                    if (!parsed.customSections) parsed.customSections = [];
+                    if (!parsed.navSections) parsed.navSections = JSON.parse(JSON.stringify(window.InitialData.navSections || []));
                     if (!parsed.lessonPeriods) parsed.lessonPeriods = JSON.parse(JSON.stringify(window.InitialData.lessonPeriods || []));
                 }
+
                 return parsed;
             }
         } catch (e) {
             console.error("Veri yükleme hatası:", e);
         }
 
-        // İlk defa açılıyorsa InitialData yükle ve kaydet
-        const initial = window.InitialData ? JSON.parse(JSON.stringify(window.InitialData)) : {};
-        initial._murat_kundakci_duty_v5 = true;
-        this.saveData(initial);
-        return initial;
+        // Eğer bu kullanıcı için kayıt bulunamazsa:
+        if (uid === 'admin') {
+            const initial = window.InitialData ? JSON.parse(JSON.stringify(window.InitialData)) : {};
+            initial._murat_kundakci_duty_v5 = true;
+            this.saveData(initial, uid);
+            return initial;
+        } else {
+            // Öğretmen için SIFIR / İZOLE BAŞLANGIÇ VERİSİ
+            const userObj = (window.AuthUsers || []).find(u => u.id === uid) || { name: 'Fen Bilimleri Öğretmeni' };
+            const teacherInitial = {
+                teacher: {
+                    id: uid,
+                    name: userObj.name,
+                    title: 'Fen Bilimleri Öğretmeni',
+                    school: '',
+                    academicYear: '2026-2027',
+                    dutyDay: 'Belirlenmedi',
+                    dutyArea: 'Kat-1',
+                    dutyLocations: ["Bahçe", "Zemin", "Kat-1", "Kat-2", "Kat-3"],
+                    dutyRotation: ["Kat-1", "Kat-2", "Kat-3", "Bahçe", "Zemin"],
+                    totalLessons: 0,
+                    fenLessons: 0,
+                    rehberLessons: 0,
+                    freeLessons: 35
+                },
+                classes: [],       // Sıfır sınıf (tamamen izole)
+                students: [],      // Sıfır öğrenci (tamamen izole)
+                weeklySchedule: window.createEmptyWeeklySchedule ? window.createEmptyWeeklySchedule() : {}, // Boş program (izole)
+                assignments: [],   // Sıfır ödev
+                tasks: [],         // Sıfır görev
+                meetings: [],      // Sıfır toplantı
+                projectCalendar: [],
+                customSections: [],
+                navSections: JSON.parse(JSON.stringify(window.InitialData ? window.InitialData.navSections : [])),
+                lessonPeriods: JSON.parse(JSON.stringify(window.InitialData ? window.InitialData.lessonPeriods : []))
+            };
+            this.saveData(teacherInitial, uid);
+            return teacherInitial;
+        }
     },
 
     // Verileri kaydet
-    saveData(data) {
+    saveData(data, userId = null) {
+        const uid = userId || localStorage.getItem('rotali_active_user_id') || 'admin';
+        const storageKey = this.getUserStorageKey(uid);
         try {
-            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
-            localStorage.setItem('rotali_fenci_last_backup', new Date().toISOString());
-            return true;
+            localStorage.setItem(storageKey, JSON.stringify(data));
+            localStorage.setItem(`rotali_last_backup_${uid}`, new Date().toISOString());
         } catch (e) {
             console.error("Veri kaydetme hatası:", e);
-            alert("Veri kaydedilirken depolama alanı hatası oluştu!");
-            return false;
         }
     },
 
@@ -129,90 +158,26 @@ window.StorageManager = {
     loadSettings() {
         try {
             const raw = localStorage.getItem(this.SETTINGS_KEY);
-            if (raw) return JSON.parse(raw);
-        } catch (e) {}
-        return {
-            theme: 'dark',
-            geminiApiKey: '',
-            autoBackup: true,
-            soundEffects: true,
-            compactMode: false,
-            schoolName: '',
-            teacherName: 'Murat Kundakcı (Rotalı Fenci)',
-            pinLock: ''
-        };
+            return raw ? JSON.parse(raw) : { theme: 'dark', notifications: true };
+        } catch (e) {
+            return { theme: 'dark', notifications: true };
+        }
     },
 
     // Ayarları kaydet
     saveSettings(settings) {
         try {
             localStorage.setItem(this.SETTINGS_KEY, JSON.stringify(settings));
-            return true;
         } catch (e) {
-            return false;
+            console.error("Ayar kaydetme hatası:", e);
         }
     },
 
-    // JSON Olarak Dışa Aktar (Dosya İndir)
-    exportJSON(data) {
-        const payload = {
-            brand: "Rotalı Fenci Kişisel Öğretmen İşletim Sistemi",
-            version: "2.0.0",
-            exportDate: new Date().toISOString(),
-            data: data || this.loadData(),
-            settings: this.loadSettings()
-        };
-        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        const dateStr = new Date().toISOString().slice(0, 10);
-        a.download = `rotali-fenci-tam-yedek-${dateStr}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    },
-
-    // JSON Dosyasından İçe Aktar
-    importJSON(file, callback) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const parsed = JSON.parse(e.target.result);
-                if (parsed.data) {
-                    this.saveData(parsed.data);
-                    if (parsed.settings) this.saveSettings(parsed.settings);
-                    if (callback) callback(true, "Yedek başarıyla geri yüklendi!");
-                } else {
-                    if (callback) callback(false, "Geçersiz yedek dosyası formatı!");
-                }
-            } catch (err) {
-                if (callback) callback(false, "Dosya okuma hatası: " + err.message);
-            }
-        };
-        reader.readAsText(file);
-    },
-
-    // Varsayılan Fabrika Verilerine Dön
-    resetToDefaults() {
-        if (confirm("DİKKAT: Tüm verileriniz sıfırlanacak ve fabrika ayarlarına dönülecektir. Devam etmek istiyor musunuz?")) {
-            localStorage.removeItem(this.STORAGE_KEY);
-            localStorage.removeItem(this.SETTINGS_KEY);
-            const fresh = JSON.parse(JSON.stringify(window.InitialData || {}));
-            this.saveData(fresh);
-            window.location.reload();
-        }
-    },
-
-    // Depolama Kullanım Boyutu (KB)
-    getStorageUsage() {
-        let total = 0;
-        for (let x in localStorage) {
-            if (localStorage.hasOwnProperty(x)) {
-                total += ((localStorage[x].length + x.length) * 2);
-            }
-        }
-        return (total / 1024).toFixed(2);
+    // Kullanıcıya ait tüm verileri sıfırla
+    resetUserData(userId = null) {
+        const uid = userId || localStorage.getItem('rotali_active_user_id') || 'admin';
+        const storageKey = this.getUserStorageKey(uid);
+        localStorage.removeItem(storageKey);
+        return this.loadData(uid);
     }
 };
