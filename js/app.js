@@ -3232,39 +3232,52 @@ document.addEventListener('alpine:init', () => {
             const school = this.data.teacher?.school || '';
             const academicYear = this.data.teacher?.academicYear || '2026-2027';
             const printDate = new Date().toLocaleDateString('tr-TR', { day: '2-digit', month: 'long', year: 'numeric' });
-
-            const workCards = list.map(work => {
-                const classes = (work.classes || []).join(' • ');
-                const photosHtml = (work.photos && work.photos.length)
-                    ? `<div class="photo-grid">
-                        ${work.photos.map(p => `<img src="${p}" alt="Calisma Fotografi" loading="eager">`).join('')}
-                    </div>`
-                    : `<div class="no-photo">Bu calismaya ait fotograf bulunmuyor</div>`;
-
-                const outcomeHtml = work.outcomeCode
-                    ? `<span class="outcome-badge">${work.outcomeCode}</span>`
-                    : '';
-
-                return `
-                    <div class="work-card">
-                        <div class="work-header">
-                            <div class="work-title-row">
-                                <h3 class="work-title">${work.title || 'Isimsiz Calisma'}</h3>
-                                ${outcomeHtml}
-                            </div>
-                            <div class="work-meta">
-                                ${classes ? `<span class="meta-tag class-tag">${classes}</span>` : ''}
-                                <span class="meta-tag cat-tag">${work.category || 'Etkinlik'}</span>
-                                <span class="meta-tag date-tag">${work.date || '—'}</span>
-                                <span class="meta-tag photo-count">${(work.photos || []).length} Fotograf</span>
-                            </div>
-                            ${work.description ? `<p class="work-desc">${work.description}</p>` : ''}
-                        </div>
-                        ${photosHtml}
-                    </div>`;
-            }).join('');
-
             const totalPhotos = list.reduce((acc, w) => acc + (w.photos || []).length, 0);
+
+            // Her fotoğraf → ayrı sayfa. Fotoğrafı olmayan çalışmalar için de bilgi sayfası oluştur.
+            const pages = [];
+
+            list.forEach(work => {
+                const classes = (work.classes || []).join(' • ');
+                const headerHtml = `
+                    <div class="photo-header">
+                        <div class="photo-header-top">
+                            <div class="photo-title">${work.title || 'İsimsiz Çalışma'}</div>
+                            ${work.outcomeCode ? `<span class="outcome-badge">${work.outcomeCode}</span>` : ''}
+                        </div>
+                        <div class="photo-meta">
+                            ${classes ? `<span class="tag class-tag">📚 ${classes}</span>` : ''}
+                            <span class="tag cat-tag">🏷 ${work.category || 'Etkinlik'}</span>
+                            <span class="tag date-tag">📅 ${work.date || '—'}</span>
+                        </div>
+                        ${work.description ? `<div class="photo-desc">${work.description}</div>` : ''}
+                    </div>`;
+
+                if (!work.photos || !work.photos.length) {
+                    // Fotoğrafsız çalışma: tek bilgi sayfası
+                    pages.push(`
+                        <div class="photo-page">
+                            ${headerHtml}
+                            <div class="no-photo-box">
+                                <div style="font-size:40px;margin-bottom:8px;">📷</div>
+                                <div style="font-size:13px;font-weight:700;color:#64748b;">Bu çalışmaya fotoğraf eklenmemiş</div>
+                            </div>
+                        </div>`);
+                } else {
+                    work.photos.forEach((photo, idx) => {
+                        const photoNum = work.photos.length > 1 ? `Fotoğraf ${idx + 1} / ${work.photos.length}` : '';
+                        pages.push(`
+                            <div class="photo-page">
+                                ${headerHtml}
+                                ${photoNum ? `<div class="photo-num">${photoNum}</div>` : ''}
+                                <div class="photo-frame">
+                                    <img src="${photo}" alt="Calisma Fotografi">
+                                </div>
+                                <div class="photo-footer">${teacherName} · ${school ? school + ' · ' : ''}${academicYear} · ${printDate}</div>
+                            </div>`);
+                    });
+                }
+            });
 
             const html = `<!DOCTYPE html>
 <html lang="tr">
@@ -3273,105 +3286,120 @@ document.addEventListener('alpine:init', () => {
 <title>Maarif Calismalari Raporu</title>
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    @page { size: A4 portrait; margin: 10mm 8mm; }
-    body { font-family: Arial, sans-serif; background: #fff; color: #1e293b; font-size: 11px; }
+    @page { size: A4 portrait; margin: 0; }
+    body { font-family: Arial, sans-serif; background: #fff; color: #1e293b; }
 
+    /* KAPAK */
     .cover {
+        width: 210mm; height: 297mm;
         display: flex; flex-direction: column; justify-content: center; align-items: center;
-        height: 270mm; text-align: center;
-        background: #064e3b; color: white; padding: 40px;
+        background: #064e3b; color: white; text-align: center; padding: 40px;
         page-break-after: always;
     }
-    .cover-emoji { font-size: 64px; margin-bottom: 20px; }
-    .cover-title { font-size: 26px; font-weight: 900; letter-spacing: 1px; margin-bottom: 6px; }
-    .cover-subtitle { font-size: 13px; opacity: 0.8; margin-bottom: 28px; }
-    .cover-line { width: 100px; height: 4px; background: #34d399; border-radius: 4px; margin: 0 auto 24px; }
-    .cover-teacher { font-size: 18px; font-weight: 900; color: #6ee7b7; margin-bottom: 4px; }
-    .cover-school { font-size: 12px; opacity: 0.8; margin-bottom: 20px; }
-    .cover-year { font-size: 12px; opacity: 0.7; }
-    .cover-stats { margin-top: 32px; display: flex; gap: 40px; justify-content: center; }
-    .stat-box { text-align: center; }
-    .stat-num { font-size: 40px; font-weight: 900; color: #34d399; line-height: 1; }
-    .stat-lbl { font-size: 11px; opacity: 0.7; margin-top: 4px; }
-    .cover-date { margin-top: 28px; font-size: 10px; opacity: 0.6; }
+    .cover-emoji { font-size: 72px; margin-bottom: 24px; }
+    .cover-title { font-size: 28px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+    .cover-subtitle { font-size: 14px; opacity: 0.8; margin-bottom: 36px; }
+    .cover-line { width: 120px; height: 4px; background: #34d399; border-radius: 4px; margin: 0 auto 32px; }
+    .cover-teacher { font-size: 20px; font-weight: 900; color: #6ee7b7; margin-bottom: 6px; }
+    .cover-school { font-size: 13px; opacity: 0.85; margin-bottom: 4px; }
+    .cover-year { font-size: 12px; opacity: 0.7; margin-bottom: 40px; }
+    .cover-stats { display: flex; gap: 60px; justify-content: center; margin-bottom: 32px; }
+    .stat-num { font-size: 52px; font-weight: 900; color: #34d399; line-height: 1; }
+    .stat-lbl { font-size: 12px; opacity: 0.7; margin-top: 6px; text-align: center; }
+    .cover-date { font-size: 11px; opacity: 0.55; }
 
-    .page-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 0 10px; border-bottom: 3px solid #059669; margin-bottom: 12px; }
-    .page-header-title { font-size: 14px; font-weight: 900; color: #064e3b; }
-    .page-header-sub { font-size: 9px; color: #64748b; font-weight: 600; }
-
-    .work-card {
-        margin-bottom: 14px;
-        border: 2px solid #d1fae5;
-        border-top: 4px solid #059669;
-        border-radius: 8px;
-        overflow: hidden;
-        page-break-inside: avoid;
+    /* HER FOTOĞRAF SAYFASI */
+    .photo-page {
+        width: 210mm; height: 297mm;
+        display: flex; flex-direction: column;
+        padding: 8mm 10mm 6mm;
+        page-break-after: always;
         background: #fff;
     }
-    .work-header { padding: 9px 11px 7px; background: #f0fdf4; }
-    .work-title-row { display: flex; align-items: flex-start; gap: 8px; flex-wrap: wrap; margin-bottom: 5px; }
-    .work-title { font-size: 12.5px; font-weight: 900; color: #064e3b; flex: 1; line-height: 1.3; }
-    .outcome-badge { background: #059669; color: white; font-size: 9px; font-weight: 900; padding: 2px 8px; border-radius: 999px; white-space: nowrap; font-family: monospace; align-self: center; }
-    .work-meta { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 4px; }
-    .meta-tag { font-size: 9px; font-weight: 800; padding: 2px 7px; border-radius: 5px; }
+
+    /* BAŞLIK ALANI */
+    .photo-header {
+        flex-shrink: 0;
+        padding: 8px 12px 8px;
+        background: #f0fdf4;
+        border-left: 5px solid #059669;
+        border-radius: 0 8px 8px 0;
+        margin-bottom: 5mm;
+    }
+    .photo-header-top { display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap; margin-bottom: 5px; }
+    .photo-title { font-size: 15px; font-weight: 900; color: #064e3b; line-height: 1.3; flex: 1; }
+    .outcome-badge { background: #059669; color: white; font-size: 9px; font-weight: 900; padding: 3px 10px; border-radius: 999px; white-space: nowrap; font-family: monospace; align-self: center; }
+    .photo-meta { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag { font-size: 10px; font-weight: 800; padding: 2px 9px; border-radius: 6px; }
     .class-tag { background: #d1fae5; color: #064e3b; border: 1px solid #6ee7b7; }
     .cat-tag { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
     .date-tag { background: #fef3c7; color: #78350f; border: 1px solid #fbbf24; }
-    .photo-count { background: #f3e8ff; color: #4c1d95; border: 1px solid #c084fc; }
-    .work-desc { font-size: 9.5px; color: #475569; line-height: 1.5; margin-top: 3px; }
+    .photo-desc { font-size: 10px; color: #475569; line-height: 1.5; margin-top: 5px; }
+    .photo-num { font-size: 9px; font-weight: 800; color: #94a3b8; text-align: right; margin-bottom: 2mm; flex-shrink: 0; }
 
-    /* FOTOGRAF KOLAJ */
-    .photo-grid {
-        padding: 7px;
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 5px;
-        background: #f8fafc;
+    /* FOTOĞRAF ALANI — Sayfayı doldur */
+    .photo-frame {
+        flex: 1;
+        min-height: 0;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 2px solid #d1fae5;
+        background: #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
-    .photo-grid img {
+    .photo-frame img {
         width: 100%;
-        height: 110px;
-        object-fit: cover;
-        border-radius: 5px;
-        border: 1.5px solid #bbf7d0;
+        height: 100%;
+        object-fit: contain;
         display: block;
-        background: #e2e8f0;
+        background: #f1f5f9;
     }
-    .photo-grid.count-1 { grid-template-columns: 1fr; }
-    .photo-grid.count-1 img { height: 180px; }
-    .photo-grid.count-2 { grid-template-columns: repeat(2, 1fr); }
-    .photo-grid.count-2 img { height: 130px; }
-    .photo-grid.count-4 { grid-template-columns: repeat(2, 1fr); }
-    .photo-grid.count-4 img { height: 110px; }
 
-    .no-photo { padding: 14px; text-align: center; color: #94a3b8; font-size: 10px; font-weight: 600; background: #f8fafc; }
+    /* FOTOĞRAFSIZ KUTU */
+    .no-photo-box {
+        flex: 1;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        border: 2px dashed #d1fae5; border-radius: 8px; background: #f8fafc;
+    }
 
-    .footer { text-align: center; padding: 10px 0 0; font-size: 8.5px; color: #94a3b8; border-top: 1px solid #e2e8f0; margin-top: 10px; font-weight: 600; }
+    /* ALT BİLGİ */
+    .photo-footer {
+        flex-shrink: 0;
+        text-align: center;
+        font-size: 8px;
+        color: #94a3b8;
+        font-weight: 600;
+        margin-top: 3mm;
+        padding-top: 3mm;
+        border-top: 1px solid #e2e8f0;
+    }
 
     @media print {
         * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         .cover { background: #064e3b !important; }
-        .work-header { background: #f0fdf4 !important; }
-        .photo-grid { background: #f8fafc !important; }
+        .photo-header { background: #f0fdf4 !important; }
     }
 </style>
 </head>
 <body>
 
+<!-- KAPAK SAYFASI -->
 <div class="cover">
     <div class="cover-emoji">🎨</div>
-    <div class="cover-title">MAARİF ÇALIŞMALARI RAPORU</div>
-    <div class="cover-subtitle">Türkiye Yüzyılı Maarif Modeli · Fotoğraflı Etkinlik Arşivi</div>
+    <div class="cover-title">Maarif Çalışmaları</div>
+    <div class="cover-subtitle">Türkiye Yüzyılı Maarif Modeli · Fotoğraflı Etkinlik Raporu</div>
     <div class="cover-line"></div>
     <div class="cover-teacher">${teacherName}</div>
     ${school ? `<div class="cover-school">${school}</div>` : ''}
     <div class="cover-year">Fen Bilimleri · ${academicYear}</div>
     <div class="cover-stats">
-        <div class="stat-box">
+        <div>
             <div class="stat-num">${list.length}</div>
             <div class="stat-lbl">Çalışma</div>
         </div>
-        <div class="stat-box">
+        <div>
             <div class="stat-num">${totalPhotos}</div>
             <div class="stat-lbl">Fotoğraf</div>
         </div>
@@ -3379,53 +3407,34 @@ document.addEventListener('alpine:init', () => {
     <div class="cover-date">Rapor Tarihi: ${printDate}</div>
 </div>
 
-<div class="page-header">
-    <div>
-        <div class="page-header-title">🎨 Maarif Çalışmaları</div>
-        <div class="page-header-sub">${teacherName} · ${academicYear} · ${list.length} Çalışma · ${totalPhotos} Fotoğraf</div>
-    </div>
-    <div style="font-size:9px;color:#64748b;font-weight:700;">${printDate}</div>
-</div>
-
-${workCards}
-
-<div class="footer">Rotalı Fenci · rotalifenci.vercel.app · ${teacherName} · ${printDate}</div>
+<!-- FOTOĞRAF SAYFALARI -->
+${pages.join('\n')}
 
 <script>
-// Fotograf gridi icin class hesapla
-document.querySelectorAll('.photo-grid').forEach(grid => {
-    const count = grid.querySelectorAll('img').length;
-    if (count === 1) grid.classList.add('count-1');
-    else if (count === 2) grid.classList.add('count-2');
-    else if (count === 4) grid.classList.add('count-4');
-});
-
 // Tum fotograflar yuklendikten sonra yazdir
-let imgCount = document.querySelectorAll('img').length;
-if (imgCount === 0) {
-    setTimeout(() => window.print(), 400);
-} else {
-    let loaded = 0;
-    document.querySelectorAll('img').forEach(img => {
-        if (img.complete) { loaded++; if (loaded >= imgCount) setTimeout(() => window.print(), 200); }
-        else {
-            img.onload = img.onerror = () => { loaded++; if (loaded >= imgCount) setTimeout(() => window.print(), 200); };
-        }
+const imgs = document.querySelectorAll('img');
+const total = imgs.length;
+if (total === 0) { setTimeout(() => window.print(), 300); }
+else {
+    let done = 0;
+    imgs.forEach(img => {
+        const check = () => { done++; if (done >= total) setTimeout(() => window.print(), 300); };
+        if (img.complete) check();
+        else { img.onload = check; img.onerror = check; }
     });
 }
 <\/script>
 </body>
 </html>`;
 
-            const win = window.open('', '_blank', 'width=950,height=750');
+            const win = window.open('', '_blank', 'width=960,height=760');
             if (!win) {
                 alert('Popup engelleyiciniz aktif. Lütfen tarayıcınızın adres çubuğunda popup iznini açın ve tekrar deneyin.');
                 return;
             }
             win.document.write(html);
             win.document.close();
-            this.showToast('🖨️ PDF kolaj raporu hazırlanıyor...');
-        },
+            this.showToast(`🖨️ ${totalPhotos} fotoğraflı PDF raporu hazırlanıyor...`);
 
         exportScheduleToExcel() {
             const title = `${this.data.teacher?.name || 'Murat Kundakcı'} - Haftalık Ders Programı (2026-2027)`;
