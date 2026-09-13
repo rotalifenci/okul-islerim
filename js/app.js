@@ -137,6 +137,16 @@ document.addEventListener('alpine:init', () => {
                 document.body.classList.remove('light');
             }
 
+            // Otomatik Maarif Modeli Kazanım Senkronizasyonu (TYMM 2026-2027)
+            if (this.data && this.data.weeklySchedule && !this.data._maarif_outcomes_v4) {
+                const initialSched = window.InitialData ? window.InitialData.weeklySchedule : null;
+                if (initialSched) {
+                    this.data.weeklySchedule = JSON.parse(JSON.stringify(initialSched));
+                    this.data._maarif_outcomes_v4 = true;
+                    window.StorageManager.saveData(this.data);
+                }
+            }
+
             // Klavye Kısayolları
             window.addEventListener('keydown', (e) => {
                 if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
@@ -152,7 +162,7 @@ document.addEventListener('alpine:init', () => {
                     this.isProjCalModalOpen = false;
                     this.isAnnualPlanModalOpen = false;
                 }
-                if (this.isAnnualPlanModalOpen && this.annualPlanViewMode === 'interactive' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+                if ((this.currentTab === 'annual-plan' || this.isAnnualPlanModalOpen) && this.annualPlanViewMode === 'interactive' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
                     if (e.key === 'ArrowLeft') {
                         this.prevAnnualPlanWeek();
                     } else if (e.key === 'ArrowRight') {
@@ -726,14 +736,14 @@ document.addEventListener('alpine:init', () => {
             if (!this.parsedSchedulePreview) return;
 
             const standardOutcomes = {
-                '5/A': { subject: 'Fen Bilimleri', topic: 'Güneş, Dünya ve Ay / Güneşin Yapısı', code: 'FB.5.1.1.1', desc: 'Güneş\'in yapısı, katmanları ve kendi ekseni etrafındaki dönme hareketini gözlem verileriyle modeller ve açıklar.', room: '5/A Sınıfı' },
-                '5/D': { subject: 'Fen Bilimleri', topic: 'Güneş, Dünya ve Ay / Ay\'ın Evreleri', code: 'FB.5.1.1.1', desc: 'Güneş\'in yapısı ve Ay\'ın evrelerinin oluşum sırasını Dünya etrafındaki dolanma hareketiyle modeller.', room: '5/D Sınıfı' },
-                '6/G': { subject: 'Fen Bilimleri', topic: 'Güneş Sistemi, Tutulmalar ve Denetleyici Sistemler', code: 'FB.6.1.1.1', desc: 'Güneş sistemi gezegenlerini, Güneş ve Ay tutulmalarını modeller; denetleyici ve düzenleyici sistemleri açıklar.', room: '6/G Sınıfı' },
-                '7/A': { subject: 'Fen Bilimleri', topic: 'Hücre, Organeller ve Mitoz Bölünme', code: 'FB.7.2.1.1', desc: 'Bitki ve hayvan hücrelerini organelleri bakımından karşılaştırır; hücre-doku-organ-sistem ilişkisini modeller.', room: 'Fen Laboratuvarı' },
-                '7/B': { subject: 'Fen Bilimleri', topic: 'Hücre, Organeller ve Mayoz Bölünme', code: 'FB.7.2.1.1', desc: 'Bitki ve hayvan hücrelerini karşılaştırır; mitoz ve mayoz bölünmenin canlılar için önemini açıklar.', room: 'Fen Laboratuvarı' },
+                '5/A': { subject: 'Fen Bilimleri', topic: 'Gökyüzündeki Komşumuz: Güneş', code: 'FB.5.1.1', desc: 'Güneş’in yapısı ve dönme hareketi ile ilgili bilgi toplayabilme', room: '5/A Sınıfı' },
+                '5/D': { subject: 'Fen Bilimleri', topic: 'Gökyüzündeki Komşumuz: Güneş & Ay', code: 'FB.5.1.1', desc: 'Güneş’in yapısı ve dönme hareketi ile ilgili bilgi toplayabilme; Ay’ın evrelerini modelleme', room: '5/D Sınıfı' },
+                '6/G': { subject: 'Fen Bilimleri', topic: 'Güneş Sistemi ve Gezegenler', code: 'FB.6.1.1', desc: 'Güneş sistemindeki gezegenleri niteliklerine göre sınıflandırabilme', room: '6/G Sınıfı' },
+                '7/A': { subject: 'Fen Bilimleri', topic: 'Uzay Çağı & Uzay Araştırmaları', code: 'FB.7.1.1', desc: 'Uzay araştırmaları için geliştirilen teknolojileri karşılaştırabilme', room: 'Fen Laboratuvarı' },
+                '7/B': { subject: 'Fen Bilimleri', topic: 'Uzay Çağı & Gözlem Araçları', code: 'FB.7.1.1', desc: 'Uzay araştırmaları için geliştirilen teknolojileri karşılaştırabilme; gözlem araçlarını modelleme', room: 'Fen Laboratuvarı' },
                 '5/D Rehberlik': { subject: 'Rehberlik ve Yönlendirme', topic: 'Sınıf Rehberliği ve Uyum', code: 'REHB.5.1', desc: '5/D Şube Rehberliği: Okula uyum, akran iletişimi, zaman yönetimi ve verimli çalışma oturumu.', room: '5/D Sınıfı' },
-                '8/A': { subject: 'Fen Bilimleri (LGS)', topic: 'Mevsimlerin Oluşumu ve DNA/Genetik Kod', code: 'F.8.1.1.1', desc: 'Mevsimlerin oluşumuna yönelik dönme ekseni eğikliği ve Güneş etrafında dolanma hareketinin etkilerini modeller üzerinden tahmin eder ve açıklar.', room: '8/A Sınıfı' },
-                '8/B': { subject: 'Fen Bilimleri (LGS)', topic: 'İklim, Hava Hareketleri ve DNA Eşlenmesi', code: 'F.8.1.2.1', desc: 'İklim ve hava olayları arasındaki temel farkları, klimatoloji ve meteoroloji bilim dallarının çalışma yöntemlerini grafik ve harita verileriyle analiz eder.', room: '8/B Sınıfı' },
+                '8/A': { subject: 'Fen Bilimleri (LGS)', topic: 'Mevsimlerin Oluşumu', code: 'F.8.1.1.1', desc: 'Mevsimlerin oluşumuna yönelik tahminlerde bulunur.', room: '8/A Sınıfı' },
+                '8/B': { subject: 'Fen Bilimleri (LGS)', topic: 'İklim ve Hava Hareketleri', code: 'F.8.1.2.1', desc: 'İklim ve hava olayları arasındaki farkı açıklar.', room: '8/B Sınıfı' },
                 'TÜBİTAK Proje': { subject: 'TÜBİTAK 2204-B & STEM', topic: 'Bilimsel Araştırma Yöntemleri & Deney Tasarımı', code: 'TÜBİTAK-AR-GE', desc: 'Bilimsel araştırma basamaklarını kullanarak hipotez kurar, deney düzeneği tasarlar ve veri analizi gerçekleştirir.', room: 'STEM Atölyesi' },
                 'Nöbet Görevi': { subject: 'Kat ve Laboratuvar Nöbeti', topic: 'Öğrenci Güvenliği & Teneffüs Düzeni (Cuma Nöbeti)', code: 'NÖBET', desc: 'Cuma günü okul kat nöbeti, laboratuvar güvenlik kontrolleri ve öğrenci teneffüs güvenliği takibini eksiksiz yerine getirir.', room: '2. Kat Koridor' },
                 'Zümre / Plan': { subject: 'Zümre Toplantısı & Planlama', topic: 'Haftalık Maarif Modeli Müfredat Eşgüdümü', code: 'ZÜMRE', desc: 'Zümre öğretmenleri haftalık Maarif Modeli kazanım takibi, deney malzemeleri planlaması ve ortak ölçme-değerlendirme süreçlerini yürütür.', room: 'Öğretmenler Odası' },
@@ -762,7 +772,7 @@ document.addEventListener('alpine:init', () => {
             });
 
             this.data.weeklySchedule = updatedSchedule;
-            this.data._maarif_v2 = true;
+            this.data._maarif_outcomes_v4 = true;
             this.data = JSON.parse(JSON.stringify(this.data));
             this.isScheduleImageUploadModalOpen = false;
             this.showToast("Görseldeki ders programı Maarif Modeli kazanımlarıyla başarıyla panele aktarıldı! 🚀");
@@ -793,14 +803,14 @@ document.addEventListener('alpine:init', () => {
 
         quickAssignClass(day, periodNo, classId) {
             const standardOutcomes = {
-                '5/A': { subject: 'Fen Bilimleri', topic: 'Güneş, Dünya ve Ay / Güneşin Yapısı', code: 'FB.5.1.1.1', desc: 'Güneş\'in yapısı, katmanları ve kendi ekseni etrafındaki dönme hareketini gözlem verileriyle modeller ve açıklar.', room: '5/A Sınıfı' },
-                '5/D': { subject: 'Fen Bilimleri', topic: 'Güneş, Dünya ve Ay / Ay\'ın Evreleri', code: 'FB.5.1.1.1', desc: 'Güneş\'in yapısı ve Ay\'ın evrelerinin oluşum sırasını Dünya etrafındaki dolanma hareketiyle modeller.', room: '5/D Sınıfı' },
-                '6/G': { subject: 'Fen Bilimleri', topic: 'Güneş Sistemi, Tutulmalar ve Denetleyici Sistemler', code: 'FB.6.1.1.1', desc: 'Güneş sistemi gezegenlerini, Güneş ve Ay tutulmalarını modeller; denetleyici ve düzenleyici sistemleri açıklar.', room: '6/G Sınıfı' },
-                '7/A': { subject: 'Fen Bilimleri', topic: 'Hücre, Organeller ve Mitoz Bölünme', code: 'FB.7.2.1.1', desc: 'Bitki ve hayvan hücrelerini organelleri bakımından karşılaştırır; hücre-doku-organ-sistem ilişkisini modeller.', room: 'Fen Laboratuvarı' },
-                '7/B': { subject: 'Fen Bilimleri', topic: 'Hücre, Organeller ve Mayoz Bölünme', code: 'FB.7.2.1.1', desc: 'Bitki ve hayvan hücrelerini karşılaştırır; mitoz ve mayoz bölünmenin canlılar için önemini açıklar.', room: 'Fen Laboratuvarı' },
+                '5/A': { subject: 'Fen Bilimleri', topic: 'Gökyüzündeki Komşumuz: Güneş', code: 'FB.5.1.1', desc: 'Güneş’in yapısı ve dönme hareketi ile ilgili bilgi toplayabilme', room: '5/A Sınıfı' },
+                '5/D': { subject: 'Fen Bilimleri', topic: 'Gökyüzündeki Komşumuz: Güneş & Ay', code: 'FB.5.1.1', desc: 'Güneş’in yapısı ve dönme hareketi ile ilgili bilgi toplayabilme; Ay’ın evrelerini modelleme', room: '5/D Sınıfı' },
+                '6/G': { subject: 'Fen Bilimleri', topic: 'Güneş Sistemi ve Gezegenler', code: 'FB.6.1.1', desc: 'Güneş sistemindeki gezegenleri niteliklerine göre sınıflandırabilme', room: '6/G Sınıfı' },
+                '7/A': { subject: 'Fen Bilimleri', topic: 'Uzay Çağı & Uzay Araştırmaları', code: 'FB.7.1.1', desc: 'Uzay araştırmaları için geliştirilen teknolojileri karşılaştırabilme', room: 'Fen Laboratuvarı' },
+                '7/B': { subject: 'Fen Bilimleri', topic: 'Uzay Çağı & Gözlem Araçları', code: 'FB.7.1.1', desc: 'Uzay araştırmaları için geliştirilen teknolojileri karşılaştırabilme; gözlem araçlarını modelleme', room: 'Fen Laboratuvarı' },
                 '5/D Rehberlik': { subject: 'Rehberlik ve Yönlendirme', topic: 'Sınıf Rehberliği ve Uyum', code: 'REHB.5.1', desc: '5/D Şube Rehberliği: Okula uyum, akran iletişimi, zaman yönetimi ve verimli çalışma oturumu.', room: '5/D Sınıfı' },
-                '8/A': { subject: 'Fen Bilimleri (LGS)', topic: 'Mevsimlerin Oluşumu ve DNA/Genetik Kod', code: 'F.8.1.1.1', desc: 'Mevsimlerin oluşumuna yönelik dönme ekseni eğikliği ve Güneş etrafında dolanma hareketinin etkilerini modeller üzerinden tahmin eder ve açıklar.', room: '8/A Sınıfı' },
-                '8/B': { subject: 'Fen Bilimleri (LGS)', topic: 'İklim, Hava Hareketleri ve DNA Eşlenmesi', code: 'F.8.1.2.1', desc: 'İklim ve hava olayları arasındaki temel farkları, klimatoloji ve meteoroloji bilim dallarının çalışma yöntemlerini grafik ve harita verileriyle analiz eder.', room: '8/B Sınıfı' },
+                '8/A': { subject: 'Fen Bilimleri (LGS)', topic: 'Mevsimlerin Oluşumu', code: 'F.8.1.1.1', desc: 'Mevsimlerin oluşumuna yönelik tahminlerde bulunur.', room: '8/A Sınıfı' },
+                '8/B': { subject: 'Fen Bilimleri (LGS)', topic: 'İklim ve Hava Hareketleri', code: 'F.8.1.2.1', desc: 'İklim ve hava olayları arasındaki farkı açıklar.', room: '8/B Sınıfı' },
                 'TÜBİTAK Proje': { subject: 'TÜBİTAK 2204-B & STEM', topic: 'Bilimsel Araştırma Yöntemleri & Deney Tasarımı', code: 'TÜBİTAK-AR-GE', desc: 'Bilimsel araştırma basamaklarını kullanarak hipotez kurar, deney düzeneği tasarlar ve veri analizi gerçekleştirir.', room: 'STEM Atölyesi' },
                 'Nöbet Görevi': { subject: 'Kat ve Laboratuvar Nöbeti', topic: 'Öğrenci Güvenliği & Teneffüs Düzeni (Cuma Nöbeti)', code: 'NÖBET', desc: 'Cuma günü okul kat nöbeti, laboratuvar güvenlik kontrolleri ve öğrenci teneffüs güvenliği takibini eksiksiz yerine getirir.', room: '2. Kat Koridor' },
                 'Zümre / Plan': { subject: 'Zümre Toplantısı & Planlama', topic: 'Haftalık Maarif Modeli Müfredat Eşgüdümü', code: 'ZÜMRE', desc: 'Zümre öğretmenleri haftalık Maarif Modeli kazanım takibi, deney malzemeleri planlaması ve ortak ölçme-değerlendirme süreçlerini yürütür.', room: 'Öğretmenler Odası' },
@@ -971,8 +981,7 @@ document.addEventListener('alpine:init', () => {
             }
             this.annualPlanSearchQuery = '';
             this.loadCurrentWeekNote();
-            this.isAnnualPlanModalOpen = true;
-            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+            this.setTab('annual-plan');
         },
 
         getCurrentAnnualPlanWeek(grade = null) {
