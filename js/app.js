@@ -326,7 +326,14 @@ document.addEventListener('alpine:init', () => {
                 this.currentUser.name = this.data.teacher.name;
             }
             this.loadAccountForm();
-            this.isAuthenticated = false;
+            // Kalıcı oturum kontrolü: Daha önce giriş yaptıysa ve çıkış yapmadıysa otomatik giriş
+            const savedAuth = localStorage.getItem('rotali_auth_state') === 'authenticated';
+            const savedUserId = localStorage.getItem('rotali_active_user_id');
+            if (savedAuth && savedUserId && this.currentUser && this.currentUser.id === savedUserId) {
+                this.isAuthenticated = true;
+            } else {
+                this.isAuthenticated = false;
+            }
             this.initBugReports();
 
             // Menü başlıklarını garantiye al
@@ -652,7 +659,7 @@ document.addEventListener('alpine:init', () => {
                 this.loginPassword = '';
                 localStorage.setItem('rotali_active_user_id', user.id);
                 localStorage.setItem('rotali_last_username', user.username);
-                // localStorage.setItem('rotali_auth_state', 'authenticated'); // Her ziyarette şifre sorulması için kalıcı oturum tutulmuyor
+                localStorage.setItem('rotali_auth_state', 'authenticated'); // Kalıcı oturum: çıkış yapılmadıkça giriş ekranı gösterilmez
 
                 // İlgili kullanıcının bağımsız izole verilerini yükle
                 this.data = window.StorageManager.loadData(user.id);
