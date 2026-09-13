@@ -22,6 +22,12 @@ window.StorageManager = {
                         parsed._murat_kundakci_duty_v5 = true;
                         this.saveData(parsed);
                     }
+                    if (!parsed._mai_sinif_students_v1) {
+                        parsed.classes = JSON.parse(JSON.stringify(window.InitialData.classes || []));
+                        parsed.students = JSON.parse(JSON.stringify(window.InitialData.students || []));
+                        parsed._mai_sinif_students_v1 = true;
+                        this.saveData(parsed);
+                    }
                     if (!parsed.lessonPeriods) parsed.lessonPeriods = JSON.parse(JSON.stringify(window.InitialData.lessonPeriods || []));
                 }
                 return parsed;
