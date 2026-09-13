@@ -51,8 +51,11 @@ document.addEventListener('alpine:init', () => {
             title: '',
             category: 'Öğrenci Takibi',
             priority: 'urgent',
-            date: new Date().toISOString().slice(0, 10)
+            date: new Date().toISOString().slice(0, 10),
+            timePeriod: 'Tüm Gün',
+            notes: ''
         },
+        selectedAssignmentClass: 'Hepsi',
 
         // 📚 Ödevler & Ödev Planlama Durumu (Sınıf Seviyeleri, Takvim, Zaman Aralığı)
         selectedAssignmentGrade: 'Hepsi',
@@ -379,17 +382,23 @@ document.addEventListener('alpine:init', () => {
 
         // Yeni Görev Ekle
         addTask() {
-            if (!this.newTask.title) return;
+            if (!this.newTask.title.trim()) {
+                alert("Lütfen görev başlığını giriniz!");
+                return;
+            }
             if (!this.data.tasks) this.data.tasks = [];
             this.data.tasks.unshift({
                 id: 'task-' + Date.now(),
-                title: this.newTask.title,
-                category: this.newTask.category,
-                priority: this.newTask.priority,
-                date: this.newTask.date,
+                title: this.newTask.title.trim(),
+                category: this.newTask.category || 'Öğrenci Takibi',
+                priority: this.newTask.priority || 'urgent',
+                date: this.newTask.date || new Date().toISOString().slice(0, 10),
+                timePeriod: this.newTask.timePeriod || 'Tüm Gün',
+                notes: this.newTask.notes || '',
                 done: false
             });
             this.newTask.title = '';
+            this.newTask.notes = '';
             this.isTaskModalOpen = false;
             window.StorageManager.saveData(this.data);
             this.showToast("Yeni görev eklendi! 📋");

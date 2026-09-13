@@ -1293,11 +1293,9 @@
                                 <i data-lucide="check-square" class="w-6 h-6"></i>
                             </div>
                             <div>
-                                <div class="flex items-center gap-2">
-                                    <h2 class="text-xl font-black text-black brand-font">📌 Okul Görevlerim & Nöbet Takibi</h2>
-                                    <span class="px-2.5 py-0.5 text-xs font-black bg-red-100 text-red-800 rounded-lg border border-red-300">Eisenhower Matrisi</span>
+                                <div>
+                                    <h2 class="text-xl font-black text-black brand-font">📌 Okul Görevlerim</h2>
                                 </div>
-                                <p class="text-xs text-slate-700 font-bold">Acil okul görevleri, şube rehberlik formları, nöbet hazırlıkları ve zümre/kulüp planlaması</p>
                             </div>
                         </div>
 
@@ -1357,10 +1355,12 @@
                                         <input type="checkbox" :checked="t.done" @change="toggleTask(t)" class="rounded text-red-600 focus:ring-red-500 cursor-pointer w-4 h-4 flex-shrink-0">
                                         <div class="min-w-0">
                                             <p class="font-black text-black text-xs leading-snug break-words" :class="t.done ? 'line-through text-slate-400' : 'text-black'" x-text="t.title"></p>
-                                            <div class="flex items-center gap-2 mt-1 text-[10px] text-slate-500 font-bold">
-                                                <span x-show="t.category" class="px-1.5 py-0.2 rounded bg-slate-100 text-slate-700" x-text="t.category"></span>
-                                                <span x-show="t.date" x-text="t.date"></span>
+                                            <div class="flex flex-wrap items-center gap-1.5 mt-1.5 text-[10px] font-bold">
+                                                <span x-show="t.category" class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 font-black border border-slate-200" x-text="t.category"></span>
+                                                <span x-show="t.date" class="px-2 py-0.5 rounded-md bg-red-50 text-red-800 font-black border border-red-200" x-text="'📅 ' + t.date"></span>
+                                                <span x-show="t.timePeriod" class="px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 font-black border border-amber-200" x-text="'⏰ ' + t.timePeriod"></span>
                                             </div>
+                                            <p x-show="t.notes" class="text-[11px] text-slate-600 bg-slate-50 p-1.5 rounded-lg border border-slate-200 mt-1 font-medium" x-text="t.notes"></p>
                                         </div>
                                     </div>
                                     <button @click="deleteTask(t.id)" title="Görevi Sil" class="p-1.5 rounded-lg bg-slate-100 hover:bg-red-100 text-slate-400 hover:text-red-600 transition flex-shrink-0">
@@ -1395,10 +1395,12 @@
                                         <input type="checkbox" :checked="t.done" @change="toggleTask(t)" class="rounded text-amber-600 focus:ring-amber-500 cursor-pointer w-4 h-4 flex-shrink-0">
                                         <div class="min-w-0">
                                             <p class="font-black text-black text-xs leading-snug break-words" :class="t.done ? 'line-through text-slate-400' : 'text-black'" x-text="t.title"></p>
-                                            <div class="flex items-center gap-2 mt-1 text-[10px] text-slate-500 font-bold">
-                                                <span x-show="t.category" class="px-1.5 py-0.2 rounded bg-slate-100 text-slate-700" x-text="t.category"></span>
-                                                <span x-show="t.date" x-text="t.date"></span>
+                                            <div class="flex flex-wrap items-center gap-1.5 mt-1.5 text-[10px] font-bold">
+                                                <span x-show="t.category" class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 font-black border border-slate-200" x-text="t.category"></span>
+                                                <span x-show="t.date" class="px-2 py-0.5 rounded-md bg-red-50 text-red-800 font-black border border-red-200" x-text="'📅 ' + t.date"></span>
+                                                <span x-show="t.timePeriod" class="px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 font-black border border-amber-200" x-text="'⏰ ' + t.timePeriod"></span>
                                             </div>
+                                            <p x-show="t.notes" class="text-[11px] text-slate-600 bg-slate-50 p-1.5 rounded-lg border border-slate-200 mt-1 font-medium" x-text="t.notes"></p>
                                         </div>
                                     </div>
                                     <button @click="deleteTask(t.id)" title="Görevi Sil" class="p-1.5 rounded-lg bg-slate-100 hover:bg-red-100 text-slate-400 hover:text-red-600 transition flex-shrink-0">
@@ -1462,38 +1464,44 @@
                         </div>
                     </div>
 
-                    <!-- 1. Üst Sınıf Seviyeleri Seçimi -->
+                    <!-- 1. Şubelere Göre Sınıf Sınıf Filtreleme & Ayırma -->
                     <div class="pt-3 border-t-2 border-slate-300 flex flex-wrap items-center justify-between gap-3">
                         <div class="flex flex-wrap items-center gap-2">
-                            <span class="text-xs font-black text-black mr-1">Sınıf Seviyesi:</span>
+                            <span class="text-xs font-black text-black mr-1">🏫 Sınıf Seçimi:</span>
                             
-                            <!-- Hepsi -->
-                            <button @click="selectedAssignmentGrade = 'Hepsi'" :class="selectedAssignmentGrade === 'Hepsi' ? 'bg-red-600 text-white font-black shadow-md border-2 border-red-700 ring-2 ring-red-300' : 'bg-white text-black font-black hover:bg-red-50 border border-slate-300 shadow-sm'" class="px-3.5 py-2 rounded-xl text-xs transition">
-                                🌟 Tüm Seviyeler
+                            <!-- Tüm Sınıflar -->
+                            <button @click="selectedAssignmentClass = 'Hepsi'; selectedAssignmentGrade = 'Hepsi'" :class="selectedAssignmentClass === 'Hepsi' ? 'bg-red-600 text-white font-black shadow-md border-2 border-red-700 ring-2 ring-red-300' : 'bg-white text-black font-black hover:bg-red-50 border border-slate-300 shadow-sm'" class="px-3.5 py-2 rounded-xl text-xs transition">
+                                🌟 Tüm Sınıflar
                             </button>
 
-                            <!-- 5. Sınıf -->
-                            <button @click="selectedAssignmentGrade = 5" :class="selectedAssignmentGrade === 5 ? 'bg-red-600 text-white font-black shadow-md border-2 border-red-700 ring-2 ring-red-300' : 'bg-white text-black font-black hover:bg-red-50 border border-slate-300 shadow-sm'" class="px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-1.5">
+                            <!-- 5/A -->
+                            <button @click="selectedAssignmentClass = '5A'" :class="selectedAssignmentClass === '5A' ? 'bg-red-600 text-white font-black shadow-md border-2 border-red-700 ring-2 ring-red-300' : 'bg-white text-black font-black hover:bg-blue-50 border border-slate-300 shadow-sm'" class="px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-1.5">
                                 <span class="w-2 h-2 rounded-full bg-blue-500"></span>
-                                <span>5. Sınıf (5/A, 5/D)</span>
+                                <span>5/A Sınıfı</span>
                             </button>
 
-                            <!-- 6. Sınıf -->
-                            <button @click="selectedAssignmentGrade = 6" :class="selectedAssignmentGrade === 6 ? 'bg-red-600 text-white font-black shadow-md border-2 border-red-700 ring-2 ring-red-300' : 'bg-white text-black font-black hover:bg-red-50 border border-slate-300 shadow-sm'" class="px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-1.5">
+                            <!-- 5/D -->
+                            <button @click="selectedAssignmentClass = '5D'" :class="selectedAssignmentClass === '5D' ? 'bg-red-600 text-white font-black shadow-md border-2 border-red-700 ring-2 ring-red-300' : 'bg-white text-black font-black hover:bg-blue-50 border border-slate-300 shadow-sm'" class="px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                                <span>5/D Sınıfı</span>
+                            </button>
+
+                            <!-- 6/G -->
+                            <button @click="selectedAssignmentClass = '6G'" :class="selectedAssignmentClass === '6G' ? 'bg-red-600 text-white font-black shadow-md border-2 border-red-700 ring-2 ring-red-300' : 'bg-white text-black font-black hover:bg-emerald-50 border border-slate-300 shadow-sm'" class="px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-1.5">
                                 <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                                <span>6. Sınıf (6/G)</span>
+                                <span>6/G Sınıfı</span>
                             </button>
 
-                            <!-- 7. Sınıf -->
-                            <button @click="selectedAssignmentGrade = 7" :class="selectedAssignmentGrade === 7 ? 'bg-red-600 text-white font-black shadow-md border-2 border-red-700 ring-2 ring-red-300' : 'bg-white text-black font-black hover:bg-red-50 border border-slate-300 shadow-sm'" class="px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-1.5">
+                            <!-- 7/A -->
+                            <button @click="selectedAssignmentClass = '7A'" :class="selectedAssignmentClass === '7A' ? 'bg-red-600 text-white font-black shadow-md border-2 border-red-700 ring-2 ring-red-300' : 'bg-white text-black font-black hover:bg-purple-50 border border-slate-300 shadow-sm'" class="px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-1.5">
                                 <span class="w-2 h-2 rounded-full bg-purple-500"></span>
-                                <span>7. Sınıf (7/A, 7/B)</span>
+                                <span>7/A Sınıfı</span>
                             </button>
 
-                            <!-- 8. Sınıf -->
-                            <button @click="selectedAssignmentGrade = 8" :class="selectedAssignmentGrade === 8 ? 'bg-red-600 text-white font-black shadow-md border-2 border-red-700 ring-2 ring-red-300' : 'bg-white text-black font-black hover:bg-red-50 border border-slate-300 shadow-sm'" class="px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-                                <span>8. Sınıf</span>
+                            <!-- 7/B -->
+                            <button @click="selectedAssignmentClass = '7B'" :class="selectedAssignmentClass === '7B' ? 'bg-red-600 text-white font-black shadow-md border-2 border-red-700 ring-2 ring-red-300' : 'bg-white text-black font-black hover:bg-purple-50 border border-slate-300 shadow-sm'" class="px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-purple-500"></span>
+                                <span>7/B Sınıfı</span>
                             </button>
                         </div>
 
@@ -2400,7 +2408,25 @@
             
             <div>
                 <label class="text-xs font-black text-black block mb-1">Görev Başlığı</label>
-                <input type="text" x-model="newTask.title" placeholder="Örn: 7/A Gözlem Raporunu Tamamla" class="w-full px-3 py-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-black shadow-sm">
+                <input type="text" x-model="newTask.title" placeholder="Örn: 5/D Rehberlik Uyum Formunu Teslim Et" class="w-full px-3.5 py-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-black text-black shadow-sm focus:border-red-600 focus:outline-none">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="text-xs font-black text-black block mb-1">📅 Yapılma / Teslim Tarihi</label>
+                    <input type="date" x-model="newTask.date" class="w-full px-3 py-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-black shadow-sm">
+                </div>
+                <div>
+                    <label class="text-xs font-black text-black block mb-1">⏰ Yapılma Zamanı / Saati</label>
+                    <select x-model="newTask.timePeriod" class="w-full px-3 py-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-black text-black shadow-sm">
+                        <option value="Tüm Gün">☀️ Tüm Gün / Mesai İçi</option>
+                        <option value="Ders Girişi (08:30)">🔔 1. Ders Girişi (08:30)</option>
+                        <option value="1. Teneffüs (09:10)">☕ 1. Teneffüs (09:10)</option>
+                        <option value="Öğle Arası (12:00)">🍽️ Öğle Arası (12:00)</option>
+                        <option value="Ders Çıkışı (14:30)">🚪 Ders Çıkışı (14:30)</option>
+                        <option value="Hafta Sonu">🗓️ Hafta Sonu / Evde</option>
+                    </select>
+                </div>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
@@ -2408,19 +2434,26 @@
                     <label class="text-xs font-black text-black block mb-1">Kategori</label>
                     <select x-model="newTask.category" class="w-full px-3 py-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-black shadow-sm">
                         <option value="Öğrenci Takibi">Öğrenci Takibi</option>
-                        <option value="Proje Takvimi">Proje Takvimi</option>
-                        <option value="Evrak">Evrak</option>
-                        <option value="Sosyal Medya">Sosyal Medya</option>
+                        <option value="Rehberlik & Veli">Rehberlik & Veli</option>
+                        <option value="Nöbet & Güvenlik">Nöbet & Güvenlik</option>
+                        <option value="Zümre & Sınav">Zümre & Sınav</option>
+                        <option value="Evrak & İdare">Evrak & İdare</option>
+                        <option value="Laboratuvar & Deney">Laboratuvar & Deney</option>
                     </select>
                 </div>
 
                 <div>
-                    <label class="text-xs font-black text-black block mb-1">Öncelik</label>
+                    <label class="text-xs font-black text-black block mb-1">Öncelik / Seviye</label>
                     <select x-model="newTask.priority" class="w-full px-3 py-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-black shadow-sm">
-                        <option value="urgent">🔴 Acil</option>
-                        <option value="important">🟠 Önemli</option>
+                        <option value="urgent">🔴 Acil & Önemli</option>
+                        <option value="important">🟠 Planlanacak Zümre/Kulüp</option>
                     </select>
                 </div>
+            </div>
+
+            <div>
+                <label class="text-xs font-black text-black block mb-1">Özel Açıklama / Hatırlatma Notu (İsteğe Bağlı)</label>
+                <textarea x-model="newTask.notes" rows="2" placeholder="Görev ile ilgili özel not veya detay..." class="w-full px-3 py-2 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-black shadow-sm focus:border-red-600 focus:outline-none"></textarea>
             </div>
 
             <div class="flex justify-end gap-2 pt-2">
