@@ -58,37 +58,70 @@
 </head>
 <body x-data="rotaliApp" class="bg-[#090d16] text-slate-100 min-h-screen flex flex-col selection:bg-red-600 selection:text-white">
 
-    <!-- ================= GİRİŞ PORTALI (AUTHENTICATION) ================= -->
-    <div x-show="!isAuthenticated" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#090d16] bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(220,38,38,0.3),rgba(9,13,22,0.95))] backdrop-blur-md">
-        <div class="w-full max-w-md bg-white p-8 rounded-3xl border-4 border-red-600 shadow-2xl space-y-6 text-slate-900 relative">
+    <!-- ================= GİRİŞ PORTALI (ÇOKLU ÖĞRETMEN GİRİŞİ) ================= -->
+    <div x-show="!isAuthenticated" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#090d16] bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(220,38,38,0.35),rgba(9,13,22,0.98))] backdrop-blur-md overflow-y-auto">
+        <div class="w-full max-w-lg bg-white p-6 sm:p-8 rounded-3xl border-4 border-red-600 shadow-2xl space-y-5 text-slate-900 relative my-auto">
             
             <!-- Logo ve Başlık -->
-            <div class="text-center space-y-3">
-                <div class="relative w-24 h-24 mx-auto">
-                    <img src="assets/logo.jpg" alt="Rotalı Fenci Logo" class="w-24 h-24 rounded-2xl shadow-xl border-2 border-red-600 object-cover object-center ring-4 ring-red-100">
+            <div class="text-center space-y-2">
+                <div class="relative w-20 h-20 mx-auto">
+                    <img src="assets/logo.jpg" alt="Rotalı Fenci Logo" class="w-20 h-20 rounded-2xl shadow-xl border-2 border-red-600 object-cover object-center ring-4 ring-red-100">
                 </div>
                 <h1 class="text-2xl font-black tracking-tight text-black brand-font">
                     ROTALI <span class="text-red-600">FENCİ</span>
                 </h1>
                 <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-100 text-red-800 border border-red-300 text-xs font-black">
-                    <i data-lucide="shield-check" class="w-4 h-4 text-red-600"></i>
-                    <span>Yönetici Giriş Portalı</span>
+                    <i data-lucide="users" class="w-4 h-4 text-red-600"></i>
+                    <span>Öğretmen Giriş Portalı</span>
                 </div>
-                <p class="text-xs text-slate-600 font-bold pt-1">
-                    Öğretmen paneline erişmek için lütfen yönetici şifrenizi giriniz.
+                <p class="text-xs text-slate-600 font-bold">
+                    Lütfen işlem yapacağınız öğretmen profilini seçip şifrenizle giriş yapınız.
                 </p>
             </div>
 
+            <!-- Öğretmen Seçim Kartları -->
+            <div class="space-y-1.5">
+                <label class="text-xs font-black text-black block">👤 Giriş Yapılacak Profil:</label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <!-- 1. Öğretmen -->
+                    <button type="button" @click="selectTeacherForLogin('teacher1')" :class="loginSelectedTeacher === 'teacher1' ? 'border-red-600 bg-red-50 ring-2 ring-red-500 shadow-md' : 'border-slate-200 bg-slate-50 hover:bg-slate-100 hover:border-slate-300'" class="p-3 rounded-2xl border-2 text-left transition flex items-start gap-3 cursor-pointer">
+                        <span class="text-2xl p-1.5 bg-white rounded-xl shadow-sm border border-slate-200">👨‍🏫</span>
+                        <div class="min-w-0 flex-1">
+                            <div class="text-xs font-black text-slate-900 truncate">1. Öğretmen</div>
+                            <div class="text-[11px] font-bold text-red-700 truncate">Murat Kundakcı</div>
+                            <div class="text-[10px] text-slate-500 font-semibold mt-0.5">5/A, 5/D, 6/G, 7/A, 7/B</div>
+                        </div>
+                    </button>
+
+                    <!-- 2. Öğretmen -->
+                    <button type="button" @click="selectTeacherForLogin('teacher2')" :class="loginSelectedTeacher === 'teacher2' ? 'border-red-600 bg-red-50 ring-2 ring-red-500 shadow-md' : 'border-slate-200 bg-slate-50 hover:bg-slate-100 hover:border-slate-300'" class="p-3 rounded-2xl border-2 text-left transition flex items-start gap-3 cursor-pointer">
+                        <span class="text-2xl p-1.5 bg-white rounded-xl shadow-sm border border-slate-200">👩‍🏫</span>
+                        <div class="min-w-0 flex-1">
+                            <div class="text-xs font-black text-slate-900 truncate">2. Öğretmen</div>
+                            <div class="text-[11px] font-bold text-red-700 truncate">Fen Bilimleri Öğr.</div>
+                            <div class="text-[10px] text-slate-500 font-semibold mt-0.5">5/B, 6/B, 7/C, 8/A</div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
             <!-- Giriş Formu -->
-            <form @submit.prevent="login()" class="space-y-4">
+            <form @submit.prevent="login()" class="space-y-3.5">
                 <div>
-                    <label class="text-xs font-black text-black block mb-1.5 flex items-center justify-between">
-                        <span>🔑 Yönetici Şifresi:</span>
+                    <label class="text-xs font-black text-black block mb-1">
+                        <span>👤 Kullanıcı Adı:</span>
+                    </label>
+                    <input type="text" x-model="loginUsername" placeholder="Kullanıcı adınızı yazınız..." class="w-full px-3.5 py-2.5 bg-slate-100 border-2 border-slate-300 rounded-xl text-sm font-black text-black placeholder-slate-400 focus:outline-none focus:border-red-600 focus:bg-white transition shadow-sm">
+                </div>
+
+                <div>
+                    <label class="text-xs font-black text-black block mb-1 flex items-center justify-between">
+                        <span>🔑 Öğretmen Şifresi:</span>
                         <span class="text-[10px] text-slate-500 font-bold">Güvenli Giriş</span>
                     </label>
                     <div class="relative">
-                        <input :type="isPasswordVisible ? 'text' : 'password'" x-model="loginPassword" placeholder="Şifrenizi yazınız..." autofocus class="w-full px-4 py-3 bg-slate-100 border-2 border-slate-300 rounded-xl text-sm font-black text-black placeholder-slate-400 focus:outline-none focus:border-red-600 focus:bg-white transition shadow-sm">
-                        <button type="button" @click="isPasswordVisible = !isPasswordVisible" class="absolute right-3 top-3 text-slate-500 hover:text-black font-black text-xs">
+                        <input :type="isPasswordVisible ? 'text' : 'password'" x-model="loginPassword" placeholder="Şifrenizi yazınız..." autofocus class="w-full px-3.5 py-2.5 bg-slate-100 border-2 border-slate-300 rounded-xl text-sm font-black text-black placeholder-slate-400 focus:outline-none focus:border-red-600 focus:bg-white transition shadow-sm">
+                        <button type="button" @click="isPasswordVisible = !isPasswordVisible" class="absolute right-3 top-2.5 text-slate-500 hover:text-black font-black text-xs">
                             <span x-text="isPasswordVisible ? 'Gizle 🙈' : 'Göster 👁️'"></span>
                         </button>
                     </div>
@@ -102,13 +135,25 @@
 
                 <!-- Giriş Butonu -->
                 <button type="submit" class="w-full py-3.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-sm transition shadow-lg shadow-red-600/30 flex items-center justify-center gap-2 active:scale-95">
-                    <span>Giriş Yap</span>
+                    <span>Öğretmen Paneline Giriş Yap</span>
                     <span>➔</span>
                 </button>
             </form>
 
+            <!-- Giriş Bilgileri Rehberi -->
+            <div class="p-3 rounded-xl bg-slate-100 border border-slate-200 text-[11px] space-y-1 text-slate-700 font-semibold">
+                <div class="font-black text-slate-900 flex items-center gap-1.5">
+                    <i data-lucide="key" class="w-3.5 h-3.5 text-red-600"></i>
+                    <span>Kayıtlı Öğretmen Giriş Bilgileri:</span>
+                </div>
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pt-1 border-t border-slate-200">
+                    <div><strong>1. Öğretmen:</strong> <code class="bg-white px-1.5 py-0.5 rounded border text-red-700 font-mono text-[10px]">rotalifenci</code> / <code class="bg-white px-1.5 py-0.5 rounded border text-red-700 font-mono text-[10px]">Rotali5822.</code></div>
+                    <div><strong>2. Öğretmen:</strong> <code class="bg-white px-1.5 py-0.5 rounded border text-red-700 font-mono text-[10px]">ogretmen2</code> / <code class="bg-white px-1.5 py-0.5 rounded border text-red-700 font-mono text-[10px]">Fen2026.</code></div>
+                </div>
+            </div>
+
             <!-- Alt Bilgi -->
-            <div class="text-center pt-2 border-t border-slate-200 text-[11px] text-slate-500 font-bold">
+            <div class="text-center pt-1 text-[11px] text-slate-500 font-bold">
                 <span>Rotalı Fenci — Kişisel Dijital Öğretmen Paneli & İşletim Sistemi</span>
             </div>
 
@@ -130,7 +175,7 @@
                         <span class="font-extrabold text-xl tracking-tight text-white brand-font">
                             ROTALI <span class="text-red-500">FENCİ</span>
                         </span>
-                        <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-red-500/10 text-red-400 border border-red-500/20 rounded-full">
+                        <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-red-500/10 text-red-400 border border-red-500/20 rounded-full" x-text="getCurrentTeacher().badge || 'Öğretmen Paneli'">
                             Öğretmen Paneli
                         </span>
                     </div>
@@ -155,8 +200,8 @@
                 <!-- Yönetici Durumu & Çıkış Yap Butonu -->
                 <div class="flex items-center gap-2 bg-slate-900/90 px-3 py-1.5 rounded-xl border border-red-500/30 text-xs">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span class="font-black text-white hidden sm:inline">👤 Yönetici: Rotalı Fenci</span>
-                    <button @click="logout()" title="Yönetici Oturumunu Kapat" class="ml-1 px-2.5 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white font-black text-[11px] shadow transition flex items-center gap-1">
+                    <span class="font-black text-white hidden sm:inline" x-text="'👤 ' + (data?.teacher?.name || getCurrentTeacher().name)"></span>
+                    <button @click="logout()" title="Öğretmen Oturumunu Kapat" class="ml-1 px-2.5 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white font-black text-[11px] shadow transition flex items-center gap-1">
                         <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
                         <span>Çıkış</span>
                     </button>
@@ -295,18 +340,19 @@
                                 <span x-text="data.teacher.school"></span>
                             </span>
                             <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-black border border-amber-500/30">
-                                <span>🛡️ Nöbet Günü:</span>
-                                <span class="font-extrabold text-white">Cuma (2. Kat & Fen Lab)</span>
+                                <span>🛡️ Nöbet:</span>
+                                <span class="font-extrabold text-white" x-text="(data.teacher?.dutyDay || 'Belirlenmedi') + ' (' + (data.teacher?.dutyArea || 'Kat Nöbeti') + ')'"></span>
                             </span>
                             <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-bold border border-blue-500/30">
-                                <span>📊 Toplam: 21 Ders (20 Fen + 1 Rehberlik)</span>
+                                <span>📊 Toplam:</span>
+                                <span class="font-extrabold text-white" x-text="(data.teacher?.totalLessons || 21) + ' Ders (' + (data.teacher?.fenLessons || 20) + ' Fen + ' + (data.teacher?.rehberLessons || 1) + ' Rehberlik)'"></span>
                             </span>
                         </div>
                         <h1 class="text-2xl sm:text-3xl font-black text-slate-100 tracking-tight brand-font">
-                            Günaydın, <span class="bg-gradient-to-r from-red-400 via-rose-300 to-amber-200 bg-clip-text text-transparent" x-text="data.teacher.name"></span> 👋
+                            Günaydın, <span class="bg-gradient-to-r from-red-400 via-rose-300 to-amber-200 bg-clip-text text-transparent" x-text="data.teacher?.name || getCurrentTeacher().name"></span> 👋
                         </h1>
                         <p class="text-slate-300 text-sm max-w-xl">
-                            5/A, 5/D, 6/G, 7/A, 7/B sınıfları haftalık ders akışı, 5/D şube rehberliği ve Cuma nöbet göreviniz sisteme işlenmiştir.
+                            <span class="font-bold text-white" x-text="(data.classes || []).map(c => c.name).join(', ')"></span> sınıfları haftalık ders akışı, <span x-text="data.teacher?.title || 'Şube Rehberliği'"></span> ve nöbet göreviniz sisteme işlenmiştir.
                         </p>
                     </div>
 
@@ -2206,13 +2252,11 @@
                                                 <td class="p-1.5 border-r border-slate-200 text-center">
                                                     <select x-model="(parsedSchedulePreview[d].find(l => l.periodNo === pNo) || {}).classId" class="w-full text-xs font-black p-1.5 rounded-lg border-2 border-slate-300 bg-white focus:border-red-500 shadow-sm transition" :class="(parsedSchedulePreview[d].find(l => l.periodNo === pNo) || {}).classId !== 'Boş' ? 'text-red-700 font-black bg-red-50/70 border-red-300' : 'text-slate-400 border-slate-200'">
                                                         <option value="Boş">Ders Yok</option>
-                                                        <option value="5/A">5/A</option>
-                                                        <option value="5/D">5/D</option>
-                                                        <option value="6/G">6/G</option>
-                                                        <option value="7/A">7/A</option>
-                                                        <option value="7/B">7/B</option>
-                                                        <option value="5/D Rehberlik">⭐ 5/D Rehberlik</option>
-                                                        <option value="Nöbet Görevi">🛡️ Nöbet Görevi (Cuma)</option>
+                                                        <template x-for="c in (data.classes || [])" :key="c.id">
+                                                            <option :value="c.name" x-text="c.name"></option>
+                                                        </template>
+                                                        <option value="Rehberlik">⭐ Rehberlik</option>
+                                                        <option value="Nöbet Görevi">🛡️ Nöbet Görevi</option>
                                                         <option value="TÜBİTAK Proje">🔬 TÜBİTAK Proje</option>
                                                         <option value="Zümre / Plan">👥 Zümre / Plan</option>
                                                         <option value="STEM Kulübü">🚀 STEM Kulübü</option>
