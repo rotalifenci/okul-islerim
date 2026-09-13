@@ -1640,140 +1640,167 @@
 
             <!-- ================= TAB 4: PROJE TAKVİMİ ================= -->
                         <!-- ================= TAB: MAARİF MODELİ GÜNLÜK PLAN ================= -->
+                        <!-- ================= TAB: MAARİF MODELİ GÜNLÜK PLAN (5, 6, 7, 8 & 37 HAFTA GEZGİNİ) ================= -->
             <div x-show="currentTab === 'daily-plan'" x-cloak class="space-y-6">
                 
                 <!-- Başlık ve Kontrol Paneli -->
                 <div class="bg-slate-100/95 p-5 sm:p-6 rounded-3xl border-2 border-slate-300 shadow-md space-y-4">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                         <div class="flex items-center gap-3.5">
                             <div class="p-3.5 bg-teal-600 rounded-2xl text-white shadow-lg shadow-teal-600/30">
                                 <i data-lucide="file-text" class="w-6 h-6"></i>
                             </div>
                             <div>
-                                <div class="flex items-center gap-2">
-                                    <h2 class="text-xl font-black text-black brand-font">📑 Maarif Modeli Günlük Plan</h2>
-                                    <span class="px-2.5 py-0.5 text-xs font-black bg-teal-100 text-teal-800 rounded-lg border border-teal-300">Resmi Ders Planı</span>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <h2 class="text-xl font-black text-black brand-font flex items-center gap-2">
+                                        <span>📑 Maarif Modeli Günlük Ders Planı</span>
+                                    </h2>
+                                    <span class="text-xs bg-teal-600 text-white font-black px-2.5 py-0.5 rounded-lg shadow-sm">
+                                        5, 6, 7, 8. Sınıflar • 37 Hafta
+                                    </span>
                                 </div>
-                                <p class="text-xs text-slate-700 font-bold">Öğrenme çıktıları, süreç bileşenleri, deney/materyaller ve ölçme-değerlendirme adımlarıyla zenginleştirilmiş günlük ders planları</p>
+                                <p class="text-xs text-slate-700 font-bold">Türkiye Yüzyılı Maarif Modeli öğrenme çıktılarına göre hafta hafta yapılandırılmış 4 derslik günlük ders akışı, deney ve ölçme-değerlendirme adımları</p>
                             </div>
                         </div>
 
+                        <!-- Üst Sağ Aksiyonlar -->
                         <div class="flex flex-wrap items-center gap-2">
-                            <button @click="openNewDailyPlan(selectedDailyPlanClass === 'Hepsi' ? '5/A' : selectedDailyPlanClass)" class="px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-black text-xs shadow-md flex items-center gap-2 transition transform hover:scale-105 active:scale-95">
-                                <i data-lucide="plus-circle" class="w-4 h-4"></i>
-                                <span>+ Yeni Günlük Plan Hazırla</span>
+                            <button @click="openEditWeeklyDailyPlan()" class="px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-black text-xs shadow-md flex items-center gap-2 transition transform hover:scale-105 active:scale-95">
+                                <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                <span>✏️ Bu Haftanın Planını Düzenle</span>
+                            </button>
+
+                            <button @click="printWeeklyDailyPlanInteractive(selectedDailyPlanGrade)" title="Bu Haftanın Günlük Planını Yazdır / PDF Al" class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-black text-white font-black text-xs shadow-md transition flex items-center gap-1.5">
+                                <i data-lucide="printer" class="w-4 h-4"></i>
+                                <span>🖨️ Yazdır / PDF</span>
                             </button>
                         </div>
                     </div>
 
-                    <!-- Sınıf Seçimi ve Arama Filtreleri -->
-                    <div class="pt-3 border-t-2 border-slate-300 flex flex-wrap items-center justify-between gap-3">
+                    <!-- Sınıf Seviyesi Seçimi (5, 6, 7, 8) -->
+                    <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t-2 border-slate-200">
                         <div class="flex flex-wrap items-center gap-2">
-                            <span class="text-xs font-black text-black mr-1">🏫 Sınıf:</span>
-                            
-                            <button @click="selectedDailyPlanClass = 'Hepsi'" :class="selectedDailyPlanClass === 'Hepsi' ? 'bg-teal-600 text-white font-black shadow-md border-2 border-teal-700 ring-2 ring-teal-300' : 'bg-white text-black font-black hover:bg-teal-50 border border-slate-300 shadow-sm'" class="px-3.5 py-2 rounded-xl text-xs transition">
-                                🌟 Tüm Sınıflar
-                            </button>
-                            <button @click="selectedDailyPlanClass = '5/A'" :class="selectedDailyPlanClass === '5/A' ? 'bg-teal-600 text-white font-black shadow-md border-2 border-teal-700 ring-2 ring-teal-300' : 'bg-white text-black font-black hover:bg-teal-50 border border-slate-300 shadow-sm'" class="px-3.5 py-2 rounded-xl text-xs transition">
-                                5/A Sınıfı
-                            </button>
-                            <button @click="selectedDailyPlanClass = '5/D'" :class="selectedDailyPlanClass === '5/D' ? 'bg-teal-600 text-white font-black shadow-md border-2 border-teal-700 ring-2 ring-teal-300' : 'bg-white text-black font-black hover:bg-teal-50 border border-slate-300 shadow-sm'" class="px-3.5 py-2 rounded-xl text-xs transition">
-                                5/D Sınıfı
-                            </button>
-                            <button @click="selectedDailyPlanClass = '6/G'" :class="selectedDailyPlanClass === '6/G' ? 'bg-teal-600 text-white font-black shadow-md border-2 border-teal-700 ring-2 ring-teal-300' : 'bg-white text-black font-black hover:bg-teal-50 border border-slate-300 shadow-sm'" class="px-3.5 py-2 rounded-xl text-xs transition">
-                                6/G Sınıfı
-                            </button>
-                            <button @click="selectedDailyPlanClass = '7/A'" :class="selectedDailyPlanClass === '7/A' ? 'bg-teal-600 text-white font-black shadow-md border-2 border-teal-700 ring-2 ring-teal-300' : 'bg-white text-black font-black hover:bg-teal-50 border border-slate-300 shadow-sm'" class="px-3.5 py-2 rounded-xl text-xs transition">
-                                7/A Sınıfı
-                            </button>
-                            <button @click="selectedDailyPlanClass = '7/B'" :class="selectedDailyPlanClass === '7/B' ? 'bg-teal-600 text-white font-black shadow-md border-2 border-teal-700 ring-2 ring-teal-300' : 'bg-white text-black font-black hover:bg-teal-50 border border-slate-300 shadow-sm'" class="px-3.5 py-2 rounded-xl text-xs transition">
-                                7/B Sınıfı
-                            </button>
+                            <span class="text-xs font-black text-slate-700 mr-1">Sınıf Seviyesi:</span>
+                            <template x-for="gr in [5, 6, 7, 8]" :key="gr">
+                                <button @click="selectedDailyPlanGrade = gr; $nextTick(() => { if (window.lucide) window.lucide.createIcons(); });" 
+                                        :class="selectedDailyPlanGrade === gr ? 'bg-teal-600 text-white font-black shadow-md border-2 border-teal-700 ring-2 ring-teal-300 scale-105' : 'text-slate-800 bg-white hover:text-teal-700 hover:bg-teal-50 font-extrabold border border-slate-300'" 
+                                        class="px-4 py-2 rounded-xl text-xs sm:text-sm transition flex items-center gap-1.5 active:scale-95">
+                                    <span x-text="gr + '. Sınıf'"></span>
+                                    <span class="text-[10px] px-1.5 py-0.2 rounded-md font-bold" :class="selectedDailyPlanGrade === gr ? 'bg-teal-800 text-white' : 'bg-slate-200 text-slate-700'" x-text="gr === 8 ? 'LGS' : 'TYMM'"></span>
+                                </button>
+                            </template>
                         </div>
 
-                        <!-- Arama -->
-                        <div class="relative min-w-[200px]">
-                            <input type="text" x-model="dailyPlanSearchQuery" placeholder="Konu, kazanım ara..." class="w-full px-3 py-2 pl-8 bg-white border-2 border-slate-300 rounded-xl text-xs text-black font-black placeholder-slate-500 focus:outline-none focus:border-teal-500 shadow-sm">
-                            <i data-lucide="search" class="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-2.5"></i>
+                        <!-- Seçili Müfredat Modeli Rozeti -->
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-black px-3 py-1.5 rounded-xl bg-teal-100 text-teal-950 border border-teal-300" x-text="selectedDailyPlanGrade === 8 ? 'MEB LGS Fen Bilimleri Günlük Plan' : 'Türkiye Yüzyılı Maarif Modeli (TYMM) Günlük Plan'"></span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Günlük Plan Kartları -->
-                <div class="space-y-4">
-                    <!-- Boş Durum -->
-                    <div x-show="!getFilteredDailyPlans().length" class="bg-white p-10 rounded-3xl border-2 border-slate-300 shadow-md text-center space-y-3">
-                        <i data-lucide="file-text" class="w-12 h-12 mx-auto text-slate-300"></i>
-                        <h4 class="font-black text-slate-800 text-base">Henüz günlük plan bulunmamaktadır</h4>
-                        <p class="text-xs text-slate-600 font-bold max-w-md mx-auto">Yeni bir ders için Maarif Modeli öğrenme çıktılarıyla günlük plan oluşturmak için butona tıklayınız.</p>
-                        <button @click="openNewDailyPlan()" class="px-4 py-2.5 rounded-xl bg-teal-600 text-white font-black text-xs shadow hover:bg-teal-700 transition">
-                            + Yeni Günlük Plan Hazırla 📑
+                <!-- ================= HAFTA & ZAMAN GEZGİNİ (37 HAFTA NAVİGASYONU) ================= -->
+                <div class="bg-white px-4 py-3 rounded-2xl border-2 border-slate-300 shadow-sm flex flex-col md:flex-row items-center justify-between gap-3">
+                    
+                    <!-- Sol/Sağ Butonlar ve Hafta Başlığı -->
+                    <div class="flex items-center gap-2.5 w-full md:w-auto justify-between md:justify-start">
+                        <button @click="prevDailyPlanWeek()" :disabled="selectedDailyPlanWeekIndex === 0" title="Önceki Hafta (Sol Ok Tuşu)" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-teal-100 disabled:opacity-25 disabled:hover:bg-slate-100 text-slate-800 hover:text-teal-900 font-black flex items-center gap-1.5 transition text-xs border border-slate-300 shadow-sm">
+                            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                            <span class="font-black">Önceki Hafta</span>
+                        </button>
+
+                        <div class="flex items-center gap-2 bg-teal-50 px-4 py-1.5 rounded-xl border-2 border-teal-400 shadow-sm">
+                            <span class="text-sm sm:text-base font-black text-teal-950" x-text="getDailyPlanCurrentWeek(selectedDailyPlanGrade)?.week"></span>
+                            <span class="text-xs font-mono font-bold text-slate-700" x-text="'(' + getDailyPlanCurrentWeek(selectedDailyPlanGrade)?.date + ')'"></span>
+                            <span class="px-2 py-0.5 bg-teal-700 text-white rounded-md text-[11px] font-black" x-text="getDailyPlanCurrentWeek(selectedDailyPlanGrade)?.hours || '4 Saat'"></span>
+                        </div>
+
+                        <button @click="nextDailyPlanWeek()" :disabled="selectedDailyPlanWeekIndex >= 36" title="Sonraki Hafta (Sağ Ok Tuşu)" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-teal-100 disabled:opacity-25 disabled:hover:bg-slate-100 text-slate-800 hover:text-teal-900 font-black flex items-center gap-1.5 transition text-xs border border-slate-300 shadow-sm">
+                            <span class="font-black">Sonraki Hafta</span>
+                            <i data-lucide="chevron-right" class="w-4 h-4"></i>
                         </button>
                     </div>
 
-                    <!-- Plan Listesi -->
-                    <template x-for="plan in getFilteredDailyPlans()" :key="plan.id">
-                        <div class="bg-white p-5 sm:p-6 rounded-3xl border-2 border-slate-300 shadow-sm hover:shadow-md transition space-y-4 border-l-8 border-l-teal-600">
-                            <!-- Üst Başlık Şeridi -->
-                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-200">
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <span class="px-3 py-1 rounded-xl bg-teal-600 text-white font-black text-xs" x-text="plan.classId + ' Sınıfı'"></span>
-                                    <span class="px-2.5 py-1 rounded-xl bg-slate-100 text-slate-800 font-bold text-xs" x-text="'📅 ' + plan.date + ' • ' + plan.day"></span>
-                                    <span class="px-2.5 py-1 rounded-xl bg-amber-100 text-amber-900 font-bold text-xs" x-text="'🔔 ' + plan.periodNo + '. Ders Saati'"></span>
-                                </div>
-                                <div class="flex items-center gap-1.5 self-end sm:self-auto">
-                                    <button @click="printDailyPlan(plan)" title="Resmi Günlük Plan Yazdır / PDF Al" class="p-2 rounded-xl bg-slate-900 hover:bg-black text-white transition flex items-center gap-1 text-xs font-black px-3">
-                                        <i data-lucide="printer" class="w-3.5 h-3.5"></i>
-                                        <span>Yazdır / PDF</span>
-                                    </button>
-                                    <button @click="openEditDailyPlan(plan)" title="Düzenle" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
-                                        <i data-lucide="edit-3" class="w-4 h-4"></i>
-                                    </button>
-                                    <button @click="deleteDailyPlan(plan.id)" title="Sil" class="p-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 transition">
-                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                    </button>
-                                </div>
-                            </div>
+                    <!-- Hafta Seçim Dropdown / Hızlı Atlama -->
+                    <div class="flex items-center gap-2 w-full md:w-auto">
+                        <span class="text-xs font-black text-slate-700 whitespace-nowrap">Haftaya Git:</span>
+                        <select :value="selectedDailyPlanWeekIndex" @change="setDailyPlanWeek($event.target.value)" class="px-3 py-2 bg-slate-50 border-2 border-slate-300 rounded-xl text-xs font-black text-black shadow-inner focus:border-teal-600 focus:outline-none">
+                            <template x-for="(w, idx) in getGradeCurriculum(selectedDailyPlanGrade)" :key="idx">
+                                <option :value="idx" :selected="selectedDailyPlanWeekIndex === idx" x-text="w.week + ' (' + w.date + ') - ' + (w.topic ? w.topic.substring(0, 30) : '')"></option>
+                            </template>
+                        </select>
+                    </div>
+                </div>
 
-                            <!-- Konu & Ünite -->
-                            <div>
-                                <span class="text-[11px] font-black text-teal-800 uppercase tracking-wide block" x-text="plan.unit"></span>
-                                <h3 class="text-base font-black text-black leading-snug" x-text="plan.topic"></h3>
-                            </div>
-
-                            <!-- Öğrenme Çıktısı -->
-                            <div class="p-3.5 bg-teal-50/80 rounded-2xl border border-teal-200 space-y-1">
+                <!-- ================= SEÇİLİ HAFTANIN KAZANIM & KONU ÖZETİ ================= -->
+                <template x-if="getDailyPlanCurrentWeek(selectedDailyPlanGrade)">
+                    <div class="space-y-4">
+                        <div class="bg-white p-5 sm:p-6 rounded-3xl border-2 border-slate-300 shadow-sm space-y-3 border-l-8 border-l-teal-600">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                <div>
+                                    <span class="text-xs font-black text-teal-800 uppercase tracking-wide block" x-text="getDailyPlanCurrentWeek(selectedDailyPlanGrade)?.unit"></span>
+                                    <h3 class="text-lg font-black text-black leading-snug" x-text="getDailyPlanCurrentWeek(selectedDailyPlanGrade)?.topic"></h3>
+                                </div>
                                 <div class="flex items-center gap-2">
-                                    <span class="px-2 py-0.5 rounded-md bg-teal-700 text-white font-mono text-[10px] font-black" x-text="plan.outcomeCode"></span>
+                                    <span class="px-3 py-1 bg-teal-100 text-teal-950 rounded-xl text-xs font-black border border-teal-300" x-text="selectedDailyPlanGrade + '. Sınıf • ' + (getDailyPlanCurrentWeek(selectedDailyPlanGrade)?.hours || '4 Saat')"></span>
+                                </div>
+                            </div>
+
+                            <!-- Kazanım / Öğrenme Çıktısı -->
+                            <div class="p-3.5 bg-teal-50/90 rounded-2xl border border-teal-300 space-y-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="px-2 py-0.5 rounded-md bg-teal-800 text-white font-mono text-[11px] font-black" x-text="(getDailyPlanCurrentWeek(selectedDailyPlanGrade)?.outcomesList && getDailyPlanCurrentWeek(selectedDailyPlanGrade)?.outcomesList[0]?.code) || getDailyPlanCurrentWeek(selectedDailyPlanGrade)?.outcomeCode || ('FB.' + selectedDailyPlanGrade)"></span>
                                     <span class="text-xs font-black text-teal-950">Öğrenme Çıktısı (Kazanım)</span>
                                 </div>
-                                <p class="text-xs font-black text-black leading-relaxed" x-text="plan.outcomeDesc"></p>
-                            </div>
-
-                            <!-- Öğretim Aşamaları Grid -->
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-                                    <strong class="font-black text-slate-900 block text-[11px]">1. Giriş & Merak:</strong>
-                                    <p class="text-slate-700 font-medium text-[11px]" x-text="plan.intro || '-'"></p>
-                                </div>
-                                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-                                    <strong class="font-black text-slate-900 block text-[11px]">2. Gelişme & Deney/Süreç:</strong>
-                                    <p class="text-slate-700 font-medium text-[11px]" x-text="plan.development || '-'"></p>
-                                </div>
-                                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-                                    <strong class="font-black text-slate-900 block text-[11px]">3. Sonuç & Değerlendirme:</strong>
-                                    <p class="text-slate-700 font-medium text-[11px]" x-text="plan.evaluation || '-'"></p>
-                                </div>
-                            </div>
-
-                            <!-- Yöntem & Materyaller Alt Şerit -->
-                            <div class="flex flex-wrap items-center gap-2 text-[11px] text-slate-600 font-bold pt-2 border-t border-slate-100">
-                                <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-800 font-black" x-text="'🧪 ' + plan.methods"></span>
-                                <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-800 font-black" x-text="'📦 ' + plan.materials"></span>
+                                <p class="text-xs font-black text-black leading-relaxed" x-text="(getDailyPlanCurrentWeek(selectedDailyPlanGrade)?.outcomesList && getDailyPlanCurrentWeek(selectedDailyPlanGrade)?.outcomesList[0]?.desc) || getDailyPlanCurrentWeek(selectedDailyPlanGrade)?.outcome || getDailyPlanCurrentWeek(selectedDailyPlanGrade)?.outcomeDesc"></p>
                             </div>
                         </div>
-                    </template>
-                </div>
+
+                        <!-- ================= 4 DERSLİK GÜNLÜK PLAN KARTLARI (DERS DERS AKIŞ) ================= -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <template x-for="lesson in getDailyLessonsForWeek(selectedDailyPlanGrade, selectedDailyPlanWeekIndex)" :key="lesson.lessonNo">
+                                <div class="bg-white p-5 rounded-3xl border-2 border-slate-300 shadow-sm hover:shadow-md transition space-y-3 flex flex-col justify-between border-t-6 border-t-teal-600">
+                                    <div class="space-y-2.5">
+                                        <!-- Ders Başlığı -->
+                                        <div class="flex items-center justify-between pb-2 border-b border-slate-200">
+                                            <span class="font-black text-sm text-teal-950" x-text="lesson.title"></span>
+                                            <span class="px-2 py-0.5 rounded-md bg-teal-100 text-teal-800 text-[10px] font-black">40 Dk</span>
+                                        </div>
+
+                                        <!-- Odak & Amaç -->
+                                        <div class="text-xs">
+                                            <strong class="font-black text-slate-900 block text-[11px] text-teal-800">🎯 Dersin Amacı & Odak:</strong>
+                                            <p class="text-slate-800 font-bold leading-relaxed text-[11px]" x-text="lesson.focus"></p>
+                                        </div>
+
+                                        <!-- Giriş & Süreç -->
+                                        <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-1 text-xs">
+                                            <strong class="font-black text-slate-900 block text-[11px]">1. Giriş & Merak Uyandırma:</strong>
+                                            <p class="text-slate-700 font-medium leading-relaxed text-[11px]" x-text="lesson.intro"></p>
+                                        </div>
+
+                                        <!-- Etkinlik & Deney -->
+                                        <div class="p-3 bg-teal-50/50 rounded-2xl border border-teal-200 space-y-1 text-xs">
+                                            <strong class="font-black text-teal-950 block text-[11px]">2. Keşfetme & Deney / Uygulama:</strong>
+                                            <p class="text-slate-800 font-medium leading-relaxed text-[11px]" x-text="lesson.activity"></p>
+                                        </div>
+
+                                        <!-- Materyal & Ölçme -->
+                                        <div class="pt-2 border-t border-slate-100 space-y-1 text-[11px]">
+                                            <div>
+                                                <strong class="font-black text-slate-800">📦 Materyaller:</strong>
+                                                <span class="text-slate-700 font-medium" x-text="lesson.materials"></span>
+                                            </div>
+                                            <div>
+                                                <strong class="font-black text-slate-800">📊 Ölçme / Ödev:</strong>
+                                                <span class="text-slate-700 font-medium" x-text="lesson.evaluation"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
 
             </div>
 
