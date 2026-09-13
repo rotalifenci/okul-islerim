@@ -18,8 +18,9 @@ window.InitialData = {
         { id: 'calendar-tasks', title: '📅 Ders Programı', icon: 'calendar', color: 'amber', visible: true, isSystem: true, badge: 'Günde 7 Ders' },
         { id: 'students', title: '📝 Öğrenci Ödev Kontrolü', icon: 'clipboard-check', color: 'sky', visible: true, isSystem: true, badge: '' },
         { id: 'assignments', title: '📚 Ödevler', icon: 'book-marked', color: 'purple', visible: true, isSystem: true, badge: '' },
-        { id: 'school-tasks', title: '📌 Okul Görevlerim', icon: 'check-square', color: 'red', visible: true, isSystem: true, badge: 'Nöbet & Görev' },
+        { id: 'school-tasks', title: '📌 Okul Görevlerim', icon: 'check-square', color: 'red', visible: true, isSystem: true, badge: '' },
         { id: 'annual-plan', title: '📋 Maarif Yıllık Planı', icon: 'book-open', color: 'emerald', visible: true, isSystem: true, badge: '5, 6, 7, 8' },
+        { id: 'daily-plan', title: '📑 Günlük Plan', icon: 'file-text', color: 'teal', visible: true, isSystem: true, badge: 'Maarif Modeli' },
         { id: 'project-calendar', title: 'Proje Takvimi', icon: 'calendar-range', color: 'emerald', visible: true, isSystem: true, badge: '' },
         { id: 'certificates', title: 'Sertifika / Belge Üretici', icon: 'award', color: 'yellow', visible: true, isSystem: true, badge: '' },
         { id: 'social', title: 'Sosyal Medya & Bülten', icon: 'share-2', color: 'pink', visible: true, isSystem: true, badge: '' },
@@ -53,6 +54,28 @@ window.InitialData = {
             items: [
                 { id: 'parent-1', title: '5/D Ahmet Berat Velisi Görüşmesi', category: 'Akademik Takip', count: 'Görüşüldü', status: 'Tamamlandı', note: 'Ders içi katılım ve ödev disiplini hakkında bilgilendirme yapıldı.', date: '2026-09-12' }
             ]
+        }
+    ],
+    dailyPlans: [
+        {
+            id: 'dp-1',
+            date: '2026-09-11',
+            day: 'Cuma',
+            periodNo: 1,
+            classId: '5/A',
+            grade: 5,
+            subject: 'Fen Bilimleri',
+            unit: '1. Ünite: Güneş, Dünya ve Ay',
+            topic: 'Güneş, Dünya ve Ay’ın Hareketleri ve Boyutları',
+            outcomeCode: 'FB.5.1.4',
+            outcomeDesc: 'Güneş, Dünya ve Ay’ın birbirlerine göre hareketlerini ve hacimsel büyüklüklerini temsil eden bilimsel model oluşturabilme',
+            methods: 'Model Oluşturma, Deney & Gözlem, Soru-Cevap, Akran Öğrenmesi',
+            materials: 'Farklı boyutlarda küreler, el feneri, model hamuru, etkinlik çalışma yaprağı',
+            intro: 'Güneş ve Ay tutulmalarını hatırlatıcı soru-cevap ve merak uyandırıcı simülasyon videosu ile derse başlanır.',
+            development: 'Öğrenciler 4 kişilik gruplara ayrılır. Güneş, Dünya ve Ay’ın dönme ve dolanma yönleri (saat yönünün tersi) modeller ve el feneriyle canlandırılır.',
+            summary: 'Gruplar hazırladıkları modelleri sunar. Boyut ve uzaklık ilişkisi pekiştirilir.',
+            evaluation: 'Ders sonu 3 soruluk çıkış kartı çözülür ve etkinlik defteri sayfa 15-18 ödevi verilir.',
+            notes: '5/A sınıfı deney katılımı yüksek, modeller laboratuvar panosu için seçildi.'
         }
     ],
     classes: [

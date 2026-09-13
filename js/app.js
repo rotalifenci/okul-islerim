@@ -172,6 +172,32 @@ document.addEventListener('alpine:init', () => {
         },
 
         
+                // 📑 Günlük Plan Durumu
+        selectedDailyPlanClass: 'Hepsi',
+        selectedDailyPlanDate: new Date().toISOString().slice(0, 10),
+        dailyPlanSearchQuery: '',
+        isDailyPlanModalOpen: false,
+        isEditDailyPlan: false,
+        dailyPlanForm: {
+            id: '',
+            date: new Date().toISOString().slice(0, 10),
+            day: 'Pazartesi',
+            periodNo: 1,
+            classId: '5/A',
+            grade: 5,
+            subject: 'Fen Bilimleri',
+            unit: '',
+            topic: '',
+            outcomeCode: '',
+            outcomeDesc: '',
+            methods: 'Model Oluşturma, Deney & Gözlem, Soru-Cevap',
+            materials: 'Ders Kitabı, Etkinlik Defteri, Akıllı Tahta',
+            intro: '',
+            development: '',
+            summary: '',
+            evaluation: '',
+            notes: ''
+        },
         // 📱 Mobil & Yönetim Menüsü Durumu
         isMobileMenuOpen: false,
         isMenuManagerModalOpen: false,
@@ -1564,6 +1590,170 @@ document.addEventListener('alpine:init', () => {
         // JSON Yedek İndir
 
         // ==========================================
+        
+        // ==========================================
+        // 📑 GÜNLÜK PLAN YÖNETİCİSİ (CRUD & YAZDIR)
+        // ==========================================
+        getFilteredDailyPlans() {
+            let list = this.data.dailyPlans || [];
+            if (this.selectedDailyPlanClass && this.selectedDailyPlanClass !== 'Hepsi') {
+                list = list.filter(p => p.classId === this.selectedDailyPlanClass || p.classId === this.selectedDailyPlanClass.replace('/', ''));
+            }
+            if (this.dailyPlanSearchQuery) {
+                const q = this.dailyPlanSearchQuery.toLowerCase();
+                list = list.filter(p => (p.topic && p.topic.toLowerCase().includes(q)) || (p.outcomeCode && p.outcomeCode.toLowerCase().includes(q)) || (p.unit && p.unit.toLowerCase().includes(q)) || (p.outcomeDesc && p.outcomeDesc.toLowerCase().includes(q)));
+            }
+            return list;
+        },
+        openNewDailyPlan(classId = '5/A') {
+            this.isEditDailyPlan = false;
+            const todayStr = new Date().toISOString().slice(0, 10);
+            const dayNames = ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"];
+            const dayName = dayNames[new Date().getDay()] || 'Pazartesi';
+            
+            this.dailyPlanForm = {
+                id: 'dp_' + Date.now().toString(36),
+                date: todayStr,
+                day: dayName,
+                periodNo: 1,
+                classId: classId || '5/A',
+                grade: parseInt(classId) || 5,
+                subject: 'Fen Bilimleri',
+                unit: '1. Ünite',
+                topic: '',
+                outcomeCode: 'FB.5.',
+                outcomeDesc: '',
+                methods: 'Model Oluşturma, Deney & Gözlem, Soru-Cevap, Akran Öğrenmesi',
+                materials: 'Ders Kitabı, Etkinlik Defteri, Akıllı Tahta, Deney Seti',
+                intro: 'Görsel/video ile dikkat çekme ve ön bilgileri harekete geçirme soru-cevap oturumu.',
+                development: 'Grup etkinliği ve etkileşimli model/deney uygulaması ile kavram inşası.',
+                summary: 'Öğrenilen temel kavramların özetlenmesi ve kavram haritası doldurma.',
+                evaluation: 'Ders sonu çıkış kartı soruları ve etkinlik defteri ödevlendirmesi.',
+                notes: ''
+            };
+            this.isDailyPlanModalOpen = true;
+        },
+        openEditDailyPlan(plan) {
+            this.isEditDailyPlan = true;
+            this.dailyPlanForm = JSON.parse(JSON.stringify(plan));
+            this.isDailyPlanModalOpen = true;
+        },
+        saveDailyPlan() {
+            if (!this.dailyPlanForm.topic.trim()) {
+                alert("Lütfen dersin konusunu giriniz!");
+                return;
+            }
+            if (!this.data.dailyPlans) this.data.dailyPlans = [];
+
+            if (this.isEditDailyPlan) {
+                const idx = this.data.dailyPlans.findIndex(p => p.id === this.dailyPlanForm.id);
+                if (idx !== -1) {
+                    this.data.dailyPlans[idx] = { ...this.dailyPlanForm };
+                }
+            } else {
+                this.data.dailyPlans.unshift({ ...this.dailyPlanForm });
+            }
+            window.StorageManager.saveData(this.data);
+            this.isDailyPlanModalOpen = false;
+            this.showToast("Günlük plan başarıyla kaydedildi! 📑");
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+        deleteDailyPlan(planId) {
+            if (!confirm("Bu günlük planı silmek istediğinize emin misiniz?")) return;
+            this.data.dailyPlans = (this.data.dailyPlans || []).filter(p => p.id !== planId);
+            window.StorageManager.saveData(this.data);
+            this.showToast("Günlük plan silindi. 🗑️");
+        },
+        printDailyPlan(plan) {
+            const html = `
+                <div style="font-family: Arial, sans-serif; padding: 20px; line-height: 1.5; color: #111;">
+                    <div style="text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
+                        <h2 style="margin: 0; font-size: 18px;">T.C. MİLLÎ EĞİTİM BAKANLIĞI</h2>
+                        <h3 style="margin: 5px 0; font-size: 16px;">TÜRKİYE YÜZYILI MAARİF MODELİ GÜNLÜK DERS PLANI</h3>
+                        <p style="margin: 0; font-size: 12px; color: #555;">2026-2027 Eğitim-Öğretim Yılı • Fen Bilimleri Dersi</p>
+                    </div>
+
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 12px;">
+                        <tr>
+                            <td style="border: 1px solid #333; padding: 6px; font-weight: bold; width: 20%; background: #f5f5f5;">Ders:</td>
+                            <td style="border: 1px solid #333; padding: 6px;">${plan.subject || 'Fen Bilimleri'}</td>
+                            <td style="border: 1px solid #333; padding: 6px; font-weight: bold; width: 20%; background: #f5f5f5;">Sınıf / Şube:</td>
+                            <td style="border: 1px solid #333; padding: 6px;">${plan.classId}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #333; padding: 6px; font-weight: bold; background: #f5f5f5;">Tarih / Gün:</td>
+                            <td style="border: 1px solid #333; padding: 6px;">${plan.date} • ${plan.day}</td>
+                            <td style="border: 1px solid #333; padding: 6px; font-weight: bold; background: #f5f5f5;">Ders Saati:</td>
+                            <td style="border: 1px solid #333; padding: 6px;">${plan.periodNo}. Ders Saati</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #333; padding: 6px; font-weight: bold; background: #f5f5f5;">Ünite / Tema:</td>
+                            <td colspan="3" style="border: 1px solid #333; padding: 6px;">${plan.unit || '-'}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #333; padding: 6px; font-weight: bold; background: #f5f5f5;">Konu:</td>
+                            <td colspan="3" style="border: 1px solid #333; padding: 6px; font-weight: bold;">${plan.topic || '-'}</td>
+                        </tr>
+                    </table>
+
+                    <div style="margin-bottom: 12px; font-size: 12px;">
+                        <strong style="color: #004d40;">🎯 ÖĞRENME ÇIKTILARI (KAZANIMLAR):</strong>
+                        <div style="background: #e0f2f1; border: 1px solid #80cbc4; padding: 8px; border-radius: 4px; margin-top: 4px;">
+                            <strong>${plan.outcomeCode || ''}:</strong> ${plan.outcomeDesc || ''}
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 12px; font-size: 12px;">
+                        <strong style="color: #004d40;">🧪 YÖNTEM, TEKNİK VE ARAÇ-GEREÇLER:</strong>
+                        <div style="background: #fafafa; border: 1px solid #ccc; padding: 8px; border-radius: 4px; margin-top: 4px;">
+                            <p style="margin: 0 0 4px 0;"><strong>Yöntem & Teknikler:</strong> ${plan.methods || '-'}</p>
+                            <p style="margin: 0;"><strong>Materyaller:</strong> ${plan.materials || '-'}</p>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 12px; font-size: 12px;">
+                        <strong style="color: #004d40;">🚀 ÖĞRENME-ÖĞRETME SÜRECİ VE ETKİNLİK AKIŞI:</strong>
+                        <div style="border: 1px solid #ccc; padding: 8px; border-radius: 4px; margin-top: 4px;">
+                            <p style="margin: 0 0 6px 0;"><strong>1. Giriş & Merak Uyandırma:</strong> ${plan.intro || '-'}</p>
+                            <p style="margin: 0 0 6px 0;"><strong>2. Gelişme & Deney/Etkinlik Süreci:</strong> ${plan.development || '-'}</p>
+                            <p style="margin: 0;"><strong>3. Sonuç & Kavram Özeti:</strong> ${plan.summary || '-'}</p>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 12px; font-size: 12px;">
+                        <strong style="color: #004d40;">📊 ÖLÇME, DEĞERLENDİRME VE ÖDEV:</strong>
+                        <div style="background: #fdfefe; border: 1px solid #ccc; padding: 8px; border-radius: 4px; margin-top: 4px;">
+                            ${plan.evaluation || '-'}
+                        </div>
+                    </div>
+
+                    ${plan.notes ? `
+                    <div style="margin-bottom: 12px; font-size: 12px;">
+                        <strong style="color: #004d40;">📝 ÖĞRETMEN NOTLARI:</strong>
+                        <div style="background: #fff9c4; border: 1px solid #fbc02d; padding: 8px; border-radius: 4px; margin-top: 4px;">
+                            ${plan.notes}
+                        </div>
+                    </div>` : ''}
+
+                    <table style="width: 100%; margin-top: 30px; font-size: 12px; text-align: center;">
+                        <tr>
+                            <td style="width: 50%;">
+                                <br><br>
+                                <strong>Murat Kundakcı</strong><br>
+                                Fen Bilimleri Öğretmeni
+                            </td>
+                            <td style="width: 50%;">
+                                <br><br>
+                                <strong>Okul Müdürü</strong><br>
+                                Uygundur / Onay
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            `;
+            window.Exporter.printContent(`${plan.classId} Günlük Planı - ${plan.date}`, html);
+        },
+
         // 📱 MOBİL & YÖNETİM MENÜSÜ YÖNETİCİSİ (CRUD)
         // ==========================================
         get navSectionsList() {
