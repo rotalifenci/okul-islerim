@@ -54,7 +54,25 @@ document.addEventListener('alpine:init', () => {
             date: new Date().toISOString().slice(0, 10)
         },
 
-        // Ödev Takip Sistemi Durumu
+        // 📚 Ödevler & Ödev Planlama Durumu (Sınıf Seviyeleri, Takvim, Zaman Aralığı)
+        selectedAssignmentGrade: 'Hepsi',
+        assignmentStartDate: '2026-09-01',
+        assignmentEndDate: '2026-10-31',
+        assignmentSearchQuery: '',
+        isNewAssignmentModalOpen: false,
+        editingAssignmentId: null,
+        newAssignment: {
+            grade: 5,
+            targetClasses: ['5A', '5D'],
+            title: '',
+            description: '',
+            assignedDate: new Date().toISOString().slice(0, 10),
+            dueDate: new Date(Date.now() + 3*86400000).toISOString().slice(0, 10),
+            status: 'Aktif',
+            unit: ''
+        },
+
+        // Öğrenci Ödev Kontrolü Durumu
         selectedHomeworkDate: '2026-09-11',
         currentHomeworkTitle: 'Hücre ve Organeller Etkinlik Defteri (s. 18-22)',
         homeworkViewMode: 'daily',
@@ -166,6 +184,12 @@ document.addEventListener('alpine:init', () => {
                 }
             }
 
+            // Ödevler verisini başlat
+            if (!this.data.assignments || !Array.isArray(this.data.assignments) || this.data.assignments.length === 0) {
+                this.data.assignments = JSON.parse(JSON.stringify(window.InitialData.assignments || []));
+                window.StorageManager.saveData(this.data);
+            }
+
             this.loadCurrentWeekNote();
 
             // Öğrenci isimlerindeki sınıf ön eklerini temizleme
@@ -208,6 +232,8 @@ document.addEventListener('alpine:init', () => {
                     this.isProjCalModalOpen = false;
                     this.isAnnualPlanModalOpen = false;
                     this.isAddStudentModalOpen = false;
+                    this.isNewAssignmentModalOpen = false;
+                    this.isPrintReportModalOpen = false;
                 }
                 if ((this.currentTab === 'annual-plan' || this.isAnnualPlanModalOpen) && this.annualPlanViewMode === 'interactive' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
                     if (e.key === 'ArrowLeft') {
@@ -628,6 +654,172 @@ document.addEventListener('alpine:init', () => {
                 }
             });
             return list.sort((a, b) => new Date(b.date) - new Date(a.date));
+        },
+
+        // ================= 📚 ÖDEVLER (ASSIGNMENTS & AJANDA) YÖNETİMİ =================
+        openNewAssignmentModal(item = null) {
+            if (item) {
+                this.editingAssignmentId = item.id;
+                this.newAssignment = {
+                    grade: Number(item.grade) || 5,
+                    targetClasses: item.targetClasses ? [...item.targetClasses] : ['5A'],
+                    title: item.title || '',
+                    description: item.description || '',
+                    assignedDate: item.assignedDate || new Date().toISOString().slice(0, 10),
+                    dueDate: item.dueDate || new Date().toISOString().slice(0, 10),
+                    status: item.status || 'Aktif',
+                    unit: item.unit || ''
+                };
+            } else {
+                this.editingAssignmentId = null;
+                const defaultGrade = this.selectedAssignmentGrade !== 'Hepsi' ? Number(this.selectedAssignmentGrade) : 5;
+                const defaultClasses = defaultGrade === 5 ? ['5A', '5D'] : (defaultGrade === 6 ? ['6G'] : (defaultGrade === 7 ? ['7A', '7B'] : ['8A']));
+                this.newAssignment = {
+                    grade: defaultGrade,
+                    targetClasses: defaultClasses,
+                    title: '',
+                    description: '',
+                    assignedDate: new Date().toISOString().slice(0, 10),
+                    dueDate: new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10),
+                    status: 'Aktif',
+                    unit: ''
+                };
+            }
+            this.isNewAssignmentModalOpen = true;
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+
+        saveAssignment() {
+            if (!this.newAssignment.title || !this.newAssignment.title.trim()) {
+                alert("Lütfen ödev başlığı giriniz.");
+                return;
+            }
+            if (!this.newAssignment.dueDate) {
+                alert("Lütfen ödevin getirilme / teslim tarihini seçiniz.");
+                return;
+            }
+
+            if (!this.data.assignments) this.data.assignments = [];
+
+            if (this.editingAssignmentId) {
+                const idx = this.data.assignments.findIndex(a => a.id === this.editingAssignmentId);
+                if (idx !== -1) {
+                    this.data.assignments[idx] = {
+                        ...this.data.assignments[idx],
+                        ...this.newAssignment,
+                        grade: Number(this.newAssignment.grade)
+                    };
+                    this.showToast("Ödev başarıyla güncellendi! 📝");
+                }
+            } else {
+                const newId = 'hw_' + Date.now();
+                this.data.assignments.unshift({
+                    id: newId,
+                    ...this.newAssignment,
+                    grade: Number(this.newAssignment.grade)
+                });
+                this.showToast("Yeni ödev takvime eklendi! 📚");
+            }
+
+            window.StorageManager.saveData(this.data);
+            this.isNewAssignmentModalOpen = false;
+            this.editingAssignmentId = null;
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+
+        deleteAssignment(id) {
+            if (confirm("Bu ödev kaydını silmek istediğinize emin misiniz?")) {
+                this.data.assignments = (this.data.assignments || []).filter(a => a.id !== id);
+                window.StorageManager.saveData(this.data);
+                this.showToast("Ödev silindi.");
+            }
+        },
+
+        goToStudentHomeworkCheck(assignment) {
+            if (!assignment) return;
+            const targetClass = (assignment.targetClasses && assignment.targetClasses[0]) || (assignment.grade === 5 ? '5A' : (assignment.grade === 6 ? '6G' : '7A'));
+            this.selectedClassId = targetClass;
+            this.selectedHomeworkDate = assignment.dueDate || new Date().toISOString().slice(0, 10);
+            this.currentHomeworkTitle = assignment.title || '';
+            
+            // Eğer o güne ait oturum yoksa oluştur
+            let session = this.data.homeworkDays?.find(h => h.date === this.selectedHomeworkDate && h.classId === this.selectedClassId);
+            if (!session) {
+                if (!this.data.homeworkDays) this.data.homeworkDays = [];
+                session = {
+                    date: this.selectedHomeworkDate,
+                    classId: this.selectedClassId,
+                    title: this.currentHomeworkTitle,
+                    grades: {}
+                };
+                this.data.homeworkDays.push(session);
+                window.StorageManager.saveData(this.data);
+            } else if (!session.title) {
+                session.title = this.currentHomeworkTitle;
+                window.StorageManager.saveData(this.data);
+            }
+
+            this.setTab('students');
+            this.showToast(`${targetClass} sınıfı için "${this.selectedHomeworkDate}" tarihli Öğrenci Ödev Kontrolü ekranına yönlendirildi.`);
+        },
+
+        getFilteredAssignments() {
+            let list = this.data.assignments || [];
+            if (!Array.isArray(list)) return [];
+
+            // Sınıf seviyesi filtresi
+            if (this.selectedAssignmentGrade && this.selectedAssignmentGrade !== 'Hepsi') {
+                const g = Number(this.selectedAssignmentGrade);
+                list = list.filter(a => Number(a.grade) === g);
+            }
+
+            // Zaman aralığı filtresi
+            if (this.assignmentStartDate) {
+                list = list.filter(a => (a.dueDate || a.assignedDate) >= this.assignmentStartDate);
+            }
+            if (this.assignmentEndDate) {
+                list = list.filter(a => (a.dueDate || a.assignedDate) <= this.assignmentEndDate);
+            }
+
+            // Arama filtresi
+            if (this.assignmentSearchQuery && this.assignmentSearchQuery.trim()) {
+                const q = this.assignmentSearchQuery.trim().toLowerCase();
+                list = list.filter(a => 
+                    (a.title && a.title.toLowerCase().includes(q)) ||
+                    (a.description && a.description.toLowerCase().includes(q)) ||
+                    (a.unit && a.unit.toLowerCase().includes(q))
+                );
+            }
+
+            // Tarihe göre gün be gün sıralama (En yakın teslim tarihi en üstte)
+            return list.sort((a, b) => (a.dueDate || '').localeCompare(b.dueDate || ''));
+        },
+
+        getAssignmentDateGroups() {
+            const list = this.getFilteredAssignments();
+            const groups = {};
+            list.forEach(item => {
+                const dateKey = item.dueDate || item.assignedDate || 'Tarihsiz';
+                if (!groups[dateKey]) {
+                    groups[dateKey] = [];
+                }
+                groups[dateKey].push(item);
+            });
+            return Object.keys(groups).sort().map(date => ({
+                date: date,
+                formattedDate: this.formatAssignmentDate(date),
+                items: groups[date]
+            }));
+        },
+
+        formatAssignmentDate(dateStr) {
+            if (!dateStr || dateStr === 'Tarihsiz') return 'Belirtilmemiş';
+            const parts = dateStr.split('-');
+            if (parts.length < 3) return dateStr;
+            const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+            const days = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+            const months = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+            return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()} ${days[d.getDay()]}`;
         },
 
         openPrintReportModal() {
@@ -1165,6 +1357,8 @@ document.addEventListener('alpine:init', () => {
                 this.setTab(param);
             } else if (action === 'ai') {
                 this.openAIModal(param);
+            } else if (action === 'new-assignment') {
+                this.openNewAssignmentModal();
             } else if (action === 'new-obs') {
                 this.isObsModalOpen = true;
             } else if (action === 'new-task') {
