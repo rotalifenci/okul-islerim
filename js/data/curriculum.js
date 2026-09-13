@@ -7928,3 +7928,210 @@ window.AnnualPlanData = {
     }
   ]
 };
+
+window.MaarifUnitInfo = {
+  "5": [
+    {
+      "unitName": "1. ÜNİTE: GÖKYÜZÜNDEKİ KOMŞULARIMIZ VE BİZ",
+      "description": "Bu ünitede Güneş’in yapısı ve dönme hareketinin açıklanması, Ay’ın özellikleri, evreleri, dönme ve dolanma hareketleri ile ilgili çıkarım yapılması, Ay’ın evreleri ile ilgili model hazırlanması amaçlanmaktadır. Bunun yanı sıra Güneş, Dünya ve Ay’ın hacimsel büyüklükleri ile hareketlerini dikkate alarak model hazırlanması amaçlanmaktadır.",
+      "assumptions": "Öğrencilerin Dünya’nın yapısını, özelliklerini, dönme ve dolanma hareketlerini bildikleri kabul edilmektedir. Öğrencilerin saatin dönme yönünü bildikleri kabul edilmektedir.",
+      "keywords": "Güneş, Ay, Ay’ın evreleri, dönme ve dolanma hareketi",
+      "bridge": "Dünya’nın katmanları ile Güneş’in katmanları arasında yapısal olarak benzerlik kurulabilir. Güneş’in de Dünya gibi katmanlardan oluştuğuna değinilebilir. Bir yılın 12 aydan oluştuğuna ve Ay’ın evrelerinin her ay periyodik olarak gözlemlendiğine değinilebilir."
+    },
+    {
+      "unitName": "2. ÜNİTE: KUVVETİ TANIYALIM",
+      "description": "Bu ünitede kuvvetin büyüklüğünün dinamometre ile ölçülmesinin gösterilmesi, Dünya ve Ay’daki kütle ile ağırlık kavramlarının karşılaştırılması, farklı yüzey ve ortamlarda hareketi etkileyen sürtünme kuvveti bileşenlerinin yorumlanması, günlük yaşamda sürtünme kuvvetinin öneminin vurgulanması amaçlanmaktadır.",
+      "assumptions": "Öğrencilerin kuvvetin cisimler üzerindeki etkisini bildikleri kabul edilmektedir.",
+      "keywords": "kuvvet, kuvvet birimi, dinamometre, kütle, ağırlık, sürtünme kuvveti, esneklik, pürüzlü ve az pürüzlü, su direnci, hava direnci",
+      "bridge": "Kuvvetin cisimler üzerindeki etkilerine ve kuvvetin büyüklüğünün nasıl ölçülebildiğine ilişkin sorular yöneltilebilir. El kantarlarının bir çeşit dinamometre olduğu bilgisi verilerek öğrencilerin günlük yaşamla konuyu ilişkilendirmeleri sağlanabilir. Ağırlık kavramına girilmeden önce öğrencilere astronotların Ay’daki yürüyüşüyle ilgili videolar izletilerek bu durum kütle ve ağırlık kavramları ile ilişkilendirilebilir. Hareketi olumlu ve olumsuz etkileyen durumlara yönelik günlük yaşamdan örnekler verilebilir. Hareketi engelleyen faktörün ne olduğu sorgulatılabilir. Kuvvet kavramındaki ön bilgilerini kullanarak bu etkiyi algılamaları öğrencilerden istenebilir."
+    },
+    {
+      "unitName": "3. ÜNİTE: CANLILARIN YAPISINA YOLCULUK",
+      "description": "Bu ünitede hücrenin temel kısımlarının açıklanması, bitki ve hayvan hücresi arasındaki benzerlik ve farklılıkların karşılaştırılması, hücre-doku-organ-sistem-organizma ilişkisinin kavranması, destek ve hareket sistemlerine ait yapıların sınıflandırılması ve bu sistemin sağlığı konusunda yapılması gerekenlerin araştırılarak açıklanması amaçlanmaktadır.",
+      "assumptions": "Öğrencilerin canlıların özelliklerini bildikleri kabul edilmektedir. Öğrencilerin gözle görülemeyen canlıların mikroskopla incelendiği bilgisine sahip olduğu kabul edilmektedir.",
+      "keywords": "mikroskop, hücre, bitki hücresi, hayvan hücresi, organeller, doku, organ, sistem, organizma, kıkırdak, kemik ve kemik çeşitleri, eklem ve eklem çeşitleri, kas ve kas çeşitleri",
+      "bridge": "Öğrencilerin binaların yapımında kullanılan tuğlalar ile canlıyı oluşturan hücre arasında ilişki kurması sağlanabilir. Bir binanın iskeletiyle destek ve hareket sistemi arasında benzerlik kurması sağlanabilir."
+    },
+    {
+      "unitName": "4. ÜNİTE: IŞIĞIN DÜNYASI",
+      "description": "Bu ünitede bir ışık kaynağından çıkan ışığın basit ışık ışınları ile çizilmesi, ışığın her yöne ve doğrusal bir yolla yayıldığının açıklanması, maddelerin ışık geçirme durumuna göre sınıflandırılması, tam gölgenin oluşumu gözlemlenerek tam gölgenin basit ışık ışını çizimleri ile gösterilmesi ve tam gölgenin boyunu etkileyen faktörlerin açıklanması amaçlanmaktadır.",
+      "assumptions": "Öğrencilerin ışık kaynaklarını ve aydınlatma teknolojilerini bildikleri kabul edilmektedir.",
+      "keywords": "ışığın doğrusal olarak yayılması, saydam, yarı saydam, saydam olmayan (opak) madde, tam gölge",
+      "bridge": "Öğrencilerin günlük hayatta bir kapının anahtar deliğinden karanlık odaya süzülen ışık hüzmesi ile ışığın doğrusal olarak yayılması arasında ilişki kurmaları sağlanabilir. Evlerde farklı perde türlerinin gece ve gündüz durumuna göre kapatılıp açılması ile maddelerin ışık geçirme durumları arasında ilişki kurulabilir. Öğrencilere günlük hayatta yüksek binaların ya da kendi gölgelerinin oluşumu ile tam gölgenin oluşumu arasında bağlantı kurmalarını sağlayacak açık uçlu sorular sorulabilir."
+    },
+    {
+      "unitName": "5. ÜNİTE: MADDENİN DOĞASI",
+      "description": "Bu ünitede maddelerin tanecikli, boşluklu ve hareketli yapısına göre sınıflandırılması, bu sürece yönelik deney tasarlanması, ısı ve sıcaklık arasındaki farkların açıklanması, ısı alışverişine yönelik bilimsel çıkarım yapılması, maddelerin ısı iletimi bakımından sınıflandırılması ve ısı yalıtımı ile ilgili model oluşturulması amaçlanmaktadır.",
+      "assumptions": "Öğrencilerin maddenin katı-sıvı-gaz hâlleri ile ilgili temel bilgilere sahip olduğu kabul edilmektedir. Hâl değişimi sürecinde ısı alışverişi (ısınma-soğuma) kavramlarına yönelik ön bilgilere sahip olduğu kabul edilmektedir.",
+      "keywords": "Genellemeler Doğada maddeler arası ısı alışverişi (termal denge) vardır. Her sıcaklıkta buharlaşma olur. Anahtar Kavramlar titreşim, öteleme, dönme, ısı, sıcaklık, erime, donma, kaynama, yoğuşma, buharlaşma, süblimleşme, kırağılaşma, ısı iletkenliği, ısı yalıtkanlığı, ısı yalıtımı",
+      "bridge": "Isı konusu ile ilgili Dünya’nın en temel ısı kaynağının Güneş olduğundan bahsedilebilir. Günlük yaşamda doğal ve yapay ısı kaynakları ile ilişki kurulabilir. Günlük yaşamda sıcaklığın duvar, dijital termometre, ateşölçer vb. farklı araçlarla da ölçülebileceğine ilişkin öğrencilerde farkındalık oluşturulabilir. Günlük hava durumu raporları yorumlanabilir. Bina tasarımları ve yapı malzemeleri ile ısı yalıtımı arasında bağlantı kurulabilir. Bu durumun aile ve ülke ekonomisine katkıları hakkında öğrencilerin genellemeler yapmaları sağlanabilir. Bu bilgiler kullanılarak günlük yaşamda ısı yalıtımının nasıl fayda sağlayabileceği tartışılabilir."
+    },
+    {
+      "unitName": "6. ÜNİTE: YAŞAMIMIZDAKİ ELEKTRİK",
+      "description": "Bu ünitede öğrencilerin bir elektrik devresindeki elemanları sembollerin olup olmamasına göre sınıflandırması, şemasını çizdiği elektrik devresine uygun deney yapması ve ampul parlaklığını etkileyen değişkenlerin neler olduğuna ilişkin hipotez oluşturması amaçlanmaktadır.",
+      "assumptions": "Öğrencilerin basit elektrik devresini oluşturan devre elemanlarını tanıdıkları ve çalışan bir elektrik devresi kurabildikleri kabul edilmektedir. Bağımlı ve bağımsız değişken kavramlarını bildiklerini kabul edilir.",
+      "keywords": "basit elektrik devre elemanlarının sembolleri, devre şeması, pil sayısı, ampul sayısı",
+      "bridge": "Elektrik devre elemanları ve sembollerin günlük yaşamdaki örneklerini incelemeleri sağlanabilir. Devre elemanlarının sembollerle ifade edilmemesinden kaynaklı oluşabilecek sorunlara değinilebilir. Elektrik devrelerindeki ampul parlaklığı ile günlük yaşamdaki uygun aydınlatma sistemleri arasında ilişki kurulabilir."
+    },
+    {
+      "unitName": "7. ÜNİTE: SÜRDÜRÜLEBİLİR YAŞAM VE GERİ DÖNÜŞÜM",
+      "description": "Bu ünitede evsel atıklarda geri dönüştürülebilen ve dönüştürülemeyen maddelerin sınıflandırılması, kaynakların etkili kullanımı ile geri dönüşümün önemi konusunda çıkarım yapılması amaçlanmaktadır. Ayrıca öğrencilerin yakın çevrelerinde atık yönetimine özen göstermeleri amaçlanmaktadır.",
+      "assumptions": "Öğrencilerin geri dönüşüm ve sürdürülebilirlik kavramlarını bildikleri kabul edilmektedir. Kaynaklar ve bu kaynakların kullanımı konusunda temel bilgilere sahip oldukları kabul edilmektedir.",
+      "keywords": "evsel atık, yeniden kullanım, atık yönetimi, geri kazanım, geri dönüşüm, ileri dönüşüm, sıfır atık hiyerarşisi, uzaklaştırma",
+      "bridge": "Yetkili kurumların okullara, sokaklara koydukları geri dönüşüm kutularıyla atıkların ayrıştırılması günlük yaşamla ilişkilendirilebilir. Atık ön işlem ve geri kazanım tesisleri tanıtılarak günlük hayat ile ilişkisi kurulabilir. Atık yönetimi konusunda Sıfır Atık gibi projelerle ilişki kurulabilir."
+    }
+  ],
+  "6": [
+    {
+      "unitName": "1. ÜNİTE: GÜNEŞ SİSTEMİ VE TUTULMALAR",
+      "description": "Bu ünitede Güneş sistemindeki gezegenlerin sınıflandırılması, Güneş sistemi ile ilgili model oluşturulup Güneş ve Ay tutulmalarına yönelik çıkarım yapılarak tutulma modeli geliştirilmesi amaçlanmaktadır.",
+      "assumptions": "Öğrencilerin Güneş, Dünya ve Ay’ın yapı ve özelliklerini bildikleri kabul edilmektedir. Güneş, Dünya ve Ay’ın hacimsel büyüklük ilişkisi ve birbirlerine göre hareketleri ile ilgili ön bilgilere sahip oldukları kabul edilmektedir. Dünya ve Ay’ın dönme, dolanma hareketini bildikleri kabul edilmektedir.",
+      "keywords": "Güneş sistemi, gezegenler, asteroit, gök taşı, meteor, meteorit, Güneş tutulması, Ay tutulması",
+      "bridge": "Meteor çukurlarının oluşumu, meteor ve meteoritlerin büyüklükleri ile yeryüzüne ulaşma durumları arasında ilişki kurulabilir. Günlük hayatta karşılaştıkları Güneş ve Ay tutulmaları ile ilgili haberlerle konu arasında ilişki kurulabilir."
+    },
+    {
+      "unitName": "2. ÜNİTE: KUVVETİN ETKİSİNDE HAREKET",
+      "description": "Bu ünitede bir cisme etki eden kuvvetlerin yönü, doğrultusu ve büyüklüğü gözlemlenerek veriler toplanması, toplanan verilerin analiz edilerek bileşke kuvvetin yönünün, doğrultusunun ve büyüklüğünün hesaplanıp tanımlanması, bir cisme etki eden bileşke kuvvetin büyüklüğüne göre dengelenmiş ya da dengelenmemiş olma durumunun belirlenmesi, dengelenmiş ve dengelenmemiş kuvvetlerin bir cismin hareketine olan etkisinin yorumlanması, bir cismin sürati ve hızının karşılaştırılıp niteliklerinin belirlenmesi amaçlanmaktadır.",
+      "assumptions": "Öğrencilerin kuvvet kavramını ve kuvvetin cisimler üzerindeki etkisini bildikleri kabul edilmektedir. Kuvvetin dinamometre ile ölçüldüğünü ve biriminin Newton olduğunu bildikleri kabul edilmektedir.",
+      "keywords": "büyüklük, yön, doğrultu, uygulama noktası, bileşke kuvvet, dengelenmiş ve dengelenmemiş kuvvet, dengeleyici kuvvet, sürat-hız, alınan yol-yer değiştirme, zaman",
+      "bridge": "“Kuvvetin cisimler üzerindeki etkileri nelerdir?“ vb. sorular sorularak uygulanan kuvvetin yönü ve doğrultusu ile hareketi arasında bağlantı kurulabilir. Öğrencilerin günlük yaşamlarında cisimlerin hareketini bileşke kuvvet ile ilişkilendirmeleri sağlanabilir. Öğrencilerin günlük yaşamlarındaki hız ve sürat örnekleri ile derste öğrenilen kavramlar arasında ilişki kurulabilir."
+    },
+    {
+      "unitName": "3. ÜNİTE: CANLILARDA SİSTEMLER",
+      "description": "Bu ünitede eşeyli ve eşeysiz üreme ile bitkilerde üreme, büyüme ve gelişmeye etki eden temel faktörlerin açıklanması, tohumun çimlenmesine etki eden faktörlerin deneyler yapılarak keşfedilmesi, hayvanlarda üreme, büyüme ve gelişmeye etki eden temel faktörlerin yorumlanması amaçlanmaktadır. Bununla beraber, insanda üremeyi sağlayan yapı ve organlar arasındaki ilişkilerin modeller üzerinde açıklanması, sinir sisteminin model üzerinde incelenmesi, iç salgı bezlerinin vücut için öneminin açıklanması, ergenliğe geçişte oluşan bedensel ve ruhsal değişimleri genelleyebilmesi, denetleyici ve düzenleyici sistemlerin sağlığı için yapılması gerekenlerle ilgili bilgi toplanması amaçlanmaktadır.",
+      "assumptions": "Öğrencilerin bitki ve hayvan hücrelerinin yapısal olarak birbirinden farklı olduğunu bildikleri kabul edilmektedir. Sağlığın önemi konusunda ön bilgilere sahip oldukları kabul edilmektedir.",
+      "keywords": "eşeysiz üreme (vejetatif, bölünme, tomurcuklanma ve rejenerasyonla üreme), eşeyli üreme, başkalaşım, tozlaşma, çimlenme, yaşam döngüsü, insanda üremeyi sağlayan yapı ve organlar, âdet döngüsü, sperm, yumurta, zigot, embriyo, fetüs, büyüme ve gelişme, sinir sistemi, sinir sisteminin bölümleri, merkezî ve çevresel sinir sistemi, refleks, iç salgı bezleri, hormon, iç salgı bezlerinin görevleri, ergenlik, ergen sağlığı, denetleyici ve düzenleyici sistemlerin sağlığı",
+      "bridge": "Çevresindeki bitkilerin gelişimine yönelik gözlem sonuçlarıyla ilişki kurulabilir. Bebekliğinden itibaren kendi gelişimine ait süreçler ile öğrendiği bilgiler arasında öğrencilerin bağlantı kurmaları sağlanabilir. Ergenlik döneminin başlangıcında oldukları için bu dönemde hayatlarında ve bedenlerinde meydana gelen değişimler ile ilişki kurulabilir. Öğrencilerin günlük yaşamda karşılaştığı felçlik durumu, omurilik zedelenmesi gibi konularla derste öğrendikleri bilgiler arasında ilişki kurmaları sağlanabilir."
+    },
+    {
+      "unitName": "4. ÜNİTE: IŞIĞIN YANSIMASI VE RENKLER",
+      "description": "Bu ünitede ışığın yansımasını gözlemleme, düzgün ve pürüzlü yüzeylerden ışığın yansımasını sınıflandırma, ışığın yansımasında gelen ışın, yansıyan ışın, yüzey normali, gelme ve yansıma açısı arasındaki ilişkinin açıklanması amaçlanmaktadır. Bununla beraber, ayna çeşitlerinin gözlemlenerek görüntü özelliklerinin karşılaştırılması, düz, çukur ve tümsek aynanın kullanım alanlarına günlük yaşamdan örneklerin verilmesi, ışığın cisimler tarafından soğurulmasının açıklanması, gözlemler sonucunda beyaz ışığı oluşturan renklerin neler olduğu çıkarımının yapılması, cisimlerin farklı renkte görülebilmesi için ışığın yansıma ve soğurulma olaylarının açıklanması, günümüzde ve gelecekte güneş enerjisinden yararlanma yolları hakkında yorum yapılması amaçlanmaktadır.",
+      "assumptions": "Öğrencilerin ışığın doğrusal yolla yayıldığını, ışığın saydam olmayan cisimlerle etkileşimini bildikleri kabul edilmektedir.",
+      "keywords": "yansıma, gelen ışın, yansıyan ışın, yüzey normali, gelme açısı, yansıma açısı, düz ayna, çukur ayna, tümsek ayna, soğurma, cisimlerin siyah, beyaz ve renkli görünmesi",
+      "bridge": "Öğrencilere “Güneşli bir günde kolunuzdaki saate gelen güneş ışığının saat camından duvara yansımasını görmüşsünüzdür. Duvardaki ışıklı bölgenin yeri saatinizi hareket ettirdiğinizde değişir. Bu durumun nedeni ne olabilir?“ sorusu yöneltilerek ışığın yansıması arasında ilişki kurulabilir. Öğrencilere “Çaydanlık yüzeyindeki kendi görüntünüzü hiç gördünüz mü? Çaydanlıktaki görüntünüz ile boy aynasındaki görüntünüz arasındaki farklar nelerdir? Bu durumun nedeni ne olabilir?“ soruları yöneltilerek ayna çeşitlerine dikkat çekilebilir. Öğrencilere itfaiye ve ambulans yazılarının araçlarda neden ters yazıldığının sebebi sorularak bu durum aynalardaki görüntü oluşumu ile ilişkilendirilebilir."
+    },
+    {
+      "unitName": "5. ÜNİTE: MADDENİN AYIRT EDİCİ ÖZELLİKLERİ",
+      "description": "Bu ünitede maddenin ayırt edici özelliklerinden genleşme ve büzülme ile erime, donma ve kaynama noktasına yönelik deneyler yapılması amaçlanmaktadır. Ayrıca tümdengelimsel akıl yürütülerek maddelerin yoğunluklarının hesaplanması ve maddenin hâllerine göre yoğunluklarının karşılaştırılarak bu durumun canlılar için önemi hakkında çıkarımlarda bulunulması amaçlanmaktadır.",
+      "assumptions": "Öğrencilerin kütle ve hacim konularını öğrendikleri kabul edilmektedir. Kütlenin nasıl ölçülebileceği konusunda öğrencilerin ön öğrenmelere sahip oldukları kabul edilmektedir. Öğrencilerin katı, sıvı, gaz, erime, donma, kavramlarını bildikleri kabul edilmektedir.",
+      "keywords": "genleşme, büzülme, erime noktası, donma noktası, kaynama noktası, yoğunluk",
+      "bridge": "Günlük yaşamdan ortam sıcaklığının değişmesine bağlı olarak elektrik tellerinin veya tren raylarının uzayıp kısalması, kavanoz kapağının sıkışması, termometrenin içindeki sıvının yükselip alçalması gibi gözlenebilen örnekler verilebilir. Suyun katı ve sıvı hâldeki yoğunluğunun karşılaştırılabileceği örnekler sunularak öğrencilerin günlük hayatla ilişki kurmaları sağlanabilir."
+    },
+    {
+      "unitName": "6. ÜNİTE: ELEKTRİĞİN İLETİMİ VE DİRENÇ",
+      "description": "Bu ünitede; maddelerin elektriği iletme durumlarını gösteren deneyler yapılarak günlük yaşamdaki maddeleri iletkenlik ve yalıtkanlık durumlarına göre sınıflandırılması, bir elektrik devresindeki ampulün parlaklığının bağlı olduğu değişkenlerin test edilmesi, ayarlanabilir direncin ampul parlaklığına etkisine yönelik çıkarım yapılması amaçlanmaktadır.",
+      "assumptions": "Öğrencilerin çalışan basit bir elektrik devresi kurabildikleri kabul edilmektedir. Pil ve ampul sayısındaki değişikliğin devredeki ampul parlaklığını değiştirdiğini bildikleri kabul edilmektedir.",
+      "keywords": "iletken maddeler, yalıtkan maddeler, elektriksel direnç, reosta, elektriksel direncin bağlı olduğu faktörler (kesit alanı, uzunluk ve iletkenin cinsi)",
+      "bridge": "Pil sayısı ve ampul sayısına bağlı olarak değişebilen ampul parlaklığının iletken tel, kesit alanı ve iletkenin cinsi değişkenleriyle de değişebileceğine değinilebilir. Elektrik yalıtımını sağlamak için günlük yaşamda prizler, anahtarlar ve kabloların plastikle kaplanması vb. örnekler elektrik yalıtkanlığı ile ilişkilendirilebilir. Elektrikle ilgili alanlarda çalışan işçilerin iş güvenliği açısından kullandıkları elektrik yalıtım malzemeleri ile ilişki kurulabilir. Günlük yaşamda ısıtma amaçlı kullanılan aletlerdeki düğmelerin dirençle ilişkili olduğuna değinilebilir."
+    },
+    {
+      "unitName": "7. ÜNİTE: SÜRDÜRÜLEBİLİR YAŞAM VE ETKİLEŞİM",
+      "description": "Bu ünitede biyoçeşitliliğin doğal yaşam için öneminin sorgulanıp biyoçeşitliliği tehdit eden faktörlerin araştırma verilerine dayalı olarak tahmin edilebilmesi, ısınma amaçlı yakıt kullanımının insan ve çevre üzerine etkilerinin tartışılarak geçerli fikirler oluşturulabilmesi amaçlanmaktadır. Bunun yanı sıra yakın çevredeki veya ülkemizdeki bir çevre sorununun çözümüne ilişkin önerilerin değerlendirilip insan faaliyetleri sonucunda oluşabilecek çevre sorunlarına yönelik çıkarımlarda bulunabilmesi amaçlanmaktadır.",
+      "assumptions": "Öğrencilerin canlıların sınıflandırılması konusunda canlı türlerini bildiği kabul edilmektedir. Katı, sıvı ve gaz kavramlarını bildiği kabul edilmektedir.",
+      "keywords": "biyoçeşitlilik, doğal yaşam, nesli tükenen canlılar, habitat, ekosistem, ısınma amaçlı kullanılan yakıtlar, çevre kirliliği, insan-çevre etkileşimi, deniz ve tatlı su kirliliği, toprak kirliliği, orman yangınları, ormansızlaşma",
+      "bridge": "Öğrencilerin yakın çevrelerinde rastladıkları canlı çeşitleri ile biyoçeşitlilik arasında ilişki kurulabilir. Katı, sıvı, gaz kavramlarına ilişkin öğrenmeleriyle yakıt türleri arasında ilişki kurulabilir. Bölgelerindeki çevre sorunlarına yönelik gerçekleştirilen sosyal sorumluluk projeleri ile öğrencilerin çevre-insan ilişkileri arasında bağ kurmaları sağlanabilir."
+    }
+  ],
+  "7": [
+    {
+      "unitName": "1. ÜNİTE: UZAY ÇAĞI",
+      "description": "Bu ünitede uzay araştırmaları için geliştirilen teknolojilerin sınıflandırılması, uzay gözlemi için model hazırlanması ve uzay çalışmalarının yol açabileceği problemlerin çözülmesine yönelik fikirlerin oluşturulması amaçlanmaktadır. Bunun yanı sıra yıldızların yaşamı, yıldız, galaksi ve evren kavramları arasındaki hiyerarşik ilişkiler ortaya koyularak bir bütün oluşturulması amaçlanmaktadır.",
+      "assumptions": "Işığın yansımasına ilişkin bilimsel bilgileri bildikleri kabul edilmektedir.",
+      "keywords": "uzay, uzay teknolojileri, yıldız, takımyıldız, galaksi, evren",
+      "bridge": "Günlük yaşamdaki iletişim, yer-yön bulma, meteoroloji, savunma, deprem, hava olayları gibi çeşitli araştırmalar için yapay uydu verilerinden faydalanıldığı ifade edilebilir. Işık kirliliği ile yaşanılan yer arasında ilişki kurulabilir. Işık kirliliğinin daha az olduğu yerleşim yerlerinde gökyüzü gözleminin daha kolay yapılabilmesi ve gözlemevlerinin bu yerleşim yerlerine kurulması arasında ilişki kurulabilir. Türkiye Uzay Ajansının yaptığı çalışmalar ile uzay araştırmaları için geliştirilen teknolojiler arasında ilişki kurulabilir. Uzay araştırmaları için geliştirilen teknolojiler ile bu teknolojilerin günlük yaşamda kullanılma durumu arasındaki ilişki kurulabilir."
+    },
+    {
+      "unitName": "2. ÜNİTE: KUVVET VE ENERJİYİ KEŞFEDELİM",
+      "description": "Bu ünitede bir cisme etki eden kuvvet sonucunda fiziksel anlamda yapılan işin bağlı olduğu faktörlere yönelik çıkarım yapılması, günlük yaşamından örnekler üzerinden fiziksel anlamda iş yapma durumlarının analiz edilmesi, fiziksel anlamda yapılan iş ve enerji kavramı arasında ilişki kurulması, kinetik ve potansiyel enerjinin karşılaştırılıp niteliklerinin belirlenmesi, enerjinin korunumundan hareketle kinetik ve potansiyel enerjinin birbirine dönüşümüne yönelik akıl yürütülmesi amaçlanmaktadır.",
+      "assumptions": "Öğrencilerin kütle, ağırlık, doğrultu, yön ve kuvvetin cisimler üzerindeki etkisini bildikleri kabul edilmektedir. Öğrencilerin hareket, yer değiştirme, hız kavramlarını bildikleri kabul edilmektedir.",
+      "keywords": "iş, enerji, joule, kinetik ve potansiyel enerji (esneklik ve çekim), ısı",
+      "bridge": "“Kuvvetin hangi etkilerini hatırlıyorsunuz?“ vb. sorular sorularak uygulanan kuvvetin yönü ve doğrultusunda cismin hareket etmesi ile ilgili bağlantı kurulabilir. Günlük yaşamda kullandığı iş kavramıyla fiziksel anlamdaki iş kavramı arasında ilişki kurulabilir."
+    },
+    {
+      "unitName": "3. ÜNİTE: VÜCUDUMUZDAKİ SİSTEMLER",
+      "description": "Bu ünitede sindirim, dolaşım, solunum ve boşaltım sistemlerine ait yapı ve organlar ile bu yapı ve organların görevlerinin açıklanması amaçlanmaktadır. Bu sistemlerin sağlığı konusunda yapılması gerekenlerin araştırma verileriyle tartışılarak açıklanması, kan bağışı ve organ bağışının toplumsal dayanışma açısından öneminin tartışılarak fark edilmesi, Yeşilay ve bağımlılık konusunda farkındalık kazandırılması amaçlanmaktadır.",
+      "assumptions": "Öğrencilerin vücudun temel kısımlarını ve sistem kavramını bildikleri kabul edilmektedir. Besin türleri ve içeriklerini bildikleri kabul edilmektedir. Hücre kavramını bildikleri kabul edilmektedir. Toplumsal dayanışma kavramını bildikleri kabul edilmektedir.",
+      "keywords": "ağız, yutak, yemek borusu, mide, ince bağırsak, kalın bağırsak, anüs, enzim, fiziksel sindirim, kimyasal sindirim, karaciğer, pankreas, kalp, kan, kan damarları, nabız, kan bağışı, organ bağışı, burun, yutak, gırtlak, soluk borusu, akciğerler, Yeşilay, bağımlılık, böbrekler, üreter (idrar borusu), mesane (idrar kesesi), üretra (idrar kanalı), deri",
+      "bridge": "Sindirim sistemi, dolaşım sistemi, solunum sistemi ve boşaltım sistemlerine ait yapı ve organların görevlerini kendi vücutlarıyla ilişkilendirmeleri sağlanabilir. Bu sistemlerin sağlığı ile ilgili derste öğrendikleriyle günlük hayatta bazı durumlarla bağlantı kurmaları öğrencilerden beklenebilir. Kan ve organ bağışının toplumsal dayanışmadaki öneminden bahsedilerek gerçek yaşama transferi desteklenebilir. Yeşilay’ın bağımlılıkla verdiği mücadeleye ilişkin güncel uygulamalarına değinilebilir."
+    },
+    {
+      "unitName": "4. ÜNİTE: IŞIĞIN KIRILMASI VE MERCEKLER",
+      "description": "Bu ünitede ortam değiştiren ışığın izlediği yolun gözlemlenerek kırılma olayının açıklanması, mercek çeşitlerinin ince ve kalın kenarlı mercek olarak çıkarım yapılması ve merceklerin günlük hayatta kullanım alanlarının örneklerle sınıflandırılması amaçlanmaktadır.",
+      "assumptions": "Öğrencilerin ışığın doğrusal olarak yayıldığını bildikleri kabul edilmektedir. Cisimlerin ışığı soğurma ve yansıtma olaylarının sonuçlarını farklı şekillerde gözlemleyebildikleri kabul edilmektedir. Farklı maddesel ortamların farklı yoğunluğa sahip olduklarını bildikleri kabul edilmektedir. Işığın yansımasında gelen ışın, yansıyan ışın ve yüzey normali arasındaki ilişkiyi tanımlayabildikleri kabul edilmektedir. Güneş enerjisinden yararlanma yöntemlerini bildikleri kabul edilmektedir.",
+      "keywords": "gelen ışın, kırılan ışın, gelme açısı, kırılma açısı, kırılma, ince kenarlı mercek, kalın kenarlı mercek, odak noktası",
+      "bridge": "Suyun içindeki balıkların olduğundan daha yakın görünmesi, çay bardağındaki kaşığın kırılmış gibi görünmesi vb. örnekler ile ışığın kırılmasına yönelik günlük yaşamdaki olay ve durumlar arasında köprü kurulabilir. “Uzaktaki nesneleri gözlemlemek için kullanılan araçlar nelerdir?“, “Gözle görülemeyecek kadar küçük cisimleri gözlemlemek için mikroskop kullanılmasının nedeni nedir? Mikroskoba cisimlerin daha büyük görünmesini sağlayan özellik nedir?“, “Yakını veya uzağı görmekte zorlanan kişilerin gözlük kullanmasının nedeni ne olabilir? Kullandıkları gözlük hangi özelliği sayesinde çevrenin daha net görünmesini sağlar?“ vb. sorular ile merceklerin günlük hayattaki kullanım alanlarına dikkat çekilebilir."
+    },
+    {
+      "unitName": "5. ÜNİTE: MADDENİN DOĞASINA YOLCULUK",
+      "description": "Bu ünitede atomun proton, nötron ve elektrondan oluşan yapısının bilinmesi, saf ve saf olmayan madde temelinde element, bileşik ve karışımların sınıflandırılması, elementlerin sembollerle moleküler elementlerin ve bileşiklerin formüllerle ifade edilebilmesi, çözünme olayını etkileyen değişkenlerin ve karışımların ayrılmasında kullanılan bazı ayırma tekniklerinin deney yoluyla keşfedilmesi amaçlanmaktadır.",
+      "assumptions": "Öğrencilerin maddenin tanecikli yapısı ile ilgili ön öğrenmelere sahip olduğu kabul edilmektedir. Öğrencilerin “saf madde ve karışım“ kavramlarını bildikleri kabul edilmektedir. Karışımların ayırma yöntemlerinden elemeyi, süzmeyi ve mıknatısla ayırmayı bildiği kabul edilmektedir.",
+      "keywords": "atom (çekirdek, katman, proton, nötron ve elektron), bilimsel bilginin özelliği, molekül, element ve sembolleri, bileşik ve formülleri, homojen karışım, heterojen karışım, çözelti (çözünen ve çözücü), çözünme ve çözünme hızına etki eden faktörler, karışımları ayırma yöntemleri (buharlaştırma, yoğunluk farkı ve damıtma)",
+      "bridge": "Atom ve hücre arasındaki benzerlikler ve farklılıklar karşılaştırılarak önceki öğrenmeleri ile ilişki kurulabilir. Kütüphanede kitapların raflara dizilmesi ya da mutfakta birçok araç gereç ve malzemenin belirli bir düzene bağlı yerleştirilmesi ile elementlerin periyodik tablodaki durumu arasında benzerlik kurulabilir. Günlük yaşamda öğrencilerin karşılaştığı salata, ayran, limonata vb. pek çok madde karışım konusu ile ilgilidir. Karışımların buharlaştırma, yoğunluk farkından yararlanma, damıtma gibi fiziksel yöntemlerle ayrıştırılabileceği hakkında günlük yaşamdan farklı örneklerle ilişki kurulabilir."
+    },
+    {
+      "unitName": "6. ÜNİTE: ELEKTRİKLENME",
+      "description": "Bu ünitede elektriklenmenin açıklanması, elektrik yükleri arasında itme ve çekme kuvvetlerinin olduğunun farkına vardırılması ve elektriklenme çeşitlerinin gözlemlenebileceği deney yapılabilmesi, cisimlerin elektrik yüklerinin sınıflanması amaçlanmaktadır.",
+      "assumptions": "Öğrencilerin atomda yer alan pozitif, negatif ve nötr yüklerin olduğunu bildikleri kabul edilmektedir.",
+      "keywords": "pozitif yüklü cisim, negatif yüklü cisim, nötr cisim, temaslı ve temassız elektriklenme, elektroskop",
+      "bridge": "Elektriklenme ile günlük yaşamda karşılaşılan şimşek ve yıldırım oluşumu, kaydıraktan kayarken saçlarda oluşan hareketlenme gibi olaylar arasında ilişki kurulabilir."
+    },
+    {
+      "unitName": "7. ÜNİTE: SÜRDÜRÜLEBİLİR YAŞAM VE ENERJİ",
+      "description": "Bu ünitede besin zincirindeki canlılar ve canlılar arasındaki enerji ilişkilerinin açıklanması, sürdürülebilir yaşam için kaynakların tasarruflu kullanılması konusunda özellikle su tasarrufu, atık su ve su ayak izi bağlamında farkındalık kazandırılması ve bu konuda proje geliştirilmesi amaçlanmaktadır.",
+      "assumptions": "Canlı türlerini ve beslenmenin amacını bildikleri kabul edilmektedir. Kaynak ve tasarruf kavramlarını bildikleri kabul edilmektedir.",
+      "keywords": "besin zinciri, besin ağı, üretici, tüketici, ayrıştırıcı, ekoloji piramidi, biyolojik birikim, sürdürülebilir yaşam, kaynakların tasarruflu kullanımı, tatlı su kaynakları, su ayak izi, atık su",
+      "bridge": "Bakımını üstlendiği canlılar, çevresinde gördükleri canlılar ve besin zinciri arasında ilişki kurulabilir. Su tasarrufu konusunda kamu spotları, haberler, broşürler vb. yayınlar ile ilişki kurulabilir. Kullandıkları su kaynakları ile atık su ve su arıtma tesisleri arasında ilişki kurulabilir."
+    }
+  ],
+  "8": [
+    {
+      "unitName": "1. ÜNİTE: MEVSİMLER VE İKLİM",
+      "description": "Mevsimlerin oluşumu, iklim ve hava hareketleri, küresel iklim değişiklikleri.",
+      "assumptions": "Dünya'nın şekli ve hareketleri bilinmektedir.",
+      "keywords": "Eksen eğikliği, İklim, Hava olayları, Küresel ısınma",
+      "bridge": "7. Sınıf Uzay Ünitesi ile bağlantı kurulur."
+    },
+    {
+      "unitName": "2. ÜNİTE: DNA VE GENETİK KOD",
+      "description": "DNA yapısı, eşlenmesi, kalıtım, mutasyon, modifikasyon, adaptasyon ve biyoteknoloji.",
+      "assumptions": "Hücre ve çekirdek yapısı bilinmektedir.",
+      "keywords": "DNA, Nükleotid, Gen, Çaprazlama, Adaptasyon, Biyoteknoloji",
+      "bridge": "7. Sınıf Hücre ve Bölünmeler ile bağlantı kurulur."
+    },
+    {
+      "unitName": "3. ÜNİTE: BASINÇ",
+      "description": "Katı, sıvı ve gaz basıncı, Pascal prensibi ve günlük yaşam uygulamaları.",
+      "assumptions": "Kuvvet ve ağırlık kavramları bilinmektedir.",
+      "keywords": "Basınç, Pascal prensibi, Manometre, Toriçelli",
+      "bridge": "7. Sınıf Kuvvet ve Enerji ile bağlantı kurulur."
+    },
+    {
+      "unitName": "4. ÜNİTE: MADDE VE ENDÜSTRİ",
+      "description": "Periyodik sistem, fiziksel-kimyasal değişimler, tepkimeler, asit-bazlar ve öz ısı.",
+      "assumptions": "Saf maddeler ve atom yapısı bilinmektedir.",
+      "keywords": "Periyodik tablo, Metal, Ametal, Asit, Baz, Öz ısı",
+      "bridge": "7. Sınıf Maddenin Yapısı ile bağlantı kurulur."
+    },
+    {
+      "unitName": "5. ÜNİTE: BASİT MAKİNELER",
+      "description": "Kaldıraç, makara, eğik düzlem, çıkrık, dişli çark ve bileşik makineler.",
+      "assumptions": "İş ve enerji kavramları bilinmektedir.",
+      "keywords": "Kuvvet kazancı, Kaldıraç, Makara, Eğik düzlem",
+      "bridge": "7. Sınıf İş ve Enerji ile bağlantı kurulur."
+    },
+    {
+      "unitName": "6. ÜNİTE: ENERJİ DÖNÜŞÜMLERİ VE ÇEVRE BİLİMİ",
+      "description": "Besin zinciri, fotosentez, solunum, madde döngüleri ve sürdürülebilirlik.",
+      "assumptions": "Canlılar ve ekosistem ilişkileri bilinmektedir.",
+      "keywords": "Besin zinciri, Fotosentez, Solunum, Madde döngüleri",
+      "bridge": "7. Sınıf Canlılar ve Enerji ile bağlantı kurulur."
+    },
+    {
+      "unitName": "7. ÜNİTE: ELEKTRİK YÜKLERİ VE ELEKTRİK ENERJİSİ",
+      "description": "Elektriklenme, elektroskop, topraklama, elektrik enerjisinin dönüşümü ve motorlar.",
+      "assumptions": "Elektrik devreleri bilinmektedir.",
+      "keywords": "Elektriklenme, Elektroskop, Topraklama, Jeneratör, Motor",
+      "bridge": "7. Sınıf Elektrik Ünitesi ile bağlantı kurulur."
+    }
+  ]
+};

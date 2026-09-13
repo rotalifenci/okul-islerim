@@ -47,6 +47,7 @@
     <!-- Veri Katmanları ve Yardımcılar -->
     <script src="js/data/initialData.js"></script>
     <script src="js/data/templates.js"></script>
+    <script src="js/data/curriculum.js"></script>
     <script src="js/utils/storage.js"></script>
     <script src="js/utils/exporter.js"></script>
     <script src="js/modules/aiEngine.js"></script>
@@ -2075,14 +2076,23 @@
 
                                     <!-- Öğrenme Çıktıları -->
                                     <td class="p-3 border-r-2 border-slate-200 space-y-1.5">
-                                        <div class="p-2.5 bg-emerald-50 rounded-xl border border-emerald-300">
-                                            <p class="text-xs text-black font-black leading-relaxed" x-text="w.outcome"></p>
-                                        </div>
+                                        <template x-for="(outc, oIdx) in (w.outcomesList && w.outcomesList.length ? w.outcomesList : [{code: 'KAZANIM', desc: w.outcome}])" :key="oIdx">
+                                            <div class="p-2 bg-emerald-50 rounded-xl border border-emerald-300 space-y-1 mb-1.5 last:mb-0">
+                                                <span class="inline-block px-2 py-0.5 rounded-md bg-emerald-700 text-white font-mono text-[10px] font-black" x-text="outc.code"></span>
+                                                <p class="text-xs text-black font-black leading-relaxed" x-text="outc.desc"></p>
+                                            </div>
+                                        </template>
                                     </td>
 
                                     <!-- Süreç Bileşenleri -->
-                                    <td class="p-3 border-r-2 border-slate-200 text-slate-700">
-                                        <p class="text-[11px] font-medium leading-relaxed" x-text="w.process || '-'"></p>
+                                    <td class="p-3 border-r-2 border-slate-200 text-slate-800 space-y-1">
+                                        <template x-for="(pItem, pIdx) in (w.processList && w.processList.length ? w.processList : (w.process ? [w.process] : []))" :key="pIdx">
+                                            <div class="flex items-start gap-1.5 text-[11px] font-medium leading-relaxed mb-1 last:mb-0">
+                                                <span class="text-blue-600 font-black">•</span>
+                                                <span x-text="pItem"></span>
+                                            </div>
+                                        </template>
+                                        <div x-show="!w.process && (!w.processList || !w.processList.length)" class="text-slate-400 text-xs">-</div>
                                     </td>
 
                                     <!-- Değerler & Beceriler -->

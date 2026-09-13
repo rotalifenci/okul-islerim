@@ -952,17 +952,24 @@ document.addEventListener('alpine:init', () => {
         },
 
         getFilteredAnnualPlan(grade = null) {
-            const g = grade || this.selectedAnnualPlanGrade || 5;
-            const plans = window.AnnualPlanData ? window.AnnualPlanData[g] : [];
+            const g = String(grade || this.selectedAnnualPlanGrade || 5);
+            const plans = (window.AnnualPlanData && window.AnnualPlanData[g]) || (this.annualPlanData && this.annualPlanData[g]) || [];
             if (!plans || !Array.isArray(plans)) return [];
 
             const query = (this.annualPlanSearchQuery || '').trim().toLowerCase();
             if (!query) return plans;
 
             return plans.filter(w => {
-                const searchStr = `${w.week} ${w.date} ${w.unit} ${w.topic} ${w.outcome} ${w.process} ${w.values || ''} ${w.specialDays || ''}`.toLowerCase();
+                const outcomesStr = (w.outcomesList || []).map(o => `${o.code || ''} ${o.desc || ''}`).join(' ');
+                const processStr = (w.processList || []).join(' ');
+                const searchStr = `${w.week || ''} ${w.date || ''} ${w.unit || ''} ${w.topic || ''} ${w.outcome || ''} ${outcomesStr} ${w.process || ''} ${processStr} ${w.values || ''} ${w.skills || ''} ${w.specialDays || ''}`.toLowerCase();
                 return searchStr.includes(query);
             });
+        },
+
+        getMaarifUnitInfo(grade = null) {
+            const g = grade || this.selectedAnnualPlanGrade || 5;
+            return (window.MaarifUnitInfo && window.MaarifUnitInfo[g]) || [];
         },
 
         printAnnualPlan(grade = null) {
