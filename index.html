@@ -187,9 +187,10 @@
                     <i data-lucide="moon" class="w-4 h-4 block dark:hidden"></i>
                 </button>
 
-                <!-- Yedek İndir Butonu -->
-                <button @click="exportBackup()" title="JSON Yedek İndir" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700/50 text-slate-300 hover:text-emerald-400 transition hidden sm:block">
-                    <i data-lucide="download-cloud" class="w-4 h-4"></i>
+                <!-- Yedek İndir / Cihazlar Arası Eşitleme Butonu (Mobilde de Görünür) -->
+                <button @click="exportBackup()" title="Yedek İndir / Cihazlar Arası Aktar" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700/50 text-slate-300 hover:text-emerald-400 transition flex items-center gap-1.5 text-xs font-black">
+                    <i data-lucide="download-cloud" class="w-4 h-4 text-emerald-400"></i>
+                    <span class="hidden sm:inline">Yedek Al / Eşitle</span>
                 </button>
             </div>
         </div>
@@ -2933,18 +2934,29 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="bg-slate-100/95 p-5 rounded-3xl border-2 border-slate-300 shadow-md space-y-4">
-                        <h3 class="font-black text-black text-sm pb-2 border-b border-slate-300">💾 Veri Yedekleme ve Kurtarma</h3>
-                        <p class="text-xs text-slate-700 font-semibold">Tüm sınıflarınız, öğrencileriniz, gözlemleriniz ve proje takviminiz tek bir JSON dosyasına indirilir.</p>
+                        <div class="flex items-center gap-2 pb-2 border-b border-slate-300">
+                            <i data-lucide="refresh-cw" class="w-5 h-5 text-red-600"></i>
+                            <h3 class="font-black text-black text-sm">📱 ➔ 💻 Cihazlar Arası Eşitleme & Yedekleme</h3>
+                        </div>
+                        <p class="text-xs text-slate-700 font-semibold leading-relaxed">
+                            Telefonda girdiğiniz toplantıları, ders programını ve görevleri bilgisayara aktarmak (veya tam tersi) için aşağıdaki adımları kullanabilirsiniz:
+                        </p>
+
+                        <div class="p-3 bg-indigo-50 border border-indigo-200 rounded-2xl text-[11px] text-indigo-950 font-medium space-y-1">
+                            <p><strong>1. Adım:</strong> Telefondan <strong>"JSON Yedek İndir"</strong> butonuna basın.</p>
+                            <p><strong>2. Adım:</strong> İnen dosyayı WhatsApp veya E-posta ile bilgisayarınıza gönderin.</p>
+                            <p><strong>3. Adım:</strong> Bilgisayarda bu sayfayı açıp <strong>"JSON Yedeğini Geri Yükle"</strong> butonuna basıp dosyayı seçin. Tüm verileriniz anında eşitlenir.</p>
+                        </div>
 
                         <div class="space-y-2 pt-2">
                             <button @click="exportBackup()" class="w-full py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-xs transition flex items-center justify-center gap-2 shadow-sm">
                                 <i data-lucide="download" class="w-4 h-4"></i>
-                                <span>JSON Yedek Dosyasını İndir</span>
+                                <span>📥 JSON Yedek Dosyasını İndir</span>
                             </button>
 
                             <button @click="triggerImportBackup()" class="w-full py-2.5 rounded-xl bg-white hover:bg-slate-200 text-black font-black text-xs transition flex items-center justify-center gap-2 border-2 border-slate-300 shadow-sm">
                                 <i data-lucide="upload" class="w-4 h-4 text-red-600"></i>
-                                <span>JSON Yedeğini Geri Yükle</span>
+                                <span>📤 JSON Yedeğini Geri Yükle (Eşitle)</span>
                             </button>
                             <input type="file" id="jsonFileInput" @change="handleFileImport($event)" accept=".json" class="hidden">
                         </div>
