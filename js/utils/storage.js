@@ -54,25 +54,32 @@ window.StorageManager = {
                             parsed._clean_classrooms_v1 = true;
                             this.saveData(parsed, uid);
                         }
-                        if (!parsed._school_meetings_tab_v1) {
-                            if (parsed.navSections && Array.isArray(parsed.navSections)) {
+                        if (parsed.navSections && Array.isArray(parsed.navSections)) {
                             parsed.navSections.forEach(s => { s.badge = ''; });
-                                const hasMeetings = parsed.navSections.some(s => s.id === 'school-meetings');
-                                if (!hasMeetings) {
-                                    const taskIdx = parsed.navSections.findIndex(s => s.id === 'school-tasks');
-                                    const meetSec = { id: 'school-meetings', title: '👥 Okul Toplantılarım', icon: 'users', color: 'indigo', visible: true, isSystem: true, badge: '' };
-                                    if (taskIdx !== -1) {
-                                        parsed.navSections.splice(taskIdx, 0, meetSec);
-                                    } else {
-                                        parsed.navSections.push(meetSec);
-                                    }
+                            const hasMeetings = parsed.navSections.some(s => s.id === 'school-meetings');
+                            if (!hasMeetings) {
+                                const taskIdx = parsed.navSections.findIndex(s => s.id === 'school-tasks');
+                                const meetSec = { id: 'school-meetings', title: '👥 Okul Toplantılarım', icon: 'users', color: 'indigo', visible: true, isSystem: true, badge: '' };
+                                if (taskIdx !== -1) {
+                                    parsed.navSections.splice(taskIdx, 0, meetSec);
+                                } else {
+                                    parsed.navSections.push(meetSec);
                                 }
+                                this.saveData(parsed, uid);
                             }
-                            if (!parsed.meetings) {
-                                parsed.meetings = JSON.parse(JSON.stringify(window.InitialData.meetings || []));
+                            const mSec = parsed.navSections.find(s => s.id === 'school-meetings');
+                            if (mSec && mSec.visible === false) {
+                                mSec.visible = true;
+                                this.saveData(parsed, uid);
                             }
-                            parsed._school_meetings_tab_v1 = true;
-                            this.saveData(parsed, uid);
+                        }
+                        if (!parsed.meetings || !Array.isArray(parsed.meetings) || parsed.meetings.length === 0) {
+                            if (window.InitialData && window.InitialData.meetings && window.InitialData.meetings.length) {
+                                parsed.meetings = JSON.parse(JSON.stringify(window.InitialData.meetings));
+                                this.saveData(parsed, uid);
+                            } else {
+                                parsed.meetings = [];
+                            }
                         }
                         if (!parsed._daily_plan_tab_v1) {
                             if (!parsed.dailyPlans) {
@@ -174,6 +181,17 @@ window.StorageManager = {
 
                         if (parsed.navSections && Array.isArray(parsed.navSections)) {
                             parsed.navSections.forEach(s => { s.badge = ''; });
+                            const hasMeetings = parsed.navSections.some(s => s.id === 'school-meetings');
+                            if (!hasMeetings) {
+                                const taskIdx = parsed.navSections.findIndex(s => s.id === 'school-tasks');
+                                const meetSec = { id: 'school-meetings', title: '👥 Okul Toplantılarım', icon: 'users', color: 'indigo', visible: true, isSystem: true, badge: '' };
+                                if (taskIdx !== -1) {
+                                    parsed.navSections.splice(taskIdx, 0, meetSec);
+                                } else {
+                                    parsed.navSections.push(meetSec);
+                                }
+                                this.saveData(parsed, uid);
+                            }
                             const hasMaarif = parsed.navSections.some(s => s.id === 'maarif-works');
                             if (!hasMaarif) {
                                 const mSec = { id: 'maarif-works', title: '🎨 Maarif Çalışmaları', icon: 'palette', color: 'emerald', visible: true, isSystem: true, badge: '' };
