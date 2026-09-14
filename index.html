@@ -495,15 +495,15 @@
                                             </div>
                                             
                                             <!-- Konu -->
-                                            <p class="text-[11.5px] text-slate-700 font-bold leading-snug" x-text="sch.topic || 'Genel Ders Akışı'"></p>
+                                            <p class="text-[11.5px] text-slate-700 font-bold leading-snug" x-text="(getDailyPlanCurrentWeek(sch.classId.split('/')[0])?.topic) || sch.topic || 'Genel Ders Akışı'"></p>
 
                                             <!-- MEB Maarif Modeli Öğrenme Çıktısı Kutusu (KAZANIM TAM GÖRÜNÜR) -->
                                             <div class="p-2.5 bg-emerald-50/90 rounded-xl border border-emerald-300 space-y-1 shadow-2xs">
                                                 <div class="flex items-center gap-1.5 text-xs font-black text-emerald-950">
-                                                    <span class="px-1.5 py-0.2 rounded bg-emerald-700 text-white font-mono text-[10.5px] font-black" x-text="sch.outcomeCode || 'KOD YOK'"></span>
+                                                    <span class="px-1.5 py-0.2 rounded bg-emerald-700 text-white font-mono text-[10.5px] font-black" x-text="(getDailyPlanCurrentWeek(sch.classId.split('/')[0])?.outcomesList?.[0]?.code) || (getDailyPlanCurrentWeek(sch.classId.split('/')[0])?.outcomeCode) || sch.outcomeCode || 'KOD YOK'"></span>
                                                     <span class="text-[11px] font-black text-emerald-900">Maarif Modeli Öğrenme Çıktısı</span>
                                                 </div>
-                                                <p class="text-xs text-slate-900 font-bold leading-relaxed" x-text="sch.outcomeDesc || 'Öğrenme çıktısı tanımlı değil.'"></p>
+                                                <p class="text-xs text-slate-900 font-bold leading-relaxed" x-text="(getDailyPlanCurrentWeek(sch.classId.split('/')[0])?.outcomesList?.[0]?.desc) || (getDailyPlanCurrentWeek(sch.classId.split('/')[0])?.outcome) || (getDailyPlanCurrentWeek(sch.classId.split('/')[0])?.outcomeDesc) || sch.outcomeDesc || 'Öğrenme çıktısı tanımlı değil.'"></p>
                                             </div>
                                         </div>
                                     </template>
