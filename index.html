@@ -377,13 +377,7 @@
                                     <option value="Belirlenmedi">Yok</option>
                                 </select>
                                 <span class="border-l border-amber-300 pl-1 font-black text-amber-950">📍</span>
-                                <select :value="data.teacher?.dutyArea || 'Kat-2'" @change="setDutyArea($event.target.value)" class="bg-white text-amber-950 font-black text-[11px] px-1.5 py-0.5 rounded-lg border border-amber-300 focus:outline-none cursor-pointer">
-                                    <option value="Bahçe">Bahçe (1 Hft)</option>
-                                    <option value="Zemin">Zemin (1 Hft)</option>
-                                    <option value="Kat-1">Kat-1 (1 Hft)</option>
-                                    <option value="Kat-2">Kat-2 (2 Hft - İlk)</option>
-                                    <option value="Kat-3">Kat-3 (2 Hft)</option>
-                                </select>
+                                <input type="text" :value="data.teacher?.dutyArea || ''" @change="setDutyArea($event.target.value)" placeholder="Nöbet Yeri" class="bg-white text-amber-950 font-black text-[11px] px-1.5 py-0.5 rounded-lg border border-amber-300 focus:outline-none w-24 placeholder-amber-400">
                             </div>
 
                             <!-- Görünüm Seçici -->
@@ -419,18 +413,10 @@
                     </div>
 
                     <!-- 🔄 Ultra Kompakt Tek Sıra Nöbet Rotasyonu -->
-                    <div class="bg-amber-50/90 px-2.5 py-1 rounded-lg border border-amber-300 shadow-xs flex items-center justify-between gap-2 text-[10px] sm:text-[11px] overflow-x-auto whitespace-nowrap">
-                        <div class="flex items-center gap-1 font-bold text-slate-800">
-                            <span class="font-black text-amber-900">🔄 Nöbet:</span>
-                            <span class="bg-white px-1.5 py-0.5 rounded border border-amber-400 text-red-700 font-black">1) Kat-2 (2 hft) ⭐ İlk</span>
-                            <span>➔</span>
-                            <span class="bg-white px-1 py-0.5 rounded border border-slate-200 text-slate-700">2) Kat-3 (2 hft)</span>
-                            <span>➔</span>
-                            <span class="bg-white px-1 py-0.5 rounded border border-slate-200 text-slate-700">3) Bahçe (1 hft)</span>
-                            <span>➔</span>
-                            <span class="bg-white px-1 py-0.5 rounded border border-slate-200 text-slate-700">4) Zemin (1 hft)</span>
-                            <span>➔</span>
-                            <span class="bg-white px-1 py-0.5 rounded border border-slate-200 text-slate-700">5) Kat-1 (1 hft)</span>
+                    <div class="bg-amber-50/90 px-2.5 py-1.5 rounded-lg border border-amber-300 shadow-xs flex items-center justify-between gap-2 text-[10px] sm:text-[11px] overflow-x-auto">
+                        <div class="flex items-center gap-2 font-bold text-slate-800 w-full">
+                            <span class="font-black text-amber-900 whitespace-nowrap">🔄 Rotasyon Notu:</span>
+                            <input type="text" x-model="data.teacher.dutyRotationText" @change="saveDutyDay()" placeholder="Örn: 1. Hft Bahçe ➔ 2. Hft Zemin... (Okulunuza göre nöbet döngünüzü yazabilirsiniz)" class="bg-white/80 border border-amber-300 rounded px-2 py-0.5 text-[11px] text-amber-950 font-bold w-full focus:outline-none focus:bg-white shadow-2xs">
                         </div>
                         <div class="flex items-center gap-1.5 font-black text-[10px] pl-2 border-l border-amber-300">
                             <span class="px-1.5 py-0.5 rounded bg-amber-200 text-amber-950">Aktif: <strong class="text-red-700" x-text="data.teacher?.dutyArea || 'Kat-2'"></strong></span>
