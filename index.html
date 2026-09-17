@@ -4692,22 +4692,45 @@
                     </p>
                 </div>
 
-                <!-- Cihazlar Arası Ortak Çalışma Alanı Anahtarı -->
-                <div class="space-y-1.5 bg-indigo-50/70 p-3.5 rounded-2xl border border-indigo-200">
-                    <label class="block font-black text-indigo-950">🔑 Ortak Senkronizasyon Anahtarı (Tüm Cihazlarınızda Aynı Olmalıdır)</label>
-                    <input type="text" x-model="cloudConfig.workspaceKey" placeholder="Örn: murat-kundakci-okul-2026" class="w-full p-2.5 bg-white border-2 border-indigo-300 rounded-xl text-xs font-black text-slate-900 focus:border-indigo-600 focus:outline-none">
-                    <p class="text-[10px] text-indigo-900 font-semibold">💡 Telefonunuzda ve bilgisayarınızda bu anahtar AYNI olduğu sürece tüm belgeleriniz otomatik olarak ortak klasörde senkronize olur.</p>
+                <!-- 🚀 1. SEÇENEK: ANINDA BULUT EŞİTLEME KODU (HESAP GEREKTİRMEZ) -->
+                <div class="space-y-3 p-4 bg-emerald-50/70 rounded-2xl border-2 border-emerald-300">
+                    <div class="flex items-center justify-between gap-2 flex-wrap">
+                        <div class="flex items-center gap-2">
+                            <div class="p-1.5 bg-emerald-600 text-white rounded-lg">
+                                <i data-lucide="key" class="w-4 h-4"></i>
+                            </div>
+                            <strong class="font-black text-emerald-950 text-xs sm:text-sm">🚀 Anında Cihaz Eşitleme Kodu (Önerilen)</strong>
+                        </div>
+                        <button @click="generateNewCloudSyncCode()" :disabled="isTestingCloud" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs transition flex items-center gap-1.5 shadow-sm active:scale-95">
+                            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                            <span>✨ Yeni Bulut Kodu Oluştur</span>
+                        </button>
+                    </div>
+
+                    <p class="text-[11px] text-emerald-900 font-semibold leading-relaxed">
+                        Telefonunuzdan <strong>"✨ Yeni Bulut Kodu Oluştur"</strong> butonuna basın ve oluşan kodu bilgisayarınızdaki bu alana yapıştırın. Tüm belgeleriniz anında iki cihaz arasında senkronize olur.
+                    </p>
+
+                    <div class="space-y-1">
+                        <label class="block font-black text-slate-800">Bulut Eşitleme Kodu (Cloud Sync ID)</label>
+                        <div class="flex items-center gap-1.5">
+                            <input type="text" x-model="cloudConfig.cloudSyncId" placeholder="Örn: ff808181a09d98f701..." class="w-full p-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-black text-slate-900 focus:border-emerald-600 focus:outline-none font-mono">
+                            <button @click="if (cloudConfig.cloudSyncId) { navigator.clipboard.writeText(cloudConfig.cloudSyncId); showToast('Bulut Kodu panoya kopyalandı! 📋'); }" title="Kodu Kopyala" class="p-2.5 rounded-xl bg-slate-900 hover:bg-black text-white transition flex-shrink-0">
+                                <i data-lucide="copy" class="w-4 h-4 text-emerald-400"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Özel Supabase Entegrasyonu (İsteğe Bağlı) -->
+                <!-- ⚡ 2. SEÇENEK: ÖZEL SUPABASE HESABI (OPSİYONEL) -->
                 <div class="space-y-3 p-4 bg-slate-50 rounded-2xl border-2 border-slate-200">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
                             <i data-lucide="database" class="w-4 h-4 text-emerald-600"></i>
-                            <strong class="font-black text-slate-900">⚡ Kendi Supabase Veritabanınızı Bağlayın (Opsiyonel)</strong>
+                            <strong class="font-black text-slate-900">⚡ Kendi Supabase Hesabınızı Bağlayın (Opsiyonel)</strong>
                         </div>
                     </div>
-                    <p class="text-[11px] text-slate-500 font-medium">Supabase hesabınız varsa, verilerinizi doğrudan kendi PostgreSQL veritabanınızda ve Storage alanınızda saklayabilirsiniz.</p>
+                    <p class="text-[11px] text-slate-500 font-medium">Supabase hesabınız varsa, verilerinizi doğrudan kendi PostgreSQL veritabanınızda ve Storage alanınızda barındırabilirsiniz.</p>
 
                     <div class="space-y-1">
                         <label class="block font-black text-slate-800">Supabase Project URL</label>
@@ -4722,12 +4745,12 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
                         <button @click="copySupabaseSQL()" class="px-3 py-2 rounded-xl bg-slate-900 hover:bg-black text-white font-black text-xs transition flex items-center justify-center gap-1.5 shadow-xs">
                             <i data-lucide="copy" class="w-3.5 h-3.5 text-emerald-400"></i>
-                            <span>📋 Supabase SQL Tablo Kodunu Kopyala</span>
+                            <span>📋 Supabase SQL Kodunu Kopyala</span>
                         </button>
 
                         <button @click="cloudConfig.supabaseUrl = ''; cloudConfig.supabaseKey = ''; saveCloudSettings();" class="px-3 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-black text-xs transition flex items-center justify-center gap-1.5">
                             <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-slate-500"></i>
-                            <span>Varsayılan Buluta Dön</span>
+                            <span>Temizle</span>
                         </button>
                     </div>
                 </div>

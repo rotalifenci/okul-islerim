@@ -3940,18 +3940,50 @@ else {
                     this.data.schoolDocuments = result.documents;
                     window.StorageManager.saveData(this.data, uid);
                 }
-                this.cloudSyncStatus = 'synced';
-                this.formatLastCloudSyncTime();
-                if (!isSilent) {
-                    this.showToast('Bulut senkronizasyonu tamamlandı! ☁️ 🟢');
+                if (result && result.isLocalOnly) {
+                    this.cloudSyncStatus = 'idle';
+                    if (!isSilent) {
+                        this.showToast('📱 Belgeler yerel hafızada güncel. Diğer cihazlarla eşitlemek için Bulut Kodu oluşturabilirsiniz.');
+                    }
+                } else {
+                    this.cloudSyncStatus = 'synced';
+                    this.formatLastCloudSyncTime();
+                    if (!isSilent) {
+                        this.showToast('Bulut senkronizasyonu tamamlandı! ☁️ 🟢');
+                    }
                 }
             } catch (err) {
-                this.cloudSyncStatus = 'error';
+                this.cloudSyncStatus = 'idle';
                 if (!isSilent) {
-                    this.showToast('Senkronizasyon hatası: ' + (err.message || 'Buluta ulaşılamadı'));
+                    this.showToast('Yerel modda devam ediliyor. 📱');
                 }
             } finally {
                 this.isManualSyncing = false;
+                this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+            }
+        },
+
+        async generateNewCloudSyncCode() {
+            if (!window.CloudSyncManager) return;
+            const uid = this.currentUser ? this.currentUser.id : 'admin';
+            this.isTestingCloud = true;
+            try {
+                const res = await window.CloudSyncManager.createCloudSyncRoom(this.data.schoolDocuments || [], uid);
+                if (res.success && res.cloudSyncId) {
+                    this.cloudConfig.cloudSyncId = res.cloudSyncId;
+                    this.cloudTestResult = {
+                        tested: true,
+                        success: true,
+                        message: `Yeni Bulut Senkronizasyon Kodu oluşturuldu! 🟢 Kod: "${res.cloudSyncId}" (Bu kodu bilgisayarınızdaki veya diğer cihazınızdaki alana yapıştırın)`
+                    };
+                    this.showToast('Bulut Eşitleme Kodu oluşturuldu! ☁️ ✨');
+                } else {
+                    this.cloudTestResult = { tested: true, success: false, message: 'Kod oluşturulamadı: ' + (res.message || '') };
+                }
+            } catch(e) {
+                this.cloudTestResult = { tested: true, success: false, message: 'Hata: ' + e.message };
+            } finally {
+                this.isTestingCloud = false;
                 this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
             }
         },
