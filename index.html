@@ -51,6 +51,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <!-- Veri Katmanları ve Yardımcılar -->
+    <script src="js/config/cloudConfig.js"></script>
     <script src="js/data/initialData.js"></script>
     <script src="js/data/templates.js"></script>
     <script src="js/data/curriculum.js"></script>
@@ -2872,43 +2873,46 @@
                     </div>
 
                     <!-- ☁️ CANLI BULUT SENKRONİZASYON DURUMU VE ARAÇ ÇUBUĞU -->
-                    <div class="p-3.5 bg-gradient-to-r from-emerald-50 via-teal-50 to-indigo-50 border-2 border-emerald-300 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                    <div class="p-3.5 border-2 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs" :class="isSupabaseActive() ? 'bg-gradient-to-r from-emerald-50 via-teal-50 to-indigo-50 border-emerald-300' : 'bg-gradient-to-r from-amber-50 via-slate-50 to-blue-50 border-amber-300'">
                         <div class="flex items-center gap-3">
-                            <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
-                                <i :data-lucide="cloudSyncStatus === 'syncing' ? 'loader' : 'cloud'" :class="cloudSyncStatus === 'syncing' ? 'animate-spin' : ''" class="w-5 h-5"></i>
+                            <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm text-white" :class="isSupabaseActive() ? 'bg-emerald-600' : 'bg-amber-600'">
+                                <i :data-lucide="cloudSyncStatus === 'syncing' ? 'loader' : (isSupabaseActive() ? 'cloud' : 'hard-drive')" :class="cloudSyncStatus === 'syncing' ? 'animate-spin' : ''" class="w-5 h-5"></i>
                             </div>
                             <div>
                                 <div class="flex items-center gap-2 flex-wrap">
-                                    <span class="text-xs font-black" :class="cloudSyncStatus === 'syncing' ? 'text-amber-800' : (cloudSyncStatus === 'error' ? 'text-rose-800' : 'text-emerald-950')">
-                                        <template x-if="cloudSyncStatus === 'syncing'">
-                                            <span>🔄 Bulut Senkronizasyonu Yapılıyor...</span>
-                                        </template>
-                                        <template x-if="cloudSyncStatus === 'synced' || cloudSyncStatus === 'idle'">
-                                            <span>🟢 Bulut Senkronizasyonu Aktif</span>
-                                        </template>
-                                        <template x-if="cloudSyncStatus === 'error'">
-                                            <span>⚠️ Bulut Senkronizasyon Uyarısı</span>
-                                        </template>
-                                    </span>
-                                    <span class="text-[10px] bg-white/90 text-slate-700 font-bold px-2 py-0.5 rounded-md border border-slate-200" x-show="lastCloudSyncTime">
+                                    <template x-if="isSupabaseActive()">
+                                        <span class="text-xs font-black" :class="cloudSyncStatus === 'syncing' ? 'text-amber-800' : (cloudSyncStatus === 'error' ? 'text-rose-800' : 'text-emerald-950')">
+                                            <span x-show="cloudSyncStatus === 'syncing'">🔄 Supabase Eşitleniyor...</span>
+                                            <span x-show="cloudSyncStatus !== 'syncing'">🟢 Supabase Bulut Senkronizasyonu Aktif</span>
+                                        </span>
+                                    </template>
+                                    <template x-if="!isSupabaseActive()">
+                                        <span class="text-xs font-black text-amber-900">
+                                            📱 Yerel Bellek Modu (Bulut Bağlantısı Kurulmadı)
+                                        </span>
+                                    </template>
+                                    <span class="text-[10px] bg-white/90 text-slate-700 font-bold px-2 py-0.5 rounded-md border border-slate-200" x-show="isSupabaseActive() && lastCloudSyncTime">
                                         Son Eşitleme: <strong x-text="lastCloudSyncTime"></strong>
                                     </span>
                                 </div>
-                                <p class="text-[11px] text-slate-700 font-medium">Telefondan, tabletten ve bilgisayardan eklediğiniz tüm belgeler anında ortak bulutta eşitlenir.</p>
+                                <p class="text-[11px] font-medium" :class="isSupabaseActive() ? 'text-slate-700' : 'text-amber-950'">
+                                    <span x-show="isSupabaseActive()">Dosyalarınız Supabase PostgreSQL veritabanında anlık olarak senkronize ediliyor.</span>
+                                    <span x-show="!isSupabaseActive()">Dosyalarınız bu cihazın yerel belleğinde saklanıyor. Telefon ve bilgisayarda ortak anlık görmek için Supabase hesabınızı bağlayın.</span>
+                                </p>
                             </div>
                         </div>
 
                         <div class="flex items-center gap-2 flex-shrink-0 flex-wrap">
-                            <!-- Şimdi Eşitle Butonu -->
-                            <button @click="triggerManualCloudSync()" :disabled="isManualSyncing" class="px-3.5 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 text-white font-black text-xs transition flex items-center gap-1.5 shadow-sm active:scale-95">
+                            <!-- Şimdi Eşitle Butonu (Sadece Supabase bağlıysa) -->
+                            <button x-show="isSupabaseActive()" @click="triggerManualCloudSync()" :disabled="isManualSyncing" class="px-3.5 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 text-white font-black text-xs transition flex items-center gap-1.5 shadow-sm active:scale-95">
                                 <i :data-lucide="isManualSyncing ? 'loader' : 'refresh-cw'" :class="isManualSyncing ? 'animate-spin' : ''" class="w-3.5 h-3.5"></i>
                                 <span x-text="isManualSyncing ? 'Eşitleniyor...' : '🔄 Şimdi Eşitle'"></span>
                             </button>
 
-                            <!-- Bulut Ayarları Butonu -->
-                            <button @click="openCloudSettingsModal()" class="px-3.5 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-800 border-2 border-slate-300 font-black text-xs transition flex items-center gap-1.5 shadow-sm active:scale-95">
-                                <i data-lucide="settings" class="w-3.5 h-3.5 text-slate-600"></i>
-                                <span>⚙️ Bulut & Supabase Ayarları</span>
+                            <!-- Supabase Ayarları / Bağlan Butonu -->
+                            <button @click="openCloudSettingsModal()" class="px-3.5 py-1.5 rounded-xl font-black text-xs transition flex items-center gap-1.5 shadow-sm active:scale-95 border-2" :class="isSupabaseActive() ? 'bg-white hover:bg-slate-100 text-slate-800 border-slate-300' : 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-700 shadow-emerald-600/30'">
+                                <i data-lucide="database" class="w-3.5 h-3.5"></i>
+                                <span x-text="isSupabaseActive() ? '⚙️ Supabase Ayarları' : '⚡ Supabase\'e Bağlan (1 Dakika)'"></span>
                             </button>
                         </div>
                     </div>
@@ -4655,18 +4659,18 @@
         </div>
     </div>
 
-    <!-- ================= MODAL: ☁️ BULUT & SUPABASE SENKRONİZASYON AYARLARI ================= -->
+    <!-- ================= MODAL: ☁️ SUPABASE BULUT SENKRONİZASYON AYARLARI ================= -->
     <div x-show="isCloudSettingsModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md" @click.self="isCloudSettingsModalOpen = false">
         <div class="bg-white text-slate-900 w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden border-4 border-emerald-600 space-y-4 max-h-[92vh] flex flex-col">
             <!-- Modal Başlığı -->
             <div class="p-4 sm:p-5 bg-gradient-to-r from-emerald-800 via-teal-700 to-slate-900 text-white flex items-center justify-between gap-4 flex-shrink-0">
                 <div class="flex items-center gap-3">
                     <div class="p-2.5 bg-emerald-600 text-white rounded-2xl shadow-lg shadow-emerald-900/40">
-                        <i data-lucide="cloud" class="w-6 h-6"></i>
+                        <i data-lucide="database" class="w-6 h-6"></i>
                     </div>
                     <div>
-                        <h2 class="text-base sm:text-lg font-black tracking-tight brand-font">☁️ Bulut & Supabase Senkronizasyon Ayarları</h2>
-                        <p class="text-xs text-emerald-100/90 font-bold">Telefon, tablet ve bilgisayar arasında anlık ortak erişim</p>
+                        <h2 class="text-base sm:text-lg font-black tracking-tight brand-font">⚡ Supabase Bulut Veritabanı Bağlantısı</h2>
+                        <p class="text-xs text-emerald-100/90 font-bold">Telefon ve bilgisayar arasında %100 gerçek anlık senkronizasyon</p>
                     </div>
                 </div>
                 <button @click="isCloudSettingsModalOpen = false" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-black transition">✕</button>
@@ -4675,11 +4679,11 @@
             <!-- Modal İçeriği (Kaydırılabilir) -->
             <div class="p-5 space-y-4 text-xs overflow-y-auto flex-1">
                 <!-- Canlı Bağlantı Durumu ve Test Kartı -->
-                <div class="p-3.5 rounded-2xl border-2 space-y-2.5" :class="cloudTestResult.tested ? (cloudTestResult.success ? 'bg-emerald-50 border-emerald-300' : 'bg-rose-50 border-rose-300') : 'bg-slate-50 border-slate-300'">
+                <div class="p-3.5 rounded-2xl border-2 space-y-2.5" :class="isSupabaseActive() ? 'bg-emerald-50 border-emerald-300' : 'bg-amber-50 border-amber-300'">
                     <div class="flex items-center justify-between gap-2 flex-wrap">
                         <div class="flex items-center gap-2">
-                            <span class="w-3 h-3 rounded-full animate-pulse" :class="cloudTestResult.tested ? (cloudTestResult.success ? 'bg-emerald-500' : 'bg-rose-500') : (cloudConfig.supabaseUrl ? 'bg-blue-500' : 'bg-emerald-500')"></span>
-                            <strong class="font-black text-slate-900" x-text="cloudTestResult.tested ? (cloudTestResult.success ? '🟢 Bulut Bağlantısı Başarılı' : '🔴 Bağlantı Başarısız') : '☁️ Bulut Sistemi Durumu'"></strong>
+                            <span class="w-3 h-3 rounded-full" :class="isSupabaseActive() ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'"></span>
+                            <strong class="font-black" :class="isSupabaseActive() ? 'text-emerald-950' : 'text-amber-950'" x-text="isSupabaseActive() ? '🟢 Supabase Bağlantısı Aktif & Doğrulandı' : '📱 Yerel Bellek Modu (Supabase Bağlantısı Bekleniyor)'"></strong>
                         </div>
                         <button @click="testCloudConnection()" :disabled="isTestingCloud" class="px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 text-white font-black text-xs transition flex items-center gap-1 active:scale-95 shadow-xs">
                             <i :data-lucide="isTestingCloud ? 'loader' : 'zap'" :class="isTestingCloud ? 'animate-spin' : ''" class="w-3.5 h-3.5"></i>
@@ -4687,99 +4691,65 @@
                         </button>
                     </div>
                     <p x-show="cloudTestResult.tested" class="text-[11px] font-bold leading-relaxed" :class="cloudTestResult.success ? 'text-emerald-900' : 'text-rose-900'" x-text="cloudTestResult.message"></p>
-                    <p x-show="!cloudTestResult.tested" class="text-[11px] text-slate-600 font-medium">
-                        Sistem telefon ve bilgisayar arasında otomatik senkronizasyon için hazırdır. Dilerseniz kendi Supabase projenizi bağlayabilirsiniz.
+                    <p x-show="!cloudTestResult.tested && !isSupabaseActive()" class="text-[11px] text-amber-900 font-medium">
+                        Şu an eklediğiniz dosyalar sadece bu cihazınızın tarayıcısında saklanır. Telefondan ve bilgisayardan anında ortak erişebilmek için aşağıdaki Supabase bağlantınızı tamamlayınız.
                     </p>
                 </div>
 
-                <!-- 🚀 1. SEÇENEK: ANINDA BULUT EŞİTLEME KODU (HESAP GEREKTİRMEZ) -->
-                <div class="space-y-3 p-4 bg-emerald-50/70 rounded-2xl border-2 border-emerald-300">
-                    <div class="flex items-center justify-between gap-2 flex-wrap">
-                        <div class="flex items-center gap-2">
-                            <div class="p-1.5 bg-emerald-600 text-white rounded-lg">
-                                <i data-lucide="key" class="w-4 h-4"></i>
-                            </div>
-                            <strong class="font-black text-emerald-950 text-xs sm:text-sm">🚀 Anında Cihaz Eşitleme Kodu (Önerilen)</strong>
-                        </div>
-                        <button @click="generateNewCloudSyncCode()" :disabled="isTestingCloud" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs transition flex items-center gap-1.5 shadow-sm active:scale-95">
-                            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
-                            <span>✨ Yeni Bulut Kodu Oluştur</span>
-                        </button>
-                    </div>
-
-                    <p class="text-[11px] text-emerald-900 font-semibold leading-relaxed">
-                        Telefonunuzdan <strong>"✨ Yeni Bulut Kodu Oluştur"</strong> butonuna basın ve oluşan kodu bilgisayarınızdaki bu alana yapıştırın. Tüm belgeleriniz anında iki cihaz arasında senkronize olur.
-                    </p>
-
-                    <div class="space-y-1">
-                        <label class="block font-black text-slate-800">Bulut Eşitleme Kodu (Cloud Sync ID)</label>
-                        <div class="flex items-center gap-1.5">
-                            <input type="text" x-model="cloudConfig.cloudSyncId" placeholder="Örn: ff808181a09d98f701..." class="w-full p-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-black text-slate-900 focus:border-emerald-600 focus:outline-none font-mono">
-                            <button @click="if (cloudConfig.cloudSyncId) { navigator.clipboard.writeText(cloudConfig.cloudSyncId); showToast('Bulut Kodu panoya kopyalandı! 📋'); }" title="Kodu Kopyala" class="p-2.5 rounded-xl bg-slate-900 hover:bg-black text-white transition flex-shrink-0">
-                                <i data-lucide="copy" class="w-4 h-4 text-emerald-400"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ⚡ 2. SEÇENEK: ÖZEL SUPABASE HESABI (OPSİYONEL) -->
-                <div class="space-y-3 p-4 bg-slate-50 rounded-2xl border-2 border-slate-200">
+                <!-- Supabase API Bilgileri Giriş Alanı -->
+                <div class="space-y-3 p-4 bg-slate-50 rounded-2xl border-2 border-slate-300">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
-                            <i data-lucide="database" class="w-4 h-4 text-emerald-600"></i>
-                            <strong class="font-black text-slate-900">⚡ Kendi Supabase Hesabınızı Bağlayın (Opsiyonel)</strong>
+                            <i data-lucide="key" class="w-4 h-4 text-emerald-600"></i>
+                            <strong class="font-black text-slate-900">🔑 Supabase API Bilgileriniz</strong>
                         </div>
                     </div>
-                    <p class="text-[11px] text-slate-500 font-medium">Supabase hesabınız varsa, verilerinizi doğrudan kendi PostgreSQL veritabanınızda ve Storage alanınızda barındırabilirsiniz.</p>
 
                     <div class="space-y-1">
-                        <label class="block font-black text-slate-800">Supabase Project URL</label>
-                        <input type="url" x-model="cloudConfig.supabaseUrl" placeholder="https://xyzcompany.supabase.co" class="w-full p-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-black text-slate-900 focus:border-emerald-600 focus:outline-none font-mono">
+                        <label class="block font-black text-slate-800">1. Supabase Project URL *</label>
+                        <input type="url" x-model="cloudConfig.supabaseUrl" placeholder="https://abcdefghijklmnop.supabase.co" class="w-full p-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-black text-slate-900 focus:border-emerald-600 focus:outline-none font-mono">
                     </div>
 
                     <div class="space-y-1">
-                        <label class="block font-black text-slate-800">Supabase Public Anon Key</label>
-                        <input type="password" x-model="cloudConfig.supabaseKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." class="w-full p-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-black text-slate-900 focus:border-emerald-600 focus:outline-none font-mono">
+                        <label class="block font-black text-slate-800">2. Supabase Public Anon Key *</label>
+                        <input type="password" x-model="cloudConfig.supabaseKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6..." class="w-full p-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-black text-slate-900 focus:border-emerald-600 focus:outline-none font-mono">
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-                        <button @click="copySupabaseSQL()" class="px-3 py-2 rounded-xl bg-slate-900 hover:bg-black text-white font-black text-xs transition flex items-center justify-center gap-1.5 shadow-xs">
+                    <div class="flex items-center justify-between gap-2 pt-1 flex-wrap">
+                        <button @click="copySupabaseSQL()" class="px-3 py-2 rounded-xl bg-slate-900 hover:bg-black text-white font-black text-xs transition flex items-center gap-1.5 shadow-xs">
                             <i data-lucide="copy" class="w-3.5 h-3.5 text-emerald-400"></i>
-                            <span>📋 Supabase SQL Kodunu Kopyala</span>
+                            <span>📋 Supabase SQL Tablo Kodunu Kopyala</span>
                         </button>
 
-                        <button @click="cloudConfig.supabaseUrl = ''; cloudConfig.supabaseKey = ''; saveCloudSettings();" class="px-3 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-black text-xs transition flex items-center justify-center gap-1.5">
-                            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-slate-500"></i>
-                            <span>Temizle</span>
+                        <button @click="cloudConfig.supabaseUrl = ''; cloudConfig.supabaseKey = ''; saveCloudSettings();" class="px-3 py-2 rounded-xl bg-white hover:bg-rose-50 text-rose-700 border border-rose-300 font-black text-xs transition flex items-center gap-1.5">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-500"></i>
+                            <span>Bilgileri Temizle</span>
                         </button>
                     </div>
                 </div>
 
-                <!-- Otomatik Senkronizasyon Ayarları -->
-                <div class="space-y-2.5 p-3.5 bg-slate-50 rounded-2xl border border-slate-200">
-                    <strong class="block font-black text-slate-900">⏱️ Senkronizasyon Davranışı</strong>
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold text-slate-800">Otomatik Arka Plan Eşitlemesi</span>
-                        <input type="checkbox" x-model="cloudConfig.enabled" class="w-5 h-5 accent-emerald-600 rounded cursor-pointer">
+                <!-- 📖 1 DAKİKADA ÜCRETSİZ SUPABASE KURULUM REHBERİ -->
+                <div class="p-4 bg-indigo-50/80 rounded-2xl border-2 border-indigo-200 space-y-2.5">
+                    <div class="flex items-center gap-2 text-indigo-950">
+                        <i data-lucide="help-circle" class="w-4 h-4 text-indigo-700"></i>
+                        <strong class="font-black text-xs sm:text-sm">📖 1 Dakikada Ücretsiz Supabase Kurulum Adımları:</strong>
                     </div>
-                    <div class="flex items-center justify-between gap-3">
-                        <span class="text-xs font-bold text-slate-800">Eşitleme Sıklığı</span>
-                        <select x-model.number="cloudConfig.autoSyncInterval" class="p-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:border-emerald-600 focus:outline-none">
-                            <option value="10">10 Saniyede Bir (Çok Hızlı)</option>
-                            <option value="15">15 Saniyede Bir (Önerilen)</option>
-                            <option value="30">30 Saniyede Bir</option>
-                            <option value="60">1 Dakikada Bir</option>
-                        </select>
-                    </div>
+                    <ol class="list-decimal list-inside space-y-1.5 text-[11px] text-indigo-950 font-semibold leading-relaxed">
+                        <li><strong>1. Adım:</strong> <a href="https://supabase.com" target="_blank" class="text-emerald-700 underline font-black">supabase.com</a> sitesine girip <em>Start your project</em> diyerek ücretsiz hesap açın ve yeni bir proje oluşturun.</li>
+                        <li><strong>2. Adım:</strong> Proje açılınca soldaki <strong>Project Settings (Dişli çark) ➔ API</strong> sayfasına gidin.</li>
+                        <li><strong>3. Adım:</strong> Oradaki <strong>Project URL</strong> ve <strong>anon public key</strong> değerlerini kopyalayıp yukarıdaki kutucuklara yapıştırın.</li>
+                        <li><strong>4. Adım:</strong> Soldaki <strong>SQL Editor</strong> sekmesine geçin, yukarıdaki <strong>"📋 Supabase SQL Tablo Kodunu Kopyala"</strong> butonuna basıp kodu SQL alanına yapıştırın ve yeşil <strong>RUN</strong> butonuna basın.</li>
+                        <li><strong>5. Adım:</strong> Aşağıdaki <strong>"Ayarları Kaydet & Bağlan"</strong> butonuna tıklayın. Artık tüm cihazlarınız anında gerçek bulut veritabanına bağlanır!</li>
+                    </ol>
                 </div>
 
-                <!-- Manuel Çift Yönlü Eşitleme Aksiyonları -->
+                <!-- Manuel Eşitleme Aksiyonları -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
-                    <button @click="pullAllFromCloudAction()" class="p-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 font-black text-xs transition flex items-center justify-center gap-1.5">
+                    <button @click="pullAllFromCloudAction()" :disabled="!isSupabaseActive()" class="p-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 disabled:opacity-40 text-blue-900 border border-blue-200 font-black text-xs transition flex items-center justify-center gap-1.5">
                         <i data-lucide="download-cloud" class="w-4 h-4 text-blue-700"></i>
                         <span>⬇️ Buluttaki Belgeleri İndir</span>
                     </button>
-                    <button @click="pushAllToCloudAction()" class="p-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-200 font-black text-xs transition flex items-center justify-center gap-1.5">
+                    <button @click="pushAllToCloudAction()" :disabled="!isSupabaseActive()" class="p-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 disabled:opacity-40 text-emerald-900 border border-emerald-200 font-black text-xs transition flex items-center justify-center gap-1.5">
                         <i data-lucide="upload-cloud" class="w-4 h-4 text-emerald-700"></i>
                         <span>⬆️ Bu Cihazdakileri Buluta Yükle</span>
                     </button>
@@ -4787,11 +4757,11 @@
             </div>
 
             <!-- Modal Alt Butonları -->
-            <div class="p-4 bg-slate-100 border-t-2 border-slate-200 flex items-center justify-end gap-2.5 flex-shrink-0">
+            <div class="p-4 bg-slate-100 border-t-2 border-slate-200 flex items-center justify-between gap-2.5 flex-shrink-0">
                 <button @click="isCloudSettingsModalOpen = false" class="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-200 text-slate-800 font-black text-xs border border-slate-300 transition">Kapat</button>
                 <button @click="saveCloudSettings()" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-md transition flex items-center gap-1.5 active:scale-95">
                     <i data-lucide="check" class="w-4 h-4"></i>
-                    <span>Ayarları Kaydet & Uygula</span>
+                    <span>Ayarları Kaydet & Bağlan</span>
                 </button>
             </div>
         </div>

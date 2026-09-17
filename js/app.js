@@ -3928,8 +3928,20 @@ else {
             }
         },
 
+        isSupabaseActive() {
+            return Boolean(window.CloudSyncManager && window.CloudSyncManager.isConfigured() && window.CloudSyncManager.supabaseClient);
+        },
+
         async triggerManualCloudSync(isSilent = false) {
             if (!window.CloudSyncManager) return;
+            if (!this.isSupabaseActive()) {
+                this.cloudSyncStatus = 'idle';
+                if (!isSilent) {
+                    this.showToast('📱 Belgeler yerel bellekte saklanıyor. Bulut eşitlemesi için Supabase bilgilerinizi giriniz.');
+                }
+                return;
+            }
+
             this.isManualSyncing = true;
             this.cloudSyncStatus = 'syncing';
             const uid = this.currentUser ? this.currentUser.id : 'admin';
@@ -3940,50 +3952,18 @@ else {
                     this.data.schoolDocuments = result.documents;
                     window.StorageManager.saveData(this.data, uid);
                 }
-                if (result && result.isLocalOnly) {
-                    this.cloudSyncStatus = 'idle';
-                    if (!isSilent) {
-                        this.showToast('📱 Belgeler yerel hafızada güncel. Diğer cihazlarla eşitlemek için Bulut Kodu oluşturabilirsiniz.');
-                    }
-                } else {
-                    this.cloudSyncStatus = 'synced';
-                    this.formatLastCloudSyncTime();
-                    if (!isSilent) {
-                        this.showToast('Bulut senkronizasyonu tamamlandı! ☁️ 🟢');
-                    }
+                this.cloudSyncStatus = 'synced';
+                this.formatLastCloudSyncTime();
+                if (!isSilent) {
+                    this.showToast('Supabase bulut senkronizasyonu tamamlandı! ☁️ 🟢');
                 }
             } catch (err) {
-                this.cloudSyncStatus = 'idle';
+                this.cloudSyncStatus = 'error';
                 if (!isSilent) {
-                    this.showToast('Yerel modda devam ediliyor. 📱');
+                    this.showToast('Supabase senkronizasyon uyarısı: ' + (err.message || 'Bağlantı kurulamadı'));
                 }
             } finally {
                 this.isManualSyncing = false;
-                this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
-            }
-        },
-
-        async generateNewCloudSyncCode() {
-            if (!window.CloudSyncManager) return;
-            const uid = this.currentUser ? this.currentUser.id : 'admin';
-            this.isTestingCloud = true;
-            try {
-                const res = await window.CloudSyncManager.createCloudSyncRoom(this.data.schoolDocuments || [], uid);
-                if (res.success && res.cloudSyncId) {
-                    this.cloudConfig.cloudSyncId = res.cloudSyncId;
-                    this.cloudTestResult = {
-                        tested: true,
-                        success: true,
-                        message: `Yeni Bulut Senkronizasyon Kodu oluşturuldu! 🟢 Kod: "${res.cloudSyncId}" (Bu kodu bilgisayarınızdaki veya diğer cihazınızdaki alana yapıştırın)`
-                    };
-                    this.showToast('Bulut Eşitleme Kodu oluşturuldu! ☁️ ✨');
-                } else {
-                    this.cloudTestResult = { tested: true, success: false, message: 'Kod oluşturulamadı: ' + (res.message || '') };
-                }
-            } catch(e) {
-                this.cloudTestResult = { tested: true, success: false, message: 'Hata: ' + e.message };
-            } finally {
-                this.isTestingCloud = false;
                 this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
             }
         },
@@ -4001,8 +3981,10 @@ else {
             if (window.CloudSyncManager) {
                 window.CloudSyncManager.saveConfig(this.cloudConfig);
             }
-            this.showToast('Bulut ayarları kaydedildi! ☁️ ✨');
-            this.triggerManualCloudSync(false);
+            this.showToast('Supabase ayarları kaydedildi! ⚡');
+            if (this.isSupabaseActive()) {
+                this.triggerManualCloudSync(false);
+            }
             this.isCloudSettingsModalOpen = false;
         },
 
@@ -4046,8 +4028,11 @@ else {
 
         async pullAllFromCloudAction() {
             const uid = this.currentUser ? this.currentUser.id : 'admin';
-            if (!window.CloudSyncManager) return;
-            this.showToast('Buluttaki belgeler indiriliyor...');
+            if (!window.CloudSyncManager || !this.isSupabaseActive()) {
+                alert('Öncelikle geçerli bir Supabase bağlantısı kurmalısınız.');
+                return;
+            }
+            this.showToast('Supabase bulutundaki belgeler indiriliyor...');
             try {
                 const docs = await window.CloudSyncManager.pullFromCloud(uid);
                 if (docs && Array.isArray(docs)) {
@@ -4065,15 +4050,20 @@ else {
 
         async pushAllToCloudAction() {
             const uid = this.currentUser ? this.currentUser.id : 'admin';
-            if (!window.CloudSyncManager) return;
-            this.showToast('Belgeler buluta yükleniyor...');
+            if (!window.CloudSyncManager || !this.isSupabaseActive()) {
+                alert('Öncelikle geçerli bir Supabase bağlantısı kurmalısınız.');
+                return;
+            }
+            this.showToast('Belgeler Supabase veritabanına yükleniyor...');
             try {
                 const docs = this.data.schoolDocuments || [];
-                await window.CloudSyncManager.pushAllToRelay(docs, uid);
+                let count = 0;
                 for (const d of docs) {
-                    await window.CloudSyncManager.uploadDocToCloud(d, uid);
+                    const ok = await window.CloudSyncManager.uploadDocToCloud(d, uid);
+                    if (ok) count++;
                 }
-                this.showToast(`${docs.length} adet belge buluta başarıyla yüklendi! ☁️ ✨`);
+                this.showToast(`${count} adet belge Supabase bulutuna başarıyla yüklendi! ⚡ ☁️`);
+                this.formatLastCloudSyncTime();
             } catch (e) {
                 alert('Buluta yükleme hatası: ' + e.message);
             }

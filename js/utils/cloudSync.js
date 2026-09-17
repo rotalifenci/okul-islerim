@@ -1,20 +1,14 @@
-// Rotalı Fenci - Gelişmiş Çoklu Cihaz Senkronizasyon Yöneticisi (Supabase & Cloud Sync Engine)
+// Rotalı Fenci - Gerçek Supabase Bulut Veritabanı Senkronizasyon Yöneticisi
 
 (function () {
-    const CONFIG_KEY = 'rotali_cloud_sync_config_v2';
-    const DELETED_KEY_PREFIX = 'rotali_cloud_deleted_docs_';
-    const API_STORAGE_ENDPOINT = 'https://api.restful-api.dev/objects';
+    const STORAGE_KEY = 'rotali_supabase_config_v3';
+    const DELETED_KEY_PREFIX = 'rotali_deleted_docs_';
 
-    // Varsayılan Bulut Yapılandırması
     const DEFAULT_CONFIG = {
-        enabled: true,
-        mode: 'cloud_code', // 'supabase' veya 'cloud_code'
         supabaseUrl: '',
         supabaseKey: '',
         tableName: 'school_documents',
-        cloudSyncId: '', // Cihazlar arası eşitleme kimliği (örn: ff808181a09d98f701...)
-        cloudRoomName: 'rotali_fenci_okul_islerim',
-        autoSyncInterval: 20, // saniye
+        autoSyncInterval: 15,
         lastSyncTimestamp: null
     };
 
@@ -26,40 +20,58 @@
         lastError: null,
         onSyncListeners: [],
 
-        // Yapılandırmayı yükle
         loadConfig() {
             try {
-                const stored = localStorage.getItem(CONFIG_KEY);
-                this.config = stored ? { ...DEFAULT_CONFIG, ...JSON.parse(stored) } : { ...DEFAULT_CONFIG };
+                const stored = localStorage.getItem(STORAGE_KEY);
+                const fileConfig = window.SUPABASE_CONFIG || {};
+                
+                this.config = {
+                    ...DEFAULT_CONFIG,
+                    supabaseUrl: fileConfig.url || '',
+                    supabaseKey: fileConfig.anonKey || '',
+                    tableName: fileConfig.tableName || 'school_documents',
+                    ...(stored ? JSON.parse(stored) : {})
+                };
             } catch (e) {
                 this.config = { ...DEFAULT_CONFIG };
             }
+
             this.initClient();
             return this.config;
         },
 
-        // Yapılandırmayı kaydet
         saveConfig(newConfig) {
             this.config = { ...this.config, ...newConfig };
             try {
-                localStorage.setItem(CONFIG_KEY, JSON.stringify(this.config));
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(this.config));
             } catch (e) {
-                console.error("Bulut ayarı kaydedilemedi:", e);
+                console.error("Supabase ayarları kaydedilemedi:", e);
             }
             this.initClient();
             this.setupAutoSync();
             return this.config;
         },
 
-        // Supabase İstemcisini Başlat
+        isConfigured() {
+            return Boolean(
+                this.config &&
+                this.config.supabaseUrl &&
+                this.config.supabaseUrl.trim().startsWith('http') &&
+                this.config.supabaseKey &&
+                this.config.supabaseKey.trim().length > 20
+            );
+        },
+
         initClient() {
-            if (this.config.supabaseUrl && this.config.supabaseKey && window.supabase && window.supabase.createClient) {
+            if (this.isConfigured() && window.supabase && window.supabase.createClient) {
                 try {
-                    this.supabaseClient = window.supabase.createClient(this.config.supabaseUrl, this.config.supabaseKey, {
-                        auth: { persistSession: false }
-                    });
+                    this.supabaseClient = window.supabase.createClient(
+                        this.config.supabaseUrl.trim(),
+                        this.config.supabaseKey.trim(),
+                        { auth: { persistSession: false } }
+                    );
                 } catch (e) {
-                    console.warn("Supabase istemcisi başlatılamadı:", e);
+                    console.warn("Supabase client init hatası:", e);
                     this.supabaseClient = null;
                 }
             } else {
@@ -67,35 +79,34 @@
             }
         },
 
-        // Başlangıç Kurulumu & Olay Dinleyicileri
         init(onSyncCallback) {
             this.loadConfig();
             if (typeof onSyncCallback === 'function') {
                 this.onSyncListeners.push(onSyncCallback);
             }
 
-            // Sekmeye / Ekrana geri dönüldüğünde otomatik eşitle
             document.addEventListener('visibilitychange', () => {
-                if (document.visibilityState === 'visible') {
+                if (document.visibilityState === 'visible' && this.isConfigured()) {
                     this.triggerBackgroundSync();
                 }
             });
 
             window.addEventListener('online', () => {
-                this.triggerBackgroundSync();
+                if (this.isConfigured()) {
+                    this.triggerBackgroundSync();
+                }
             });
 
             this.setupAutoSync();
         },
 
-        // Periyodik Arka Plan Senkronizasyonu Kur
         setupAutoSync() {
             if (this.syncIntervalId) {
                 clearInterval(this.syncIntervalId);
                 this.syncIntervalId = null;
             }
 
-            if (this.config.enabled && this.config.autoSyncInterval > 0) {
+            if (this.isConfigured() && this.config.autoSyncInterval > 0) {
                 const intervalMs = Math.max(10, this.config.autoSyncInterval) * 1000;
                 this.syncIntervalId = setInterval(() => {
                     this.triggerBackgroundSync();
@@ -103,19 +114,14 @@
             }
         },
 
-        // Arka Plan Eşitlemesini Tetikle
         triggerBackgroundSync() {
-            if (!this.config.enabled || this.isSyncing || !navigator.onLine) return;
-            if (!this.isConfigured()) {
-                this.notifyListeners('sync_idle');
-                return;
-            }
-
-            this.notifyListeners('sync_start');
+            if (!this.isConfigured() || this.isSyncing || !navigator.onLine) return;
+            
             const uid = localStorage.getItem('rotali_active_user_id') || 'admin';
             const localData = window.StorageManager ? window.StorageManager.loadData(uid) : null;
             const localDocs = (localData && localData.schoolDocuments) ? localData.schoolDocuments : [];
 
+            this.notifyListeners('sync_start');
             this.syncAll(localDocs, uid)
                 .then(result => {
                     if (result && result.updated) {
@@ -125,30 +131,17 @@
                     }
                 })
                 .catch(err => {
-                    this.lastError = err.message || 'Senkronizasyon uyarısı';
-                    this.notifyListeners('sync_idle'); // Hata popup'ı patlatmak yerine sessizce yerel modda kal
+                    this.lastError = err.message;
+                    this.notifyListeners('sync_error', err.message);
                 });
         },
 
-        // Bulut yapılandırılmış mı?
-        isConfigured() {
-            if (this.supabaseClient) return true;
-            if (this.config.cloudSyncId && this.config.cloudSyncId.trim()) return true;
-            return false;
-        },
-
-        // Olay Dinleyicilerini Bilgilendir
         notifyListeners(event, data) {
             this.onSyncListeners.forEach(listener => {
-                try {
-                    listener(event, data);
-                } catch (e) {
-                    console.error("Sync listener error:", e);
-                }
+                try { listener(event, data); } catch (e) {}
             });
         },
 
-        // Silinen belgeleri yerel listede takip et
         getDeletedDocIds(userId) {
             try {
                 const raw = localStorage.getItem(DELETED_KEY_PREFIX + userId);
@@ -169,259 +162,134 @@
             } catch (e) {}
         },
 
-        // ================= ☁️ BULUT VERİTABANI İŞLEMLERİ =================
+        // ================= ☁️ SUPABASE BAĞLANTI & CRUD İŞLEMLERİ =================
 
-        // Otomatik Bulut Senkronizasyon Odası Oluştur (Zero Config)
-        async createCloudSyncRoom(initialDocs = [], userId = 'admin') {
-            try {
-                const sanitizedDocs = this.sanitizeDocsForCloud(initialDocs);
-                const res = await fetch(API_STORAGE_ENDPOINT, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        name: 'rotali_school_docs_' + (this.config.cloudRoomName || 'genel'),
-                        data: {
-                            userId: userId,
-                            updatedAt: new Date().toISOString(),
-                            documents: sanitizedDocs
-                        }
-                    })
-                });
-
-                if (res.ok) {
-                    const result = await res.json();
-                    if (result && result.id) {
-                        this.config.cloudSyncId = result.id;
-                        this.config.lastSyncTimestamp = new Date().toISOString();
-                        this.saveConfig(this.config);
-                        return { success: true, cloudSyncId: result.id };
-                    }
-                }
-                return { success: false, message: 'Bulut odası oluşturulamadı.' };
-            } catch (e) {
-                return { success: false, message: e.message };
-            }
-        },
-
-        // Bağlantıyı Test Et
         async testConnection(customConfig = null) {
             const cfg = customConfig || this.config;
+            const url = (cfg.supabaseUrl || '').trim();
+            const key = (cfg.supabaseKey || '').trim();
+            const tableName = cfg.tableName || 'school_documents';
 
-            // 1. Supabase Yapılandırılmışsa
-            if (cfg.supabaseUrl && cfg.supabaseKey) {
-                try {
-                    if (!window.supabase || !window.supabase.createClient) {
-                        return { success: false, message: 'Supabase kütüphanesi yüklenemedi.' };
-                    }
-                    const testClient = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseKey, {
-                        auth: { persistSession: false }
-                    });
-                    const start = performance.now();
-                    const { data, error } = await testClient
-                        .from(cfg.tableName || 'school_documents')
-                        .select('id')
-                        .limit(1);
-                    
-                    const duration = Math.round(performance.now() - start);
-
-                    if (error) {
-                        if (error.code === '42P01' || error.message?.includes('relation') || error.message?.includes('does not exist')) {
-                            return {
-                                success: false,
-                                message: `Supabase bağlantısı kuruldu fakat "${cfg.tableName || 'school_documents'}" tablosu bulunamadı. Lütfen SQL kodunu çalıştırarak tabloyu oluşturun.`
-                            };
-                        }
-                        return { success: false, message: `Supabase Hatası: ${error.message}` };
-                    }
-                    return { success: true, message: `Supabase bağlantısı başarılı! 🟢 (Gecikme: ${duration}ms)` };
-                } catch (e) {
-                    return { success: false, message: `Bağlantı hatası: ${e.message}` };
-                }
+            if (!url || !key) {
+                return {
+                    success: false,
+                    isNotConfigured: true,
+                    message: 'Supabase URL ve Anon Key henüz girilmemiş. Lütfen aşağıdaki alanları doldurun.'
+                };
             }
 
-            // 2. Bulut Kodu / ID Varsa
-            if (cfg.cloudSyncId && cfg.cloudSyncId.trim()) {
-                try {
-                    const res = await fetch(`${API_STORAGE_ENDPOINT}/${cfg.cloudSyncId.trim()}`, { cache: 'no-store' });
-                    if (res.ok) {
-                        const json = await res.json();
-                        const docCount = (json.data && Array.isArray(json.data.documents)) ? json.data.documents.length : 0;
-                        return { success: true, message: `Bulut Eşitleme Odası Aktif! 🟢 (${docCount} adet belge senkronize)` };
-                    } else if (res.status === 404) {
-                        return { success: false, message: 'Girilen Bulut Eşitleme Kodu bulunamadı. Lütfen yeni bir kod oluşturun.' };
-                    }
-                    return { success: false, message: 'Bulut sunucusundan yanıt alınamadı.' };
-                } catch (e) {
-                    return { success: false, message: 'Bağlantı hatası: ' + e.message };
-                }
+            if (!window.supabase || !window.supabase.createClient) {
+                return {
+                    success: false,
+                    message: 'Supabase JS kütüphanesi yüklenemedi. İnternet bağlantınızı kontrol edin.'
+                };
             }
 
-            return {
-                success: true,
-                message: '📱 Yerel Mod Aktif. Telefon ve bilgisayarı eşitlemek için yukarıdan "✨ Yeni Bulut Kodu Oluştur" butonuna basabilir veya Supabase bağlayabilirsiniz.'
-            };
+            try {
+                const testClient = window.supabase.createClient(url, key, { auth: { persistSession: false } });
+                const start = performance.now();
+                const { data, error } = await testClient
+                    .from(tableName)
+                    .select('id')
+                    .limit(1);
+
+                const duration = Math.round(performance.now() - start);
+
+                if (error) {
+                    if (error.code === '42P01' || error.message?.includes('relation') || error.message?.includes('does not exist')) {
+                        return {
+                            success: false,
+                            needsTable: true,
+                            message: `Supabase bağlantısı kuruldu fakat "${tableName}" tablosu veritabanınızda henüz oluşturulmamış. Lütfen aşağıdaki "📋 Supabase SQL Kodunu Kopyala" butonuna basarak Supabase SQL Editöründe çalıştırın.`
+                        };
+                    }
+                    return {
+                        success: false,
+                        message: `Supabase Hatası (${error.code || 'Bilinmiyor'}): ${error.message}`
+                    };
+                }
+
+                return {
+                    success: true,
+                    message: `Supabase bağlantısı başarılı! 🟢 PostgreSQL tablosu hazır. (Gecikme: ${duration}ms)`
+                };
+            } catch (e) {
+                return {
+                    success: false,
+                    message: `Bağlantı hatası: ${e.message}`
+                };
+            }
         },
 
-        // Buluttan Belgeleri Çek (Pull)
         async pullFromCloud(userId = 'admin') {
-            // 1. Supabase
-            if (this.supabaseClient) {
-                try {
-                    const { data, error } = await this.supabaseClient
-                        .from(this.config.tableName || 'school_documents')
-                        .select('*')
-                        .or(`user_id.eq.${userId},user_id.eq.shared`)
-                        .order('updated_at', { ascending: false });
+            if (!this.supabaseClient) return null;
 
-                    if (!error && Array.isArray(data)) {
-                        return data.map(item => this.mapFromSupabaseRow(item));
-                    }
-                } catch (e) {
-                    console.warn("Supabase pull uyarısı:", e);
+            try {
+                const tableName = this.config.tableName || 'school_documents';
+                const { data, error } = await this.supabaseClient
+                    .from(tableName)
+                    .select('*')
+                    .or(`user_id.eq.${userId},user_id.eq.shared,user_id.eq.admin`)
+                    .order('updated_at', { ascending: false });
+
+                if (!error && Array.isArray(data)) {
+                    return data.map(item => this.mapFromSupabaseRow(item));
                 }
-            }
-
-            // 2. Cloud ID Relay
-            if (this.config.cloudSyncId && this.config.cloudSyncId.trim()) {
-                try {
-                    const res = await fetch(`${API_STORAGE_ENDPOINT}/${this.config.cloudSyncId.trim()}`, { cache: 'no-store' });
-                    if (res.ok) {
-                        const json = await res.json();
-                        if (json && json.data && Array.isArray(json.data.documents)) {
-                            return json.data.documents;
-                        }
-                    }
-                } catch (e) {
-                    console.warn("Cloud pull uyarısı:", e);
+                if (error) {
+                    console.warn("Supabase pull error:", error);
                 }
+            } catch (e) {
+                console.warn("Supabase pull exception:", e);
             }
-
             return null;
         },
 
-        // Buluta Tek Bir Belgeyi Gönder / Güncelle
         async uploadDocToCloud(doc, userId = 'admin') {
-            if (!doc || !this.config.enabled) return false;
+            if (!doc || !this.supabaseClient) return false;
 
             doc.updatedAt = new Date().toISOString();
             doc.userId = userId;
 
-            // 1. Supabase
-            if (this.supabaseClient) {
-                try {
-                    const row = this.mapToSupabaseRow(doc, userId);
-                    await this.supabaseClient
-                        .from(this.config.tableName || 'school_documents')
-                        .upsert(row, { onConflict: 'id' });
-                    doc._isCloudSynced = true;
-                } catch (e) {
-                    console.warn("Supabase upsert uyarısı:", e);
-                }
-            }
+            try {
+                const tableName = this.config.tableName || 'school_documents';
+                const row = this.mapToSupabaseRow(doc, userId);
+                const { error } = await this.supabaseClient
+                    .from(tableName)
+                    .upsert(row, { onConflict: 'id' });
 
-            // 2. Cloud Relay
-            if (this.config.cloudSyncId && this.config.cloudSyncId.trim()) {
-                try {
-                    const currentDocs = (await this.pullFromCloud(userId)) || [];
-                    const idx = currentDocs.findIndex(d => d.id === doc.id);
-                    if (idx !== -1) {
-                        currentDocs[idx] = doc;
-                    } else {
-                        currentDocs.unshift(doc);
-                    }
-                    await this.pushAllToCloudRelay(currentDocs, userId);
+                if (!error) {
                     doc._isCloudSynced = true;
                     return true;
-                } catch (e) {
-                    console.warn("Cloud upload uyarısı:", e);
+                } else {
+                    console.warn("Supabase upload error:", error);
                 }
-            } else {
-                // Eğer henüz bir bulut odası yoksa otomatik oluştur
-                const res = await this.createCloudSyncRoom([doc], userId);
-                if (res.success) {
-                    doc._isCloudSynced = true;
-                    return true;
-                }
+            } catch (e) {
+                console.warn("Supabase upload exception:", e);
             }
-
             return false;
         },
 
-        // Buluttan Tek Bir Belgeyi Sil
         async deleteDocFromCloud(docId, userId = 'admin') {
             if (!docId) return false;
             this.markDocAsDeletedLocally(docId, userId);
 
-            // 1. Supabase
             if (this.supabaseClient) {
                 try {
+                    const tableName = this.config.tableName || 'school_documents';
                     await this.supabaseClient
-                        .from(this.config.tableName || 'school_documents')
+                        .from(tableName)
                         .delete()
                         .eq('id', docId);
-                } catch (e) {}
-            }
-
-            // 2. Cloud Relay
-            if (this.config.cloudSyncId && this.config.cloudSyncId.trim()) {
-                try {
-                    const currentDocs = (await this.pullFromCloud(userId)) || [];
-                    const filtered = currentDocs.filter(d => d.id !== docId);
-                    await this.pushAllToCloudRelay(filtered, userId);
                     return true;
                 } catch (e) {}
             }
-
             return false;
         },
 
-        // Tüm Belgeleri Buluta Yaz
-        async pushAllToCloudRelay(docs, userId = 'admin') {
-            if (!this.config.cloudSyncId || !this.config.cloudSyncId.trim()) {
-                const res = await this.createCloudSyncRoom(docs, userId);
-                return res.success;
-            }
-
-            const sanitizedDocs = this.sanitizeDocsForCloud(docs);
-            try {
-                const res = await fetch(`${API_STORAGE_ENDPOINT}/${this.config.cloudSyncId.trim()}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        name: 'rotali_school_docs_' + (this.config.cloudRoomName || 'genel'),
-                        data: {
-                            userId: userId,
-                            updatedAt: new Date().toISOString(),
-                            documents: sanitizedDocs
-                        }
-                    })
-                });
-                return res.ok;
-            } catch (e) {
-                console.warn("Bulut yazma uyarısı:", e);
-                return false;
-            }
-        },
-
-        sanitizeDocsForCloud(docs) {
-            return (docs || []).map(d => {
-                if (d.dataUrl && d.dataUrl.length > 2 * 1024 * 1024) {
-                    return {
-                        ...d,
-                        dataUrl: null,
-                        notes: (d.notes ? d.notes + ' ' : '') + '(Büyük dosya: Cihaz hafızasında saklanıyor)'
-                    };
-                }
-                return d;
-            });
-        },
-
-        // ================= 🔄 AKILLI ÇİFT YÖNLÜ SENKRONİZASYON =================
         async syncAll(localDocs = [], userId = 'admin') {
             if (this.isSyncing) return { updated: false, documents: localDocs };
-            
-            // Eğer hiçbir bulut ayarı girilmemişse sessizce yerel belgeleri döndür
-            if (!this.isConfigured()) {
+
+            if (!this.isConfigured() || !this.supabaseClient) {
                 return { updated: false, documents: localDocs, isLocalOnly: true };
             }
 
@@ -465,7 +333,7 @@
                         const localTime = new Date(localItem.updatedAt || 0).getTime();
 
                         if (cloudTime > localTime) {
-                            mergedDocs.push({ ...localItem, ...cloudItem });
+                            mergedDocs.push({ ...localItem, ...cloudItem, _isCloudSynced: true });
                             hasChanges = true;
                         } else {
                             mergedDocs.push({ ...cloudItem, ...localItem, _isCloudSynced: true });
@@ -544,7 +412,12 @@
         },
 
         getSQLSchema() {
-            return `-- Rotalı Fenci - Okul Belgeleri Supabase Tablo & RLS Kurulumu
+            return `-- ================================================================
+-- ROTALI FENCI - SUPABASE OKUL BELGELERİ TABLO VE RLS KURULUM KODU
+-- ================================================================
+-- Supabase panelinizde (https://supabase.com) SQL Editor sekmesine yapıştırıp
+-- yeşil "RUN" butonuna basınız.
+
 CREATE TABLE IF NOT EXISTS public.school_documents (
     id TEXT PRIMARY KEY,
     user_id TEXT NOT NULL DEFAULT 'admin',
@@ -563,12 +436,15 @@ CREATE TABLE IF NOT EXISTS public.school_documents (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
 );
 
+-- Hızlı Sorgulama İndeksleri
 CREATE INDEX IF NOT EXISTS idx_school_docs_user ON public.school_documents(user_id);
 CREATE INDEX IF NOT EXISTS idx_school_docs_updated ON public.school_documents(updated_at DESC);
 
+-- Okuma / Yazma İzni (Row Level Security)
 ALTER TABLE public.school_documents ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "Public Full Access" ON public.school_documents;
-CREATE POLICY "Public Full Access" ON public.school_documents FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public All Access" ON public.school_documents;
+CREATE POLICY "Public All Access" ON public.school_documents FOR ALL USING (true) WITH CHECK (true);
 `;
         }
     };
