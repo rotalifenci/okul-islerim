@@ -8,7 +8,7 @@
         supabaseUrl: 'https://wthklmdzkxccdxumlcvh.supabase.co',
         supabaseKey: 'sb_publishable_SjTKEYpK9qZ85N4hj_pyaA_bnpN-QeU',
         tableName: 'school_documents',
-        autoSyncInterval: 10, // 10 saniyede bir tam otomatik arka plan eşitlemesi
+        autoSyncInterval: 4, // 4 saniyede bir tam otomatik arka plan eşitlemesi
         lastSyncTimestamp: null
     };
 
@@ -17,6 +17,7 @@
         supabaseClient: null,
         syncIntervalId: null,
         isSyncing: false,
+        _activeSyncPromise: null,
         lastError: null,
         onSyncListeners: [],
 
@@ -117,6 +118,11 @@
                 this.onSyncListeners.push(onSyncCallback);
             }
 
+            // Sayfa açıldığında anında buluttan çek
+            setTimeout(() => {
+                this.triggerBackgroundSync();
+            }, 50);
+
             // Sekmeye geri dönüldüğünde veya ekran açıldığında anında çek
             document.addEventListener('visibilitychange', () => {
                 if (document.visibilityState === 'visible' && this.isConfigured()) {
@@ -146,7 +152,7 @@
             }
 
             if (this.isConfigured() && this.config.autoSyncInterval > 0) {
-                const intervalMs = Math.max(5, this.config.autoSyncInterval) * 1000;
+                const intervalMs = Math.max(3, this.config.autoSyncInterval) * 1000;
                 this.syncIntervalId = setInterval(() => {
                     this.triggerBackgroundSync();
                 }, intervalMs);
@@ -154,7 +160,7 @@
         },
 
         triggerBackgroundSync() {
-            if (!this.isConfigured() || this.isSyncing || !navigator.onLine) return;
+            if (!this.isConfigured() || !navigator.onLine) return;
             
             const uid = localStorage.getItem('rotali_active_user_id') || 'admin';
             const localData = window.StorageManager ? window.StorageManager.loadData(uid) : null;
@@ -163,7 +169,7 @@
             this.notifyListeners('sync_start');
             this.syncAll(localDocs, uid)
                 .then(result => {
-                    if (result && result.updated) {
+                    if (result && Array.isArray(result.documents)) {
                         this.notifyListeners('sync_complete', result.documents);
                     } else {
                         this.notifyListeners('sync_idle');
@@ -331,92 +337,98 @@
         },
 
         async syncAll(localDocs = [], userId = 'admin') {
-            if (this.isSyncing) return { updated: false, documents: localDocs };
-
             if (!this.isConfigured()) {
                 return { updated: false, documents: localDocs, isLocalOnly: true };
             }
 
-            this.isSyncing = true;
-            this.lastError = null;
+            if (this._activeSyncPromise) {
+                return this._activeSyncPromise;
+            }
 
-            try {
-                const deletedIds = new Set(this.getDeletedDocIds(userId));
-                const cloudDocs = await this.pullFromCloud(userId);
+            this._activeSyncPromise = (async () => {
+                this.isSyncing = true;
+                this.lastError = null;
 
-                if (!cloudDocs) {
-                    this.isSyncing = false;
-                    return { updated: false, documents: localDocs };
-                }
+                try {
+                    const deletedIds = new Set(this.getDeletedDocIds(userId));
+                    const cloudDocs = await this.pullFromCloud(userId);
 
-                const cloudMap = new Map();
-                cloudDocs.forEach(d => {
-                    if (!deletedIds.has(d.id)) {
-                        cloudMap.set(d.id, d);
+                    if (!cloudDocs) {
+                        return { updated: false, documents: localDocs };
                     }
-                });
 
-                const localMap = new Map();
-                (localDocs || []).forEach(d => {
-                    if (!deletedIds.has(d.id)) {
-                        localMap.set(d.id, d);
-                    }
-                });
+                    const cloudMap = new Map();
+                    cloudDocs.forEach(d => {
+                        if (!deletedIds.has(d.id)) {
+                            cloudMap.set(d.id, d);
+                        }
+                    });
 
-                let hasChanges = false;
-                const mergedDocs = [];
+                    const localMap = new Map();
+                    (localDocs || []).forEach(d => {
+                        if (!deletedIds.has(d.id)) {
+                            localMap.set(d.id, d);
+                        }
+                    });
 
-                for (const [id, cloudItem] of cloudMap.entries()) {
-                    cloudItem._isCloudSynced = true;
-                    if (!localMap.has(id)) {
-                        mergedDocs.push(cloudItem);
-                        hasChanges = true;
-                    } else {
-                        const localItem = localMap.get(id);
-                        const cloudTime = new Date(cloudItem.updatedAt || 0).getTime();
-                        const localTime = new Date(localItem.updatedAt || 0).getTime();
+                    let hasChanges = false;
+                    const mergedDocs = [];
 
-                        if (cloudTime > localTime) {
-                            mergedDocs.push({ ...localItem, ...cloudItem, _isCloudSynced: true });
+                    for (const [id, cloudItem] of cloudMap.entries()) {
+                        cloudItem._isCloudSynced = true;
+                        if (!localMap.has(id)) {
+                            mergedDocs.push(cloudItem);
                             hasChanges = true;
                         } else {
-                            mergedDocs.push({ ...cloudItem, ...localItem, _isCloudSynced: true });
-                            if (localTime > cloudTime) {
-                                this.uploadDocToCloud(localItem, userId);
+                            const localItem = localMap.get(id);
+                            const cloudTime = new Date(cloudItem.updatedAt || 0).getTime();
+                            const localTime = new Date(localItem.updatedAt || 0).getTime();
+
+                            if (cloudTime > localTime) {
+                                mergedDocs.push({ ...localItem, ...cloudItem, _isCloudSynced: true });
+                                hasChanges = true;
+                            } else {
+                                mergedDocs.push({ ...cloudItem, ...localItem, _isCloudSynced: true });
+                                if (localTime > cloudTime) {
+                                    this.uploadDocToCloud(localItem, userId);
+                                }
                             }
                         }
                     }
-                }
 
-                for (const [id, localItem] of localMap.entries()) {
-                    if (!cloudMap.has(id)) {
-                        mergedDocs.push(localItem);
-                        hasChanges = true;
-                        this.uploadDocToCloud(localItem, userId);
+                    for (const [id, localItem] of localMap.entries()) {
+                        if (!cloudMap.has(id)) {
+                            mergedDocs.push(localItem);
+                            hasChanges = true;
+                            this.uploadDocToCloud(localItem, userId);
+                        }
                     }
+
+                    mergedDocs.sort((a, b) => {
+                        const timeA = new Date(a.updatedAt || a.uploadDate || 0).getTime();
+                        const timeB = new Date(b.updatedAt || b.uploadDate || 0).getTime();
+                        return timeB - timeA;
+                    });
+
+                    this.config.lastSyncTimestamp = new Date().toISOString();
+                    try {
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(this.config));
+                    } catch (e) {}
+
+                    return {
+                        updated: hasChanges || mergedDocs.length !== (localDocs || []).length,
+                        documents: mergedDocs
+                    };
+                } catch (err) {
+                    this.lastError = err.message || 'Senkronizasyon hatası';
+                    return { updated: false, documents: localDocs };
+                } finally {
+                    this.isSyncing = false;
+                    this._activeSyncPromise = null;
                 }
+            })();
 
-                mergedDocs.sort((a, b) => {
-                    const timeA = new Date(a.updatedAt || a.uploadDate || 0).getTime();
-                    const timeB = new Date(b.updatedAt || b.uploadDate || 0).getTime();
-                    return timeB - timeA;
-                });
-
-                this.config.lastSyncTimestamp = new Date().toISOString();
-                try {
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify(this.config));
-                } catch (e) {}
-
-                this.isSyncing = false;
-                return {
-                    updated: hasChanges || mergedDocs.length !== (localDocs || []).length,
-                    documents: mergedDocs
-                };
-            } catch (err) {
-                this.isSyncing = false;
-                this.lastError = err.message || 'Senkronizasyon hatası';
-                return { updated: false, documents: localDocs };
-            }
+            return this._activeSyncPromise;
         },
 
         mapToSupabaseRow(doc, userId) {

@@ -704,6 +704,7 @@ document.addEventListener('alpine:init', () => {
             }
 
                 this.showToast(`Giriş başarılı! Hoş geldiniz, ${this.data.teacher?.name || user.name} 👋 ✨`);
+                this.triggerManualCloudSync(true);
                 this.$nextTick(() => {
                     if (window.lucide) window.lucide.createIcons();
                 });
@@ -3902,23 +3903,21 @@ else {
                     this.cloudSyncStatus = 'synced';
                     this.formatLastCloudSyncTime();
                     if (Array.isArray(data)) {
-                        this.data.schoolDocuments = data;
+                        this.data.schoolDocuments = [...data];
                         const uid = this.currentUser ? this.currentUser.id : 'admin';
                         window.StorageManager.saveData(this.data, uid);
                         this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
                     }
                 } else if (event === 'sync_idle') {
-                    this.cloudSyncStatus = 'idle';
+                    this.cloudSyncStatus = 'synced';
                     this.formatLastCloudSyncTime();
                 } else if (event === 'sync_error') {
                     this.cloudSyncStatus = 'error';
                 }
             });
 
-            // Başlangıçta 1 saniye sonra arka planda buluttan son verileri çek
-            setTimeout(() => {
-                this.triggerManualCloudSync(true);
-            }, 1000);
+            // Başlangıçta anında buluttan son verileri çek
+            this.triggerManualCloudSync(true);
         },
 
         formatLastCloudSyncTime() {
@@ -3942,14 +3941,16 @@ else {
                 return;
             }
 
-            this.isManualSyncing = true;
+            if (!isSilent) {
+                this.isManualSyncing = true;
+            }
             this.cloudSyncStatus = 'syncing';
             const uid = this.currentUser ? this.currentUser.id : 'admin';
 
             try {
                 const result = await window.CloudSyncManager.syncAll(this.data.schoolDocuments || [], uid);
-                if (result && result.documents) {
-                    this.data.schoolDocuments = result.documents;
+                if (result && Array.isArray(result.documents)) {
+                    this.data.schoolDocuments = [...result.documents];
                     window.StorageManager.saveData(this.data, uid);
                 }
                 this.cloudSyncStatus = 'synced';
