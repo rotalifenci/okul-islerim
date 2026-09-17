@@ -108,8 +108,10 @@ window.InitialData = {
         { id: 'social', title: 'Sosyal Medya & Bülten', icon: 'share-2', color: 'pink', visible: true, isSystem: true, badge: '' },
         { id: 'ai-assistant', title: 'AI Öğretmen Asistanı', icon: 'sparkles', color: 'red', visible: true, isSystem: true, badge: '' },
         { id: 'bug-reports', title: '⚠️ Hatalar & Sorun Bildir', icon: 'alert-triangle', color: 'rose', visible: true, isSystem: true, badge: '' },
+        { id: 'school-documents', title: '📄 Okul Çıktıları ve Dosya Arşivi', icon: 'file-text', color: 'blue', visible: true, isSystem: true, badge: '' },
         { id: 'settings', title: 'Ayarlar & Yedekleme', icon: 'settings', color: 'slate', visible: true, isSystem: true, badge: '' }
     ],
+    schoolDocuments: [],
     maarifWorks: [
         {
             id: "mw-1",

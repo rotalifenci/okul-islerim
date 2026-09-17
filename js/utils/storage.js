@@ -149,6 +149,27 @@ window.StorageManager = {
                                 }
                                 this.saveData(parsed, uid);
                             }
+
+                            const hasSchoolDocs = parsed.navSections.some(s => s.id === 'school-documents');
+                            if (!hasSchoolDocs) {
+                                const docSec = { id: 'school-documents', title: '📄 Okul Çıktıları ve Dosya Arşivi', icon: 'file-text', color: 'blue', visible: true, isSystem: true, badge: '' };
+                                const bugIdx = parsed.navSections.findIndex(s => s.id === 'bug-reports');
+                                if (bugIdx !== -1) {
+                                    parsed.navSections.splice(bugIdx + 1, 0, docSec);
+                                } else {
+                                    const setIdx = parsed.navSections.findIndex(s => s.id === 'settings');
+                                    if (setIdx !== -1) {
+                                        parsed.navSections.splice(setIdx, 0, docSec);
+                                    } else {
+                                        parsed.navSections.push(docSec);
+                                    }
+                                }
+                                this.saveData(parsed, uid);
+                            }
+                        }
+
+                        if (!parsed.schoolDocuments) {
+                            parsed.schoolDocuments = [];
                         }
 
                         if (parsed.navSections && Array.isArray(parsed.navSections)) {
@@ -249,6 +270,27 @@ window.StorageManager = {
                                 }
                                 this.saveData(parsed, uid);
                             }
+
+                            const hasSchoolDocs = parsed.navSections.some(s => s.id === 'school-documents');
+                            if (!hasSchoolDocs) {
+                                const docSec = { id: 'school-documents', title: '📄 Okul Çıktıları ve Dosya Arşivi', icon: 'file-text', color: 'blue', visible: true, isSystem: true, badge: '' };
+                                const bugIdx = parsed.navSections.findIndex(s => s.id === 'bug-reports');
+                                if (bugIdx !== -1) {
+                                    parsed.navSections.splice(bugIdx + 1, 0, docSec);
+                                } else {
+                                    const setIdx = parsed.navSections.findIndex(s => s.id === 'settings');
+                                    if (setIdx !== -1) {
+                                        parsed.navSections.splice(setIdx, 0, docSec);
+                                    } else {
+                                        parsed.navSections.push(docSec);
+                                    }
+                                }
+                                this.saveData(parsed, uid);
+                            }
+                        }
+
+                        if (!parsed.schoolDocuments) {
+                            parsed.schoolDocuments = [];
                         }
 
                         if (parsed.navSections && Array.isArray(parsed.navSections)) {
@@ -315,6 +357,7 @@ window.StorageManager = {
                 assignments: [],   // Sıfır ödev
                 tasks: [],         // Sıfır görev
                 meetings: [],      // Sıfır toplantı
+                schoolDocuments: [], // Okul çıktıları ve dosya arşivi
                 projectCalendar: [],
                 customSections: [],
                 navSections: JSON.parse(JSON.stringify(window.InitialData ? window.InitialData.navSections : [])),

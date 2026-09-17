@@ -2829,6 +2829,173 @@
 
             </div>
 
+            <!-- ================= TAB: 📄 OKUL ÇIKTILARI VE DOSYA ARŞİVİ ================= -->
+            <div x-show="currentTab === 'school-documents'" x-cloak class="space-y-6">
+                
+                <!-- Başlık ve Kontrol Kartı -->
+                <div class="bg-slate-100/95 p-5 sm:p-6 rounded-3xl border-2 border-slate-300 shadow-md space-y-4">
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                        <div class="flex items-center gap-3.5">
+                            <div class="p-3.5 bg-blue-600 rounded-2xl text-white shadow-lg shadow-blue-600/30">
+                                <i data-lucide="file-text" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <h2 class="text-xl font-black text-black brand-font">📄 Okul Çıktıları ve Dosya Arşivi</h2>
+                                    <span class="text-xs bg-blue-600 text-white font-black px-2.5 py-0.5 rounded-lg shadow-sm">
+                                        Çoklu Dosya & Arşiv
+                                    </span>
+                                </div>
+                                <p class="text-xs text-slate-700 font-bold">PDF, Word, Excel, Ders Çıktıları, Sınav Evrakları, Tutanaklar ve Resmi Belgelerinizi yükleyin, görüntüleyin ve tek tıkla yazdırın.</p>
+                            </div>
+                        </div>
+
+                        <!-- Üst Aksiyon Butonları -->
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button @click="triggerSchoolDocUpload()" :disabled="isDocUploading" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-black text-xs shadow-md flex items-center gap-2 transition transform hover:scale-105 active:scale-95">
+                                <i :data-lucide="isDocUploading ? 'loader' : 'upload-cloud'" :class="isDocUploading ? 'animate-spin' : ''" class="w-4 h-4"></i>
+                                <span x-text="isDocUploading ? 'Yükleniyor...' : '+ Çoklu Dosya Yükle'"></span>
+                            </button>
+                            <input type="file" id="schoolDocFileInput" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.jpg,.jpeg,.png,.webp,.txt" @change="handleSchoolDocUpload($event)" class="hidden">
+                        </div>
+                    </div>
+
+                    <!-- Dosya Yükleme Alanı & Kategori Seçimi -->
+                    <div class="p-4 bg-white rounded-2xl border-2 border-dashed border-blue-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="folder-up" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-black text-slate-900">Yüklenecek Dosya Kategorisi</h4>
+                                <p class="text-[11px] text-slate-500 font-medium">Yüklemeden önce kategoriyi seçebilir veya doğrudan yükleyebilirsiniz.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <select x-model="docUploadCategory" class="px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-black text-slate-800 focus:outline-none focus:border-blue-600">
+                                <option value="Genel Evrak">📁 Genel Evrak</option>
+                                <option value="Ders & Sınav Çıktısı">📝 Ders & Sınav Çıktısı</option>
+                                <option value="Zümre & Toplantı">👥 Zümre & Toplantı Tutanağı</option>
+                                <option value="Belirli Gün & Etkinlik">📅 Belirli Gün & Etkinlik</option>
+                                <option value="Dilekçe & Resmi Yazı">📜 Dilekçe & Resmi Yazı</option>
+                                <option value="Öğrenci & Veli">👨‍🎓 Öğrenci & Veli Evrakı</option>
+                            </select>
+                            <button @click="triggerSchoolDocUpload()" class="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-black text-white font-black text-xs transition flex items-center gap-1.5">
+                                <i data-lucide="plus" class="w-3.5 h-3.5 text-blue-300"></i>
+                                <span>Dosya Seç</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Filtreler & Arama Şeridi -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 border-t-2 border-slate-200">
+                        <!-- Arama -->
+                        <div class="relative sm:col-span-2">
+                            <input type="text" x-model="docSearchQuery" placeholder="Dosya adı, kategori, uzantı veya tarih ara..." class="w-full px-3.5 py-2 pl-9 bg-white border-2 border-slate-300 rounded-xl text-xs font-black text-black placeholder-slate-400 focus:outline-none focus:border-blue-600 shadow-sm">
+                            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+                        </div>
+
+                        <!-- Kategori Filtresi -->
+                        <div>
+                            <select x-model="selectedDocCategory" class="w-full px-3 py-2 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-600 shadow-sm">
+                                <option value="Tümü">Tüm Kategoriler</option>
+                                <option value="Genel Evrak">📁 Genel Evrak</option>
+                                <option value="Ders & Sınav Çıktısı">📝 Ders & Sınav Çıktısı</option>
+                                <option value="Zümre & Toplantı">👥 Zümre & Toplantı</option>
+                                <option value="Belirli Gün & Etkinlik">📅 Belirli Gün & Etkinlik</option>
+                                <option value="Dilekçe & Resmi Yazı">📜 Dilekçe & Resmi Yazı</option>
+                                <option value="Öğrenci & Veli">👨‍🎓 Öğrenci & Veli Evrakı</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- İstatistik Rozetleri -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
+                        <div class="bg-white p-3 rounded-2xl border border-slate-300 shadow-xs">
+                            <div class="text-[11px] font-bold text-slate-600">Toplam Belge</div>
+                            <div class="text-lg font-black text-black" x-text="(data.schoolDocuments || []).length"></div>
+                        </div>
+                        <div class="bg-rose-50 p-3 rounded-2xl border border-rose-200 shadow-xs">
+                            <div class="text-[11px] font-bold text-rose-900">📕 PDF Dosyaları</div>
+                            <div class="text-lg font-black text-rose-700" x-text="(data.schoolDocuments || []).filter(d => (d.extension || '').toLowerCase() === 'pdf').length"></div>
+                        </div>
+                        <div class="bg-blue-50 p-3 rounded-2xl border border-blue-200 shadow-xs">
+                            <div class="text-[11px] font-bold text-blue-900">📘 Word / Ofis</div>
+                            <div class="text-lg font-black text-blue-700" x-text="(data.schoolDocuments || []).filter(d => ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes((d.extension || '').toLowerCase())).length"></div>
+                        </div>
+                        <div class="bg-purple-50 p-3 rounded-2xl border border-purple-200 shadow-xs">
+                            <div class="text-[11px] font-bold text-purple-900">🖼️ Görseller</div>
+                            <div class="text-lg font-black text-purple-700" x-text="(data.schoolDocuments || []).filter(d => ['jpg', 'jpeg', 'png', 'webp', 'gif'].includes((d.extension || '').toLowerCase())).length"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Arşiv Dosyaları Listesi -->
+                <div class="space-y-4">
+                    <!-- Boş Durum -->
+                    <div x-show="!getFilteredSchoolDocs().length" class="p-12 text-center bg-white rounded-3xl border-2 border-slate-300 space-y-3">
+                        <div class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto">
+                            <i data-lucide="folder-x" class="w-7 h-7"></i>
+                        </div>
+                        <h4 class="text-sm font-black text-slate-900">Arşivde Uygun Dosya Bulunamadı</h4>
+                        <p class="text-xs text-slate-500 font-medium">Yeni okul çıktısı veya arşiv dosyası yüklemek için yukarıdaki "+ Çoklu Dosya Yükle" butonunu kullanabilirsiniz.</p>
+                        <button @click="triggerSchoolDocUpload()" class="px-4 py-2 rounded-xl bg-blue-600 text-white font-black text-xs hover:bg-blue-700 transition inline-flex items-center gap-1.5 shadow-sm">
+                            <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+                            <span>Şimdi Dosya Yükle</span>
+                        </button>
+                    </div>
+
+                    <!-- Dosya Kartları Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <template x-for="doc in getFilteredSchoolDocs()" :key="doc.id">
+                            <div class="bg-white p-4 rounded-3xl border-2 border-slate-300 shadow-sm hover:shadow-md transition flex flex-col justify-between space-y-3 hover:border-blue-400">
+                                <div class="space-y-2.5">
+                                    <!-- Üst Rozetler: Tür ve Kategori -->
+                                    <div class="flex items-center justify-between gap-2 flex-wrap pb-2 border-b border-slate-100">
+                                        <span class="px-2 py-0.5 rounded-lg text-[10px] font-black border uppercase" :class="getDocTypeBadge(doc.extension).bg" x-text="getDocTypeBadge(doc.extension).text"></span>
+                                        <span class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-slate-100 text-slate-800 border border-slate-200" x-text="doc.category"></span>
+                                    </div>
+
+                                    <!-- Dosya İkonu ve İsim -->
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-10 h-10 rounded-2xl bg-slate-100 text-slate-800 border border-slate-200 flex items-center justify-center flex-shrink-0">
+                                            <i :data-lucide="getDocIcon(doc.extension)" class="w-5 h-5 text-blue-600"></i>
+                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            <h3 class="text-xs font-black text-slate-900 leading-snug break-words line-clamp-2" :title="doc.name" x-text="doc.name"></h3>
+                                            <div class="flex items-center gap-2 mt-1 text-[10px] text-slate-500 font-semibold">
+                                                <span x-text="doc.size"></span>
+                                                <span>•</span>
+                                                <span x-text="doc.uploadDate"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Alt İşlem Butonları (Görüntüle, Yazdır, Sil) -->
+                                <div class="flex items-center justify-between gap-1.5 pt-2 border-t border-slate-100">
+                                    <button @click="viewSchoolDoc(doc)" title="Belgeyi Görüntüle / İndir" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-800 font-black text-xs transition flex items-center gap-1 border border-slate-200 shadow-2xs">
+                                        <i data-lucide="eye" class="w-3.5 h-3.5 text-blue-600"></i>
+                                        <span>Görüntüle</span>
+                                    </button>
+
+                                    <div class="flex items-center gap-1">
+                                        <button @click="printSchoolDoc(doc)" title="Belgeyi Yazdır" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-black text-white font-black text-xs transition flex items-center gap-1 shadow-2xs">
+                                            <i data-lucide="printer" class="w-3.5 h-3.5 text-red-400"></i>
+                                            <span>🖨️ Yazdır</span>
+                                        </button>
+                                        <button @click="deleteSchoolDoc(doc.id)" title="Belgeyi Arşivden Sil" class="p-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+            </div>
+
             <!-- ================= TAB 9: AYARLAR & YEDEKLEME ================= -->
             <div x-show="currentTab === 'settings'" class="space-y-6">
                 

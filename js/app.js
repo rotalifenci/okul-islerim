@@ -208,6 +208,11 @@ document.addEventListener('alpine:init', () => {
             urgency: 'Normal',
             screenshot: ''
         },
+        // 📄 Okul Çıktıları ve Dosya Arşivi Durumu
+        selectedDocCategory: 'Tümü',
+        docSearchQuery: '',
+        docUploadCategory: 'Genel Evrak',
+        isDocUploading: false,
         // Güvenlik & 4 Kullanıcılı Giriş Sistemi (1 Yönetici + 3 Öğretmen)
         users: window.AuthUsers || [],
         currentUser: null,
@@ -361,10 +366,8 @@ document.addEventListener('alpine:init', () => {
                 }
             }
 
-            // Ödevler verisini doğrula
-            if (!this.data.assignments || !Array.isArray(this.data.assignments)) {
-                this.data.assignments = [];
-            }
+            // Ders Programı için o anki günü otomatik seç (Hafta sonu ise Pazartesi)
+            this.selectedScheduleDay = this.getCurrentDayName();
 
             this.loadCurrentWeekNote();
 
@@ -714,6 +717,12 @@ document.addEventListener('alpine:init', () => {
         setTab(tab) {
             this.currentTab = tab;
             localStorage.setItem('rotali_last_tab', tab); // Sayfa yenilenince aynı bölüm açılsın
+            
+            // Ders Programı sekmesi açıldığında o anki günü otomatik algıla ve seç
+            if (tab === 'calendar-tasks') {
+                this.selectedScheduleDay = this.getCurrentDayName();
+            }
+
             if (tab === 'account' || tab === 'settings') {
                 this.loadAccountForm();
 
@@ -3483,6 +3492,260 @@ else {
 
             window.Exporter.exportHtmlTableToExcel(`haftalik_ders_programi`, title, headers, rows);
             this.showToast(`Ders programı Excel olarak indirildi! 📊`);
+        },
+
+        // ================= 📄 OKUL ÇIKTILARI VE DOSYA ARŞİVİ METODLARI =================
+        getFilteredSchoolDocs() {
+            let docs = this.data.schoolDocuments || [];
+            if (this.selectedDocCategory && this.selectedDocCategory !== 'Tümü') {
+                docs = docs.filter(d => d.category === this.selectedDocCategory);
+            }
+            if (this.docSearchQuery && this.docSearchQuery.trim()) {
+                const q = this.docSearchQuery.toLowerCase().trim();
+                docs = docs.filter(d => 
+                    (d.name && d.name.toLowerCase().includes(q)) ||
+                    (d.category && d.category.toLowerCase().includes(q)) ||
+                    (d.uploadDate && d.uploadDate.toLowerCase().includes(q)) ||
+                    (d.extension && d.extension.toLowerCase().includes(q))
+                );
+            }
+            return docs;
+        },
+
+        triggerSchoolDocUpload() {
+            const input = document.getElementById('schoolDocFileInput');
+            if (input) input.click();
+        },
+
+        handleSchoolDocUpload(event) {
+            const files = event.target.files;
+            if (!files || !files.length) return;
+            
+            this.isDocUploading = true;
+            if (!this.data.schoolDocuments) this.data.schoolDocuments = [];
+            
+            let uploadedCount = 0;
+            const total = files.length;
+            
+            Array.from(files).forEach(file => {
+                if (file.size > 8 * 1024 * 1024) {
+                    alert(`"${file.name}" dosyası 8MB'dan büyük olduğu için yüklenemedi. Lütfen daha küçük bir dosya seçiniz.`);
+                    uploadedCount++;
+                    if (uploadedCount === total) this.isDocUploading = false;
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const ext = (file.name.split('.').pop() || '').toLowerCase();
+                    const newDoc = {
+                        id: 'doc-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+                        name: file.name,
+                        size: this.formatDocSize(file.size),
+                        sizeBytes: file.size,
+                        type: file.type || 'application/octet-stream',
+                        extension: ext,
+                        category: this.docUploadCategory || 'Genel Evrak',
+                        uploadDate: new Date().toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+                        dataUrl: e.target.result
+                    };
+                    
+                    this.data.schoolDocuments.unshift(newDoc);
+                    uploadedCount++;
+                    
+                    if (uploadedCount === total) {
+                        this.isDocUploading = false;
+                        const uid = this.currentUser ? this.currentUser.id : 'admin';
+                        window.StorageManager.saveData(this.data, uid);
+                        this.showToast(`${total} adet dosya başarıyla arşivlendi! 📄 ✨`);
+                        this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+                    }
+                };
+                reader.onerror = () => {
+                    uploadedCount++;
+                    if (uploadedCount === total) this.isDocUploading = false;
+                };
+                reader.readAsDataURL(file);
+            });
+            
+            event.target.value = '';
+        },
+
+        formatDocSize(bytes) {
+            if (!bytes || bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        },
+
+        getDocIcon(ext) {
+            if (!ext) return 'file-text';
+            const e = ext.toLowerCase();
+            if (['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'].includes(e)) return 'image';
+            if (['pdf'].includes(e)) return 'file-text';
+            if (['doc', 'docx'].includes(e)) return 'file-text';
+            if (['xls', 'xlsx', 'csv'].includes(e)) return 'table';
+            if (['ppt', 'pptx'].includes(e)) return 'presentation';
+            if (['txt', 'rtf', 'md'].includes(e)) return 'file-code';
+            return 'file';
+        },
+
+        getDocTypeBadge(ext) {
+            if (!ext) return { text: 'BELGE', bg: 'bg-slate-100 text-slate-800 border-slate-300' };
+            const e = ext.toUpperCase();
+            if (['JPG', 'JPEG', 'PNG', 'WEBP', 'GIF', 'SVG'].includes(e)) return { text: e, bg: 'bg-purple-100 text-purple-900 border-purple-300' };
+            if (['PDF'].includes(e)) return { text: 'PDF', bg: 'bg-rose-100 text-rose-900 border-rose-300' };
+            if (['DOC', 'DOCX'].includes(e)) return { text: 'WORD', bg: 'bg-blue-100 text-blue-900 border-blue-300' };
+            if (['XLS', 'XLSX', 'CSV'].includes(e)) return { text: 'EXCEL', bg: 'bg-emerald-100 text-emerald-900 border-emerald-300' };
+            if (['PPT', 'PPTX'].includes(e)) return { text: 'SUNU', bg: 'bg-amber-100 text-amber-900 border-amber-300' };
+            return { text: e, bg: 'bg-slate-100 text-slate-800 border-slate-300' };
+        },
+
+        dataUrlToBlob(dataUrl) {
+            try {
+                const parts = dataUrl.split(',');
+                const mime = parts[0].match(/:(.*?);/)[1];
+                const bstr = atob(parts[1]);
+                let n = bstr.length;
+                const u8arr = new Uint8Array(n);
+                while (n--) {
+                    u8arr[n] = bstr.charCodeAt(n);
+                }
+                return new Blob([u8arr], { type: mime });
+            } catch (e) {
+                return null;
+            }
+        },
+
+        viewSchoolDoc(doc) {
+            if (!doc || !doc.dataUrl) {
+                alert('Dosya içeriği bulunamadı!');
+                return;
+            }
+            const ext = (doc.extension || '').toLowerCase();
+            const blob = this.dataUrlToBlob(doc.dataUrl);
+            
+            if (blob) {
+                const blobUrl = URL.createObjectURL(blob);
+                if (['pdf', 'jpg', 'jpeg', 'png', 'webp', 'gif', 'svg', 'txt'].includes(ext)) {
+                    window.open(blobUrl, '_blank');
+                } else {
+                    const a = document.createElement('a');
+                    a.href = blobUrl;
+                    a.download = doc.name || 'belge';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                }
+                setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+            } else {
+                window.open(doc.dataUrl, '_blank');
+            }
+        },
+
+        printSchoolDoc(doc) {
+            if (!doc || !doc.dataUrl) {
+                alert('Yazdırılacak dosya bulunamadı!');
+                return;
+            }
+            const ext = (doc.extension || '').toLowerCase();
+            const blob = this.dataUrlToBlob(doc.dataUrl);
+            
+            if (['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'].includes(ext)) {
+                // Görsel Yazdırma
+                const printWindow = window.open('', '_blank', 'width=900,height=700');
+                if (printWindow) {
+                    printWindow.document.write(`
+                        <!DOCTYPE html>
+                        <html lang="tr">
+                        <head>
+                            <meta charset="UTF-8">
+                            <title>${doc.name} - Yazdır</title>
+                            <style>
+                                @media print {
+                                    @page { margin: 1cm; size: auto; }
+                                    body { margin: 0; padding: 0; }
+                                    .no-print { display: none !important; }
+                                }
+                                body { font-family: 'Segoe UI', sans-serif; text-align: center; padding: 20px; background: #fff; }
+                                .header { margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+                                img { max-width: 100%; height: auto; max-height: 88vh; object-fit: contain; }
+                                .btn { background: #dc2626; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+                            </style>
+                        </head>
+                        <body>
+                            <div class="header no-print">
+                                <strong>📄 ${doc.name} (${doc.category})</strong>
+                                <button class="btn" onclick="window.print()">🖨️ Yazdır</button>
+                            </div>
+                            <div>
+                                <img src="${doc.dataUrl}" alt="${doc.name}" onload="setTimeout(function(){ window.print(); }, 500);" />
+                            </div>
+                        </body>
+                        </html>
+                    `);
+                    printWindow.document.close();
+                    printWindow.focus();
+                }
+            } else if (ext === 'pdf') {
+                // PDF Yazdırma (Doğrudan Blob penceresi)
+                if (blob) {
+                    const blobUrl = URL.createObjectURL(blob);
+                    const printWindow = window.open(blobUrl, '_blank');
+                    if (printWindow) {
+                        printWindow.focus();
+                        setTimeout(() => {
+                            try { printWindow.print(); } catch(e) {}
+                        }, 1200);
+                    }
+                    setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+                } else {
+                    window.open(doc.dataUrl, '_blank');
+                }
+            } else {
+                // Word, Excel veya diğer belgeler için yazdırma & indirme penceresi
+                const blobUrl = blob ? URL.createObjectURL(blob) : doc.dataUrl;
+                const printWindow = window.open('', '_blank', 'width=800,height=600');
+                if (printWindow) {
+                    printWindow.document.write(`
+                        <!DOCTYPE html>
+                        <html lang="tr">
+                        <head>
+                            <meta charset="UTF-8">
+                            <title>${doc.name} - Okul Belgesi</title>
+                            <style>
+                                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; text-align: center; color: #1e293b; background: #f8fafc; }
+                                .card { max-width: 500px; margin: 40px auto; padding: 30px; border: 2px solid #cbd5e1; border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); background: white; }
+                                .btn { background: #dc2626; color: white; border: none; padding: 12px 24px; border-radius: 12px; font-weight: bold; font-size: 14px; cursor: pointer; text-decoration: none; display: inline-block; margin-top: 20px; }
+                                .btn-print { background: #0f172a; margin-left: 10px; }
+                            </style>
+                        </head>
+                        <body>
+                            <div class="card">
+                                <h2>📄 ${doc.name}</h2>
+                                <p style="color: #64748b; font-size: 13px;">Kategori: <strong>${doc.category}</strong> • Boyut: ${doc.size}</p>
+                                <p style="font-size: 14px; margin-top: 15px;">Bu belge türü (${doc.extension.toUpperCase()}) tarayıcı içi doğrudan yazdırılamıyor olabilir. Dosyayı indirerek ilgili programdan (Word/Excel) yazdırabilirsiniz.</p>
+                                <a class="btn" href="${blobUrl}" download="${doc.name}">💾 Dosyayı İndir ve Aç</a>
+                                <button class="btn btn-print" onclick="window.print()">🖨️ Sayfayı Yazdır</button>
+                            </div>
+                        </body>
+                        </html>
+                    `);
+                    printWindow.document.close();
+                    printWindow.focus();
+                }
+            }
+        },
+
+        deleteSchoolDoc(docId) {
+            if (!confirm('Bu arşiv belgesini silmek istediğinize emin misiniz?')) return;
+            if (!this.data.schoolDocuments) this.data.schoolDocuments = [];
+            this.data.schoolDocuments = this.data.schoolDocuments.filter(d => d.id !== docId);
+            const uid = this.currentUser ? this.currentUser.id : 'admin';
+            window.StorageManager.saveData(this.data, uid);
+            this.showToast('Belge arşivden silindi. 🗑️');
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
         },
 
         exportBackup() {
