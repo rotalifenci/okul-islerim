@@ -2842,56 +2842,51 @@
                             <div>
                                 <div class="flex items-center gap-2 flex-wrap">
                                     <h2 class="text-xl font-black text-black brand-font">📄 Okul Çıktıları ve Dosya Arşivi</h2>
-                                    <span class="text-xs bg-blue-600 text-white font-black px-2.5 py-0.5 rounded-lg shadow-sm">
-                                        Çoklu Dosya & Arşiv
+                                    <span class="text-xs bg-emerald-600 text-white font-black px-2.5 py-0.5 rounded-lg shadow-sm">
+                                        ☁️ Bulut & Cihaz Arşivi
                                     </span>
                                 </div>
-                                <p class="text-xs text-slate-700 font-bold">PDF, Word, Excel, Ders Çıktıları, Sınav Evrakları, Tutanaklar ve Resmi Belgelerinizi yükleyin, görüntüleyin ve tek tıkla yazdırın.</p>
+                                <p class="text-xs text-slate-700 font-bold">Google Drive linklerinizi veya cihazınızdaki PDF, Word, Excel ve görsellerinizi arşivleyin; telefondan ve bilgisayardan anında erişip yazdırın.</p>
                             </div>
                         </div>
 
-                        <!-- Üst Aksiyon Butonları -->
+                        <!-- Üst Aksiyon Butonları (Drive Linki + Dosya Yükle) -->
                         <div class="flex flex-wrap items-center gap-2">
+                            <!-- ☁️ Google Drive Linki Ekle Butonu -->
+                            <button @click="openAddDocLinkModal()" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white font-black text-xs shadow-md flex items-center gap-2 transition transform hover:scale-105 active:scale-95">
+                                <i data-lucide="cloud-upload" class="w-4 h-4"></i>
+                                <span>+ Google Drive / Bulut Linki Ekle</span>
+                            </button>
+
+                            <!-- 📁 Cihazdan Dosya Yükle Butonu -->
                             <button @click="triggerSchoolDocUpload()" :disabled="isDocUploading" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-black text-xs shadow-md flex items-center gap-2 transition transform hover:scale-105 active:scale-95">
-                                <i :data-lucide="isDocUploading ? 'loader' : 'upload-cloud'" :class="isDocUploading ? 'animate-spin' : ''" class="w-4 h-4"></i>
-                                <span x-text="isDocUploading ? 'Yükleniyor...' : '+ Çoklu Dosya Yükle'"></span>
+                                <i :data-lucide="isDocUploading ? 'loader' : 'upload'" :class="isDocUploading ? 'animate-spin' : ''" class="w-4 h-4"></i>
+                                <span x-text="isDocUploading ? 'Yükleniyor...' : '+ Cihazdan Dosya Yükle'"></span>
                             </button>
                             <input type="file" id="schoolDocFileInput" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.jpg,.jpeg,.png,.webp,.txt" @change="handleSchoolDocUpload($event)" class="hidden">
                         </div>
                     </div>
 
-                    <!-- Dosya Yükleme Alanı & Kategori Seçimi -->
-                    <div class="p-4 bg-white rounded-2xl border-2 border-dashed border-blue-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
-                                <i data-lucide="folder-up" class="w-5 h-5"></i>
-                            </div>
-                            <div>
-                                <h4 class="text-xs font-black text-slate-900">Yüklenecek Dosya Kategorisi</h4>
-                                <p class="text-[11px] text-slate-500 font-medium">Yüklemeden önce kategoriyi seçebilir veya doğrudan yükleyebilirsiniz.</p>
+                    <!-- Hızlı Bilgilendirme ve Eşitleme İpucu Şeridi -->
+                    <div class="p-3.5 bg-gradient-to-r from-emerald-50 via-teal-50 to-indigo-50 border-2 border-emerald-200 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                        <div class="flex items-center gap-2.5">
+                            <span class="text-xl">💡</span>
+                            <div class="text-xs text-slate-800 font-semibold">
+                                <strong class="text-emerald-900 font-black">Cihazlar Arası Ortak Erişim İpucu:</strong>
+                                <span>Telefondan ve bilgisayardan dosyalarınıza anında ortak erişmek için dosyalarınızı <strong>Google Drive bağlantısı</strong> olarak ekleyebilirsiniz.</span>
                             </div>
                         </div>
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <select x-model="docUploadCategory" class="px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-black text-slate-800 focus:outline-none focus:border-blue-600">
-                                <option value="Genel Evrak">📁 Genel Evrak</option>
-                                <option value="Ders & Sınav Çıktısı">📝 Ders & Sınav Çıktısı</option>
-                                <option value="Zümre & Toplantı">👥 Zümre & Toplantı Tutanağı</option>
-                                <option value="Belirli Gün & Etkinlik">📅 Belirli Gün & Etkinlik</option>
-                                <option value="Dilekçe & Resmi Yazı">📜 Dilekçe & Resmi Yazı</option>
-                                <option value="Öğrenci & Veli">👨‍🎓 Öğrenci & Veli Evrakı</option>
-                            </select>
-                            <button @click="triggerSchoolDocUpload()" class="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-black text-white font-black text-xs transition flex items-center gap-1.5">
-                                <i data-lucide="plus" class="w-3.5 h-3.5 text-blue-300"></i>
-                                <span>Dosya Seç</span>
-                            </button>
-                        </div>
+                        <button @click="openAddDocLinkModal()" class="px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-black text-xs transition flex items-center justify-center gap-1 flex-shrink-0">
+                            <i data-lucide="link" class="w-3.5 h-3.5"></i>
+                            <span>Drive Linki Ekle</span>
+                        </button>
                     </div>
 
                     <!-- Filtreler & Arama Şeridi -->
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 border-t-2 border-slate-200">
                         <!-- Arama -->
                         <div class="relative sm:col-span-2">
-                            <input type="text" x-model="docSearchQuery" placeholder="Dosya adı, kategori, uzantı veya tarih ara..." class="w-full px-3.5 py-2 pl-9 bg-white border-2 border-slate-300 rounded-xl text-xs font-black text-black placeholder-slate-400 focus:outline-none focus:border-blue-600 shadow-sm">
+                            <input type="text" x-model="docSearchQuery" placeholder="Dosya / link adı, kategori, not veya tarih ara..." class="w-full px-3.5 py-2 pl-9 bg-white border-2 border-slate-300 rounded-xl text-xs font-black text-black placeholder-slate-400 focus:outline-none focus:border-blue-600 shadow-sm">
                             <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
                         </div>
 
@@ -2899,8 +2894,8 @@
                         <div>
                             <select x-model="selectedDocCategory" class="w-full px-3 py-2 bg-white border-2 border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-600 shadow-sm">
                                 <option value="Tümü">Tüm Kategoriler</option>
-                                <option value="Genel Evrak">📁 Genel Evrak</option>
                                 <option value="Ders & Sınav Çıktısı">📝 Ders & Sınav Çıktısı</option>
+                                <option value="Genel Evrak">📁 Genel Evrak</option>
                                 <option value="Zümre & Toplantı">👥 Zümre & Toplantı</option>
                                 <option value="Belirli Gün & Etkinlik">📅 Belirli Gün & Etkinlik</option>
                                 <option value="Dilekçe & Resmi Yazı">📜 Dilekçe & Resmi Yazı</option>
@@ -2912,20 +2907,20 @@
                     <!-- İstatistik Rozetleri -->
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
                         <div class="bg-white p-3 rounded-2xl border border-slate-300 shadow-xs">
-                            <div class="text-[11px] font-bold text-slate-600">Toplam Belge</div>
+                            <div class="text-[11px] font-bold text-slate-600">Toplam Belge & Link</div>
                             <div class="text-lg font-black text-black" x-text="(data.schoolDocuments || []).length"></div>
                         </div>
+                        <div class="bg-emerald-50 p-3 rounded-2xl border border-emerald-200 shadow-xs">
+                            <div class="text-[11px] font-bold text-emerald-900">☁️ Google Drive / Linkler</div>
+                            <div class="text-lg font-black text-emerald-700" x-text="(data.schoolDocuments || []).filter(d => d.isCloudLink).length"></div>
+                        </div>
                         <div class="bg-rose-50 p-3 rounded-2xl border border-rose-200 shadow-xs">
-                            <div class="text-[11px] font-bold text-rose-900">📕 PDF Dosyaları</div>
-                            <div class="text-lg font-black text-rose-700" x-text="(data.schoolDocuments || []).filter(d => (d.extension || '').toLowerCase() === 'pdf').length"></div>
+                            <div class="text-[11px] font-bold text-rose-900">📕 PDF Belgeleri</div>
+                            <div class="text-lg font-black text-rose-700" x-text="(data.schoolDocuments || []).filter(d => (d.extension || '').toUpperCase() === 'PDF').length"></div>
                         </div>
                         <div class="bg-blue-50 p-3 rounded-2xl border border-blue-200 shadow-xs">
-                            <div class="text-[11px] font-bold text-blue-900">📘 Word / Ofis</div>
-                            <div class="text-lg font-black text-blue-700" x-text="(data.schoolDocuments || []).filter(d => ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes((d.extension || '').toLowerCase())).length"></div>
-                        </div>
-                        <div class="bg-purple-50 p-3 rounded-2xl border border-purple-200 shadow-xs">
-                            <div class="text-[11px] font-bold text-purple-900">🖼️ Görseller</div>
-                            <div class="text-lg font-black text-purple-700" x-text="(data.schoolDocuments || []).filter(d => ['jpg', 'jpeg', 'png', 'webp', 'gif'].includes((d.extension || '').toLowerCase())).length"></div>
+                            <div class="text-[11px] font-bold text-blue-900">📘 Ofis / Diğer</div>
+                            <div class="text-lg font-black text-blue-700" x-text="(data.schoolDocuments || []).filter(d => !d.isCloudLink && (d.extension || '').toUpperCase() !== 'PDF').length"></div>
                         </div>
                     </div>
                 </div>
@@ -2937,18 +2932,24 @@
                         <div class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto">
                             <i data-lucide="folder-x" class="w-7 h-7"></i>
                         </div>
-                        <h4 class="text-sm font-black text-slate-900">Arşivde Uygun Dosya Bulunamadı</h4>
-                        <p class="text-xs text-slate-500 font-medium">Yeni okul çıktısı veya arşiv dosyası yüklemek için yukarıdaki "+ Çoklu Dosya Yükle" butonunu kullanabilirsiniz.</p>
-                        <button @click="triggerSchoolDocUpload()" class="px-4 py-2 rounded-xl bg-blue-600 text-white font-black text-xs hover:bg-blue-700 transition inline-flex items-center gap-1.5 shadow-sm">
-                            <i data-lucide="upload" class="w-3.5 h-3.5"></i>
-                            <span>Şimdi Dosya Yükle</span>
-                        </button>
+                        <h4 class="text-sm font-black text-slate-900">Arşivde Uygun Dosya veya Bağlantı Bulunamadı</h4>
+                        <p class="text-xs text-slate-500 font-medium">Google Drive linki eklemek veya cihazınızdan dosya yüklemek için yukarıdaki butonları kullanabilirsiniz.</p>
+                        <div class="flex items-center justify-center gap-2 pt-2">
+                            <button @click="openAddDocLinkModal()" class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-black text-xs hover:bg-emerald-700 transition inline-flex items-center gap-1.5 shadow-sm">
+                                <i data-lucide="cloud-upload" class="w-3.5 h-3.5"></i>
+                                <span>Google Drive Linki Ekle</span>
+                            </button>
+                            <button @click="triggerSchoolDocUpload()" class="px-4 py-2 rounded-xl bg-blue-600 text-white font-black text-xs hover:bg-blue-700 transition inline-flex items-center gap-1.5 shadow-sm">
+                                <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+                                <span>Cihazdan Yükle</span>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Dosya Kartları Grid -->
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <template x-for="doc in getFilteredSchoolDocs()" :key="doc.id">
-                            <div class="bg-white p-4 rounded-3xl border-2 border-slate-300 shadow-sm hover:shadow-md transition flex flex-col justify-between space-y-3 hover:border-blue-400">
+                            <div class="bg-white p-4 rounded-3xl border-2 border-slate-300 shadow-sm hover:shadow-md transition flex flex-col justify-between space-y-3" :class="doc.isCloudLink ? 'hover:border-emerald-500 border-t-6 border-t-emerald-600' : 'hover:border-blue-400 border-t-6 border-t-blue-600'">
                                 <div class="space-y-2.5">
                                     <!-- Üst Rozetler: Tür ve Kategori -->
                                     <div class="flex items-center justify-between gap-2 flex-wrap pb-2 border-b border-slate-100">
@@ -2958,8 +2959,8 @@
 
                                     <!-- Dosya İkonu ve İsim -->
                                     <div class="flex items-start gap-3">
-                                        <div class="w-10 h-10 rounded-2xl bg-slate-100 text-slate-800 border border-slate-200 flex items-center justify-center flex-shrink-0">
-                                            <i :data-lucide="getDocIcon(doc.extension)" class="w-5 h-5 text-blue-600"></i>
+                                        <div class="w-10 h-10 rounded-2xl border flex items-center justify-center flex-shrink-0" :class="doc.isCloudLink ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-800 border-slate-200'">
+                                            <i :data-lucide="getDocIcon(doc.extension)" class="w-5 h-5" :class="doc.isCloudLink ? 'text-emerald-600' : 'text-blue-600'"></i>
                                         </div>
                                         <div class="min-w-0 flex-1">
                                             <h3 class="text-xs font-black text-slate-900 leading-snug break-words line-clamp-2" :title="doc.name" x-text="doc.name"></h3>
@@ -2968,19 +2969,26 @@
                                                 <span>•</span>
                                                 <span x-text="doc.uploadDate"></span>
                                             </div>
+                                            <p x-show="doc.notes" class="text-[11px] text-slate-600 bg-slate-50 p-1.5 rounded-lg border border-slate-200 mt-1 font-medium" x-text="doc.notes"></p>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Alt İşlem Butonları (Görüntüle, Yazdır, Sil) -->
-                                <div class="flex items-center justify-between gap-1.5 pt-2 border-t border-slate-100">
-                                    <button @click="viewSchoolDoc(doc)" title="Belgeyi Görüntüle / İndir" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-800 font-black text-xs transition flex items-center gap-1 border border-slate-200 shadow-2xs">
-                                        <i data-lucide="eye" class="w-3.5 h-3.5 text-blue-600"></i>
-                                        <span>Görüntüle</span>
-                                    </button>
+                                <!-- Alt İşlem Butonları (Görüntüle, Yazdır, Kopyala, Sil) -->
+                                <div class="flex items-center justify-between gap-1.5 pt-2 border-t border-slate-100 flex-wrap">
+                                    <div class="flex items-center gap-1">
+                                        <button @click="viewSchoolDoc(doc)" :title="doc.isCloudLink ? 'Drive Bağlantısını Aç' : 'Belgeyi Görüntüle'" class="px-3 py-1.5 rounded-xl font-black text-xs transition flex items-center gap-1 border shadow-2xs" :class="doc.isCloudLink ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border-emerald-300' : 'bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-800 border-slate-200'">
+                                            <i :data-lucide="doc.isCloudLink ? 'external-link' : 'eye'" class="w-3.5 h-3.5" :class="doc.isCloudLink ? 'text-emerald-700' : 'text-blue-600'"></i>
+                                            <span x-text="doc.isCloudLink ? 'Drive\'da Aç' : 'Görüntüle'"></span>
+                                        </button>
+
+                                        <button x-show="doc.isCloudLink" @click="copyDocLink(doc.url)" title="Drive Linkini Kopyala" class="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 transition">
+                                            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                                        </button>
+                                    </div>
 
                                     <div class="flex items-center gap-1">
-                                        <button @click="printSchoolDoc(doc)" title="Belgeyi Yazdır" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-black text-white font-black text-xs transition flex items-center gap-1 shadow-2xs">
+                                        <button @click="printSchoolDoc(doc)" title="Belgeyi Yazdır" class="px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-black text-white font-black text-xs transition flex items-center gap-1 shadow-2xs">
                                             <i data-lucide="printer" class="w-3.5 h-3.5 text-red-400"></i>
                                             <span>🖨️ Yazdır</span>
                                         </button>
@@ -4534,6 +4542,78 @@
 
                 <button @click="isMenuManagerModalOpen = false" class="px-6 py-2 rounded-xl bg-slate-900 hover:bg-black text-white font-black text-xs shadow-md transition">
                     Tamamlandı
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: ☁️ GOOGLE DRIVE / BULUT LİNKİ EKLE ================= -->
+    <div x-show="isAddDocLinkModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md" @click.self="isAddDocLinkModalOpen = false">
+        <div class="bg-white text-slate-900 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden border-4 border-emerald-600 space-y-4">
+            <div class="p-4 sm:p-5 bg-gradient-to-r from-emerald-800 via-teal-700 to-slate-900 text-white flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 bg-emerald-600 text-white rounded-2xl shadow-lg shadow-emerald-900/40">
+                        <i data-lucide="cloud-upload" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-base sm:text-lg font-black tracking-tight brand-font">☁️ Google Drive / Bulut Linki Ekle</h2>
+                        <p class="text-xs text-emerald-100/90 font-bold">Telefondan ve bilgisayardan anında ortak erişin</p>
+                    </div>
+                </div>
+                <button @click="isAddDocLinkModalOpen = false" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-black transition">✕</button>
+            </div>
+            
+            <div class="p-5 space-y-3.5 text-xs">
+                <div class="space-y-1">
+                    <label class="block font-black text-slate-800">📄 Belge / Dosya Adı *</label>
+                    <input type="text" x-model="newDocLinkForm.name" placeholder="Örn: 5. Sınıf Fen 1. Dönem Yazılı Soruları & Cevap Anahtarı" class="w-full p-2.5 bg-slate-50 border-2 border-slate-300 rounded-xl text-xs font-black text-slate-900 focus:border-emerald-600 focus:outline-none">
+                </div>
+
+                <div class="space-y-1">
+                    <label class="block font-black text-slate-800">🔗 Google Drive / Bulut Dosya Linki (URL) *</label>
+                    <div class="relative">
+                        <input type="url" x-model="newDocLinkForm.url" placeholder="https://drive.google.com/file/d/... veya https://docs.google.com/..." class="w-full p-2.5 pl-9 bg-slate-50 border-2 border-slate-300 rounded-xl text-xs font-black text-slate-900 focus:border-emerald-600 focus:outline-none font-mono">
+                        <i data-lucide="link" class="w-4 h-4 text-emerald-600 absolute left-3 top-3"></i>
+                    </div>
+                    <p class="text-[10px] text-slate-500 font-semibold mt-0.5">💡 Google Drive'dan "Bağlantıyı Kopyala" (Herkes Görüntüleyebilir) diyerek linki buraya yapıştırabilirsiniz.</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="space-y-1">
+                        <label class="block font-black text-slate-800">Kategori</label>
+                        <select x-model="newDocLinkForm.category" class="w-full p-2.5 bg-slate-50 border-2 border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:border-emerald-600 focus:outline-none">
+                            <option value="Ders & Sınav Çıktısı">📝 Ders & Sınav Çıktısı</option>
+                            <option value="Genel Evrak">📁 Genel Evrak</option>
+                            <option value="Zümre & Toplantı">👥 Zümre & Toplantı Tutanağı</option>
+                            <option value="Belirli Gün & Etkinlik">📅 Belirli Gün & Etkinlik</option>
+                            <option value="Dilekçe & Resmi Yazı">📜 Dilekçe & Resmi Yazı</option>
+                            <option value="Öğrenci & Veli">👨‍🎓 Öğrenci & Veli Evrakı</option>
+                        </select>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="block font-black text-slate-800">Belge Türü / İkon</label>
+                        <select x-model="newDocLinkForm.type" class="w-full p-2.5 bg-slate-50 border-2 border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:border-emerald-600 focus:outline-none">
+                            <option value="DRIVE">☁️ Google Drive</option>
+                            <option value="PDF">📕 PDF Belgesi</option>
+                            <option value="DOCX">📘 Word Belgesi</option>
+                            <option value="XLSX">📊 Excel Tablosu</option>
+                            <option value="FOLDER">📂 Klasör / Arşiv</option>
+                            <option value="LINK">🔗 Genel Web Linki</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="block font-black text-slate-800">Açıklama / Not (İsteğe Bağlı)</label>
+                    <textarea x-model="newDocLinkForm.notes" rows="2" placeholder="Örn: 2026-2027 1. Yazılı ortak zümre sınavı..." class="w-full p-2 bg-slate-50 border-2 border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:border-emerald-600 focus:outline-none"></textarea>
+                </div>
+            </div>
+
+            <div class="p-4 bg-slate-100 border-t-2 border-slate-200 flex items-center justify-end gap-2.5">
+                <button @click="isAddDocLinkModalOpen = false" class="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-200 text-slate-800 font-black text-xs border border-slate-300 transition">İptal</button>
+                <button @click="saveSchoolDocLink()" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-md transition flex items-center gap-1.5 active:scale-95">
+                    <i data-lucide="check" class="w-4 h-4"></i>
+                    <span>Arşive Kaydet</span>
                 </button>
             </div>
         </div>

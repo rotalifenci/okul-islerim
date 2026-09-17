@@ -213,6 +213,14 @@ document.addEventListener('alpine:init', () => {
         docSearchQuery: '',
         docUploadCategory: 'Genel Evrak',
         isDocUploading: false,
+        isAddDocLinkModalOpen: false,
+        newDocLinkForm: {
+            name: '',
+            url: '',
+            category: 'Ders & Sınav Çıktısı',
+            type: 'DRIVE',
+            notes: ''
+        },
         // Güvenlik & 4 Kullanıcılı Giriş Sistemi (1 Yönetici + 3 Öğretmen)
         users: window.AuthUsers || [],
         currentUser: null,
@@ -3506,10 +3514,73 @@ else {
                     (d.name && d.name.toLowerCase().includes(q)) ||
                     (d.category && d.category.toLowerCase().includes(q)) ||
                     (d.uploadDate && d.uploadDate.toLowerCase().includes(q)) ||
-                    (d.extension && d.extension.toLowerCase().includes(q))
+                    (d.extension && d.extension.toLowerCase().includes(q)) ||
+                    (d.notes && d.notes.toLowerCase().includes(q)) ||
+                    (d.url && d.url.toLowerCase().includes(q))
                 );
             }
             return docs;
+        },
+
+        openAddDocLinkModal() {
+            this.newDocLinkForm = {
+                name: '',
+                url: '',
+                category: 'Ders & Sınav Çıktısı',
+                type: 'DRIVE',
+                notes: ''
+            };
+            this.isAddDocLinkModalOpen = true;
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+
+        saveSchoolDocLink() {
+            if (!this.newDocLinkForm.name || !this.newDocLinkForm.name.trim()) {
+                alert('Lütfen belge veya dosya adını giriniz!');
+                return;
+            }
+            let url = (this.newDocLinkForm.url || '').trim();
+            if (!url) {
+                alert('Lütfen Google Drive veya Bulut dosya linkini giriniz!');
+                return;
+            }
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                url = 'https://' + url;
+            }
+
+            if (!this.data.schoolDocuments) this.data.schoolDocuments = [];
+
+            const newDoc = {
+                id: 'doc-link-' + Date.now(),
+                name: this.newDocLinkForm.name.trim(),
+                url: url,
+                isCloudLink: true,
+                category: this.newDocLinkForm.category || 'Genel Evrak',
+                extension: this.newDocLinkForm.type || 'DRIVE',
+                size: 'Bulut Bağlantısı ☁️',
+                uploadDate: new Date().toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+                notes: (this.newDocLinkForm.notes || '').trim()
+            };
+
+            this.data.schoolDocuments.unshift(newDoc);
+            const uid = this.currentUser ? this.currentUser.id : 'admin';
+            window.StorageManager.saveData(this.data, uid);
+            this.isAddDocLinkModalOpen = false;
+            this.showToast('Google Drive / Bulut bağlantısı arşive eklendi! ☁️ ✨');
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+
+        copyDocLink(url) {
+            if (!url) return;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url).then(() => {
+                    this.showToast('Dosya linki panoya kopyalandı! 📋');
+                }).catch(() => {
+                    prompt('Dosya linkini kopyalayabilirsiniz:', url);
+                });
+            } else {
+                prompt('Dosya linkini kopyalayabilirsiniz:', url);
+            }
         },
 
         triggerSchoolDocUpload() {
@@ -3528,11 +3599,9 @@ else {
             const total = files.length;
             
             Array.from(files).forEach(file => {
-                if (file.size > 8 * 1024 * 1024) {
-                    alert(`"${file.name}" dosyası 8MB'dan büyük olduğu için yüklenemedi. Lütfen daha küçük bir dosya seçiniz.`);
-                    uploadedCount++;
-                    if (uploadedCount === total) this.isDocUploading = false;
-                    return;
+                // Tarayıcı hafızasını korumak için 3MB üzeri dosyalarda uyarı ver
+                if (file.size > 3 * 1024 * 1024) {
+                    alert(`⚠️ "${file.name}" dosyası (${this.formatDocSize(file.size)}) tarayıcı hafızası (localStorage) için büyüktür. Bu dosyayı "Google Drive / Bulut Linki Ekle" butonunu kullanarak bağlantı olarak eklemeniz tavsiye edilir.`);
                 }
                 
                 const reader = new FileReader();
@@ -3545,6 +3614,7 @@ else {
                         sizeBytes: file.size,
                         type: file.type || 'application/octet-stream',
                         extension: ext,
+                        isCloudLink: false,
                         category: this.docUploadCategory || 'Genel Evrak',
                         uploadDate: new Date().toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
                         dataUrl: e.target.result
@@ -3582,6 +3652,9 @@ else {
         getDocIcon(ext) {
             if (!ext) return 'file-text';
             const e = ext.toLowerCase();
+            if (e === 'drive') return 'cloud';
+            if (e === 'link') return 'link';
+            if (e === 'folder') return 'folder';
             if (['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'].includes(e)) return 'image';
             if (['pdf'].includes(e)) return 'file-text';
             if (['doc', 'docx'].includes(e)) return 'file-text';
@@ -3594,6 +3667,9 @@ else {
         getDocTypeBadge(ext) {
             if (!ext) return { text: 'BELGE', bg: 'bg-slate-100 text-slate-800 border-slate-300' };
             const e = ext.toUpperCase();
+            if (e === 'DRIVE') return { text: '☁️ GOOGLE DRIVE', bg: 'bg-emerald-100 text-emerald-900 border-emerald-300' };
+            if (e === 'LINK') return { text: '🔗 BULUT LİNKİ', bg: 'bg-teal-100 text-teal-900 border-teal-300' };
+            if (e === 'FOLDER') return { text: '📂 KLASÖR', bg: 'bg-amber-100 text-amber-900 border-amber-300' };
             if (['JPG', 'JPEG', 'PNG', 'WEBP', 'GIF', 'SVG'].includes(e)) return { text: e, bg: 'bg-purple-100 text-purple-900 border-purple-300' };
             if (['PDF'].includes(e)) return { text: 'PDF', bg: 'bg-rose-100 text-rose-900 border-rose-300' };
             if (['DOC', 'DOCX'].includes(e)) return { text: 'WORD', bg: 'bg-blue-100 text-blue-900 border-blue-300' };
@@ -3619,7 +3695,12 @@ else {
         },
 
         viewSchoolDoc(doc) {
-            if (!doc || !doc.dataUrl) {
+            if (!doc) return;
+            if (doc.isCloudLink && doc.url) {
+                window.open(doc.url, '_blank');
+                return;
+            }
+            if (!doc.dataUrl) {
                 alert('Dosya içeriği bulunamadı!');
                 return;
             }
@@ -3645,7 +3726,13 @@ else {
         },
 
         printSchoolDoc(doc) {
-            if (!doc || !doc.dataUrl) {
+            if (!doc) return;
+            if (doc.isCloudLink && doc.url) {
+                // Bulut linki ise doğrudan yeni sekmede aç (Drive'ın kendi yazdırma penceresi mevcuttur)
+                window.open(doc.url, '_blank');
+                return;
+            }
+            if (!doc.dataUrl) {
                 alert('Yazdırılacak dosya bulunamadı!');
                 return;
             }
