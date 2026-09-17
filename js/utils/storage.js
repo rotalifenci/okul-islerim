@@ -54,25 +54,7 @@ window.StorageManager = {
                             parsed._clean_classrooms_v1 = true;
                             this.saveData(parsed, uid);
                         }
-                        if (parsed.navSections && Array.isArray(parsed.navSections)) {
-                            parsed.navSections.forEach(s => { s.badge = ''; });
-                            const hasMeetings = parsed.navSections.some(s => s.id === 'school-meetings');
-                            if (!hasMeetings) {
-                                const taskIdx = parsed.navSections.findIndex(s => s.id === 'school-tasks');
-                                const meetSec = { id: 'school-meetings', title: '👥 Okul Toplantılarım', icon: 'users', color: 'indigo', visible: true, isSystem: true, badge: '' };
-                                if (taskIdx !== -1) {
-                                    parsed.navSections.splice(taskIdx, 0, meetSec);
-                                } else {
-                                    parsed.navSections.push(meetSec);
-                                }
-                                this.saveData(parsed, uid);
-                            }
-                            const mSec = parsed.navSections.find(s => s.id === 'school-meetings');
-                            if (mSec && mSec.visible === false) {
-                                mSec.visible = true;
-                                this.saveData(parsed, uid);
-                            }
-                        }
+                        this.ensureSystemNavSections(parsed, uid);
                         if (!parsed.meetings || !Array.isArray(parsed.meetings) || parsed.meetings.length === 0) {
                             if (window.InitialData && window.InitialData.meetings && window.InitialData.meetings.length) {
                                 parsed.meetings = JSON.parse(JSON.stringify(window.InitialData.meetings));
@@ -80,6 +62,12 @@ window.StorageManager = {
                             } else {
                                 parsed.meetings = [];
                             }
+                        }
+                        if (!parsed.assignments || !Array.isArray(parsed.assignments)) {
+                            parsed.assignments = [];
+                        }
+                        if (!parsed.tasks || !Array.isArray(parsed.tasks)) {
+                            parsed.tasks = (window.InitialData && window.InitialData.tasks) ? JSON.parse(JSON.stringify(window.InitialData.tasks)) : [];
                         }
                         if (!parsed._daily_plan_tab_v1) {
                             if (!parsed.dailyPlans) {
@@ -89,40 +77,9 @@ window.StorageManager = {
                             this.saveData(parsed, uid);
                         }
                         if (!parsed.lessonPeriods) parsed.lessonPeriods = JSON.parse(JSON.stringify(window.InitialData.lessonPeriods || []));
-
-                        if (parsed.navSections && Array.isArray(parsed.navSections)) {
-                            parsed.navSections.forEach(s => { s.badge = ''; });
-                            const hasMaarif = parsed.navSections.some(s => s.id === 'maarif-works');
-                            if (!hasMaarif) {
-                                const mSec = { id: 'maarif-works', title: '🎨 Maarif Çalışmaları', icon: 'palette', color: 'emerald', visible: true, isSystem: true, badge: '' };
-                                const dpIdx = parsed.navSections.findIndex(s => s.id === 'daily-plan');
-                                if (dpIdx !== -1) {
-                                    parsed.navSections.splice(dpIdx + 1, 0, mSec);
-                                } else {
-                                    parsed.navSections.push(mSec);
-                                }
-                                this.saveData(parsed, uid);
-                            }
-                        }
-                                                if (parsed.navSections && Array.isArray(parsed.navSections)) {
-                            parsed.navSections.forEach(s => { s.badge = ''; });
-                            const hasStudentList = parsed.navSections.some(s => s.id === 'student-list');
-                            if (!hasStudentList) {
-                                const slSec = { id: 'student-list', title: '👨‍🎓 Öğrenci Listesi', icon: 'graduation-cap', color: 'blue', visible: true, isSystem: true, badge: '' };
-                                const stIdx = parsed.navSections.findIndex(s => s.id === 'school-tasks');
-                                if (stIdx !== -1) {
-                                    parsed.navSections.splice(stIdx + 1, 0, slSec);
-                                } else {
-                                    parsed.navSections.push(slSec);
-                                }
-                                this.saveData(parsed, uid);
-                            }
-                        }
-
                         if (!parsed.maarifWorks) {
                             parsed.maarifWorks = JSON.parse(JSON.stringify(window.InitialData.maarifWorks || []));
                         }
-
 
                         if (parsed.weeklySchedule) {
                             Object.keys(parsed.weeklySchedule).forEach(day => {
@@ -136,57 +93,9 @@ window.StorageManager = {
                             });
                         }
 
-
-                                                if (parsed.navSections && Array.isArray(parsed.navSections)) {
-                            const hasBugReports = parsed.navSections.some(s => s.id === 'bug-reports');
-                            if (!hasBugReports) {
-                                const bugSec = { id: 'bug-reports', title: '⚠️ Hatalar & Sorun Bildir', icon: 'alert-triangle', color: 'rose', visible: true, isSystem: true, badge: '' };
-                                const setIdx = parsed.navSections.findIndex(s => s.id === 'settings');
-                                if (setIdx !== -1) {
-                                    parsed.navSections.splice(setIdx, 0, bugSec);
-                                } else {
-                                    parsed.navSections.push(bugSec);
-                                }
-                                this.saveData(parsed, uid);
-                            }
-
-                            const hasSchoolDocs = parsed.navSections.some(s => s.id === 'school-documents');
-                            if (!hasSchoolDocs) {
-                                const docSec = { id: 'school-documents', title: '📄 Okul Çıktıları ve Dosya Arşivi', icon: 'file-text', color: 'blue', visible: true, isSystem: true, badge: '' };
-                                const bugIdx = parsed.navSections.findIndex(s => s.id === 'bug-reports');
-                                if (bugIdx !== -1) {
-                                    parsed.navSections.splice(bugIdx + 1, 0, docSec);
-                                } else {
-                                    const setIdx = parsed.navSections.findIndex(s => s.id === 'settings');
-                                    if (setIdx !== -1) {
-                                        parsed.navSections.splice(setIdx, 0, docSec);
-                                    } else {
-                                        parsed.navSections.push(docSec);
-                                    }
-                                }
-                                this.saveData(parsed, uid);
-                            }
-                        }
-
                         if (!parsed.schoolDocuments) {
                             parsed.schoolDocuments = [];
                         }
-
-                        if (parsed.navSections && Array.isArray(parsed.navSections)) {
-                            parsed.navSections.forEach(s => { s.badge = ''; });
-                            const hasAccount = parsed.navSections.some(s => s.id === 'account');
-                            if (!hasAccount) {
-                                const accSec = { id: 'account', title: '👤 Hesap Bilgilerim', icon: 'user-check', color: 'red', visible: true, isSystem: true, badge: '' };
-                                const setIdx = parsed.navSections.findIndex(s => s.id === 'settings');
-                                if (setIdx !== -1) {
-                                    parsed.navSections.splice(setIdx, 0, accSec);
-                                } else {
-                                    parsed.navSections.push(accSec);
-                                }
-                                this.saveData(parsed, uid);
-                            }
-                        }
-
                     }
                 } else {
                     // Öğretmen kullanıcısı için garanti alanlar
@@ -199,133 +108,94 @@ window.StorageManager = {
                     if (!parsed.customSections) parsed.customSections = [];
                     if (!parsed.navSections) parsed.navSections = JSON.parse(JSON.stringify(window.InitialData.navSections || []));
                     if (!parsed.lessonPeriods) parsed.lessonPeriods = JSON.parse(JSON.stringify(window.InitialData.lessonPeriods || []));
-
-                        if (parsed.navSections && Array.isArray(parsed.navSections)) {
-                            parsed.navSections.forEach(s => { s.badge = ''; });
-                            const hasMeetings = parsed.navSections.some(s => s.id === 'school-meetings');
-                            if (!hasMeetings) {
-                                const taskIdx = parsed.navSections.findIndex(s => s.id === 'school-tasks');
-                                const meetSec = { id: 'school-meetings', title: '👥 Okul Toplantılarım', icon: 'users', color: 'indigo', visible: true, isSystem: true, badge: '' };
-                                if (taskIdx !== -1) {
-                                    parsed.navSections.splice(taskIdx, 0, meetSec);
-                                } else {
-                                    parsed.navSections.push(meetSec);
-                                }
-                                this.saveData(parsed, uid);
-                            }
-                            const hasMaarif = parsed.navSections.some(s => s.id === 'maarif-works');
-                            if (!hasMaarif) {
-                                const mSec = { id: 'maarif-works', title: '🎨 Maarif Çalışmaları', icon: 'palette', color: 'emerald', visible: true, isSystem: true, badge: '' };
-                                const dpIdx = parsed.navSections.findIndex(s => s.id === 'daily-plan');
-                                if (dpIdx !== -1) {
-                                    parsed.navSections.splice(dpIdx + 1, 0, mSec);
-                                } else {
-                                    parsed.navSections.push(mSec);
-                                }
-                                this.saveData(parsed, uid);
-                            }
-                        }
-                                                if (parsed.navSections && Array.isArray(parsed.navSections)) {
-                            parsed.navSections.forEach(s => { s.badge = ''; });
-                            const hasStudentList = parsed.navSections.some(s => s.id === 'student-list');
-                            if (!hasStudentList) {
-                                const slSec = { id: 'student-list', title: '👨‍🎓 Öğrenci Listesi', icon: 'graduation-cap', color: 'blue', visible: true, isSystem: true, badge: '' };
-                                const stIdx = parsed.navSections.findIndex(s => s.id === 'school-tasks');
-                                if (stIdx !== -1) {
-                                    parsed.navSections.splice(stIdx + 1, 0, slSec);
-                                } else {
-                                    parsed.navSections.push(slSec);
-                                }
-                                this.saveData(parsed, uid);
-                            }
-                        }
-
-                        if (!parsed.maarifWorks) {
-                            parsed.maarifWorks = JSON.parse(JSON.stringify(window.InitialData.maarifWorks || []));
-                        }
-
-
-                        if (parsed.weeklySchedule) {
-                            Object.keys(parsed.weeklySchedule).forEach(day => {
-                                if (Array.isArray(parsed.weeklySchedule[day])) {
-                                    parsed.weeklySchedule[day].forEach(lesson => {
-                                        if (lesson.room && lesson.room.includes('Kendi Sınıfı') && lesson.classId && lesson.classId !== 'Boş') {
-                                            lesson.room = lesson.classId + ' Sınıfı';
-                                        }
-                                    });
-                                }
-                            });
-                        }
-
-
-                                                if (parsed.navSections && Array.isArray(parsed.navSections)) {
-                            const hasBugReports = parsed.navSections.some(s => s.id === 'bug-reports');
-                            if (!hasBugReports) {
-                                const bugSec = { id: 'bug-reports', title: '⚠️ Hatalar & Sorun Bildir', icon: 'alert-triangle', color: 'rose', visible: true, isSystem: true, badge: '' };
-                                const setIdx = parsed.navSections.findIndex(s => s.id === 'settings');
-                                if (setIdx !== -1) {
-                                    parsed.navSections.splice(setIdx, 0, bugSec);
-                                } else {
-                                    parsed.navSections.push(bugSec);
-                                }
-                                this.saveData(parsed, uid);
-                            }
-
-                            const hasSchoolDocs = parsed.navSections.some(s => s.id === 'school-documents');
-                            if (!hasSchoolDocs) {
-                                const docSec = { id: 'school-documents', title: '📄 Okul Çıktıları ve Dosya Arşivi', icon: 'file-text', color: 'blue', visible: true, isSystem: true, badge: '' };
-                                const bugIdx = parsed.navSections.findIndex(s => s.id === 'bug-reports');
-                                if (bugIdx !== -1) {
-                                    parsed.navSections.splice(bugIdx + 1, 0, docSec);
-                                } else {
-                                    const setIdx = parsed.navSections.findIndex(s => s.id === 'settings');
-                                    if (setIdx !== -1) {
-                                        parsed.navSections.splice(setIdx, 0, docSec);
-                                    } else {
-                                        parsed.navSections.push(docSec);
-                                    }
-                                }
-                                this.saveData(parsed, uid);
-                            }
-                        }
-
-                        if (!parsed.schoolDocuments) {
-                            parsed.schoolDocuments = [];
-                        }
-
-                        if (parsed.navSections && Array.isArray(parsed.navSections)) {
-                            parsed.navSections.forEach(s => { s.badge = ''; });
-                            const hasAccount = parsed.navSections.some(s => s.id === 'account');
-                            if (!hasAccount) {
-                                const accSec = { id: 'account', title: '👤 Hesap Bilgilerim', icon: 'user-check', color: 'red', visible: true, isSystem: true, badge: '' };
-                                const setIdx = parsed.navSections.findIndex(s => s.id === 'settings');
-                                if (setIdx !== -1) {
-                                    parsed.navSections.splice(setIdx, 0, accSec);
-                                } else {
-                                    parsed.navSections.push(accSec);
-                                }
-                                this.saveData(parsed, uid);
-                            }
-                        }
-
+                    if (!parsed.schoolDocuments) parsed.schoolDocuments = [];
+                    this.ensureSystemNavSections(parsed, uid);
                 }
 
-                
-                        if (parsed.navSections && Array.isArray(parsed.navSections)) {
-                            parsed.navSections.forEach(s => { s.badge = ''; });
-                            parsed.navSections.forEach(sec => {
-                                if (sec.id === 'account') {
-                                    sec.title = '👤 Hesap Bilgilerim';
-                                }
-                            });
+                if (parsed.navSections && Array.isArray(parsed.navSections)) {
+                    parsed.navSections.forEach(s => { s.badge = ''; });
+                    parsed.navSections.forEach(sec => {
+                        if (sec.id === 'account') {
+                            sec.title = '👤 Hesap Bilgilerim';
                         }
+                    });
+                }
 
                 return parsed;
             }
         } catch (e) {
-            console.error("Veri yükleme hatası:", e);
+            console.error("Storage loadData hatası:", e);
         }
 
+        // İlk kez açılıyorsa varsayılan verileri oluştur
+        const fresh = this.getInitialDataForUser(uid);
+        this.saveData(fresh, uid);
+        return fresh;
+    },
+
+    // Tüm standart ve sistem menü bölümlerinin eksiksiz ve görünür olduğunu garantiye al
+    ensureSystemNavSections(parsed, uid = 'admin') {
+        if (!parsed) return;
+        if (!parsed.navSections || !Array.isArray(parsed.navSections) || parsed.navSections.length === 0) {
+            parsed.navSections = JSON.parse(JSON.stringify(window.InitialData?.navSections || []));
+            this.saveData(parsed, uid);
+            return;
+        }
+
+        const defaultSections = (window.InitialData && window.InitialData.navSections) ? window.InitialData.navSections : [
+            { id: 'calendar-tasks', title: '📅 Ders Programı', icon: 'calendar', color: 'amber', visible: true, isSystem: true, badge: '' },
+            { id: 'students', title: '📝 Öğrenci Ödev Kontrolü', icon: 'clipboard-check', color: 'sky', visible: true, isSystem: true, badge: '' },
+            { id: 'assignments', title: '📚 Ödevler', icon: 'book-marked', color: 'purple', visible: true, isSystem: true, badge: '' },
+            { id: 'school-meetings', title: '👥 Okul Toplantılarım', icon: 'users', color: 'indigo', visible: true, isSystem: true, badge: '' },
+            { id: 'school-tasks', title: '📌 Okul Görevlerim', icon: 'check-square', color: 'red', visible: true, isSystem: true, badge: '' },
+            { id: 'student-list', title: '👨‍🎓 Öğrenci Listesi', icon: 'graduation-cap', color: 'blue', visible: true, isSystem: true, badge: '' },
+            { id: 'annual-plan', title: '📋 Maarif Yıllık Planı', icon: 'book-open', color: 'emerald', visible: true, isSystem: true, badge: '' },
+            { id: 'daily-plan', title: '📑 Günlük Plan', icon: 'file-text', color: 'teal', visible: true, isSystem: true, badge: '' },
+            { id: 'maarif-works', title: '🎨 Maarif Çalışmaları', icon: 'palette', color: 'emerald', visible: true, isSystem: true, badge: '' },
+            { id: 'account', title: '👤 Hesap Bilgilerim', icon: 'user-check', color: 'red', visible: true, isSystem: true, badge: '' },
+            { id: 'project-calendar', title: 'Proje Takvimi', icon: 'calendar-range', color: 'emerald', visible: true, isSystem: true, badge: '' },
+            { id: 'certificates', title: 'Sertifika / Belge Üretici', icon: 'award', color: 'yellow', visible: true, isSystem: true, badge: '' },
+            { id: 'social', title: 'Sosyal Medya & Bülten', icon: 'share-2', color: 'pink', visible: true, isSystem: true, badge: '' },
+            { id: 'ai-assistant', title: 'AI Öğretmen Asistanı', icon: 'sparkles', color: 'red', visible: true, isSystem: true, badge: '' },
+            { id: 'bug-reports', title: '⚠️ Hatalar & Sorun Bildir', icon: 'alert-triangle', color: 'rose', visible: true, isSystem: true, badge: '' },
+            { id: 'school-documents', title: '📄 Okul Çıktıları ve Dosya Arşivi', icon: 'file-text', color: 'blue', visible: true, isSystem: true, badge: '' },
+            { id: 'settings', title: 'Ayarlar & Yedekleme', icon: 'settings', color: 'slate', visible: true, isSystem: true, badge: '' }
+        ];
+
+        let changed = false;
+        defaultSections.forEach((defSec, defIdx) => {
+            const existing = parsed.navSections.find(s => s.id === defSec.id);
+            if (!existing) {
+                const nextSec = defaultSections.slice(defIdx + 1).find(ns => parsed.navSections.some(s => s.id === ns.id));
+                if (nextSec) {
+                    const nextIdx = parsed.navSections.findIndex(s => s.id === nextSec.id);
+                    parsed.navSections.splice(nextIdx, 0, { ...defSec, visible: true, isSystem: true });
+                } else {
+                    parsed.navSections.push({ ...defSec, visible: true, isSystem: true });
+                }
+                changed = true;
+            } else {
+                if (existing.visible === false) {
+                    existing.visible = true;
+                    changed = true;
+                }
+                if (!existing.title) {
+                    existing.title = defSec.title;
+                    changed = true;
+                }
+                if (!existing.icon) {
+                    existing.icon = defSec.icon;
+                    changed = true;
+                }
+            }
+        });
+
+        if (changed) {
+            this.saveData(parsed, uid);
+        }
+    },
+
+    getInitialDataForUser(uid = 'admin') {
         // Eğer bu kullanıcı için kayıt bulunamazsa:
         if (uid === 'admin') {
             const initial = window.InitialData ? JSON.parse(JSON.stringify(window.InitialData)) : {};

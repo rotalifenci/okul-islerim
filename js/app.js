@@ -366,15 +366,7 @@ document.addEventListener('alpine:init', () => {
             this.initBugReports();
             this.initCloudSync();
 
-            // Menü başlıklarını garantiye al
-            if (this.data && this.data.navSections && Array.isArray(this.data.navSections)) {
-                this.data.navSections.forEach(sec => {
-                    sec.badge = '';
-                    if (sec.id === 'account') {
-                        sec.title = '👤 Hesap Bilgilerim';
-                    }
-                });
-            }
+            this.ensureNavSections();
 
 
             if (this.settings.theme === 'light') {
@@ -756,22 +748,77 @@ document.addEventListener('alpine:init', () => {
 
             if (tab === 'account' || tab === 'settings') {
                 this.loadAccountForm();
-
-            // Menü başlıklarını garantiye al
-            if (this.data && this.data.navSections && Array.isArray(this.data.navSections)) {
-                this.data.navSections.forEach(sec => {
-                    sec.badge = '';
-                    if (sec.id === 'account') {
-                        sec.title = '👤 Hesap Bilgilerim';
-                    }
-                });
-            }
-
+                this.ensureNavSections();
             }
             window.scrollTo({ top: 0, behavior: 'smooth' });
             this.$nextTick(() => {
                 if (window.lucide) window.lucide.createIcons();
             });
+        },
+
+        ensureNavSections() {
+            if (!this.data) return;
+            if (!this.data.navSections || !Array.isArray(this.data.navSections) || this.data.navSections.length === 0) {
+                this.data.navSections = JSON.parse(JSON.stringify(window.InitialData?.navSections || []));
+            }
+
+            const defaultSections = (window.InitialData && window.InitialData.navSections) ? window.InitialData.navSections : [
+                { id: 'calendar-tasks', title: '📅 Ders Programı', icon: 'calendar', color: 'amber', visible: true, isSystem: true, badge: '' },
+                { id: 'students', title: '📝 Öğrenci Ödev Kontrolü', icon: 'clipboard-check', color: 'sky', visible: true, isSystem: true, badge: '' },
+                { id: 'assignments', title: '📚 Ödevler', icon: 'book-marked', color: 'purple', visible: true, isSystem: true, badge: '' },
+                { id: 'school-meetings', title: '👥 Okul Toplantılarım', icon: 'users', color: 'indigo', visible: true, isSystem: true, badge: '' },
+                { id: 'school-tasks', title: '📌 Okul Görevlerim', icon: 'check-square', color: 'red', visible: true, isSystem: true, badge: '' },
+                { id: 'student-list', title: '👨‍🎓 Öğrenci Listesi', icon: 'graduation-cap', color: 'blue', visible: true, isSystem: true, badge: '' },
+                { id: 'annual-plan', title: '📋 Maarif Yıllık Planı', icon: 'book-open', color: 'emerald', visible: true, isSystem: true, badge: '' },
+                { id: 'daily-plan', title: '📑 Günlük Plan', icon: 'file-text', color: 'teal', visible: true, isSystem: true, badge: '' },
+                { id: 'maarif-works', title: '🎨 Maarif Çalışmaları', icon: 'palette', color: 'emerald', visible: true, isSystem: true, badge: '' },
+                { id: 'account', title: '👤 Hesap Bilgilerim', icon: 'user-check', color: 'red', visible: true, isSystem: true, badge: '' },
+                { id: 'project-calendar', title: 'Proje Takvimi', icon: 'calendar-range', color: 'emerald', visible: true, isSystem: true, badge: '' },
+                { id: 'certificates', title: 'Sertifika / Belge Üretici', icon: 'award', color: 'yellow', visible: true, isSystem: true, badge: '' },
+                { id: 'social', title: 'Sosyal Medya & Bülten', icon: 'share-2', color: 'pink', visible: true, isSystem: true, badge: '' },
+                { id: 'ai-assistant', title: 'AI Öğretmen Asistanı', icon: 'sparkles', color: 'red', visible: true, isSystem: true, badge: '' },
+                { id: 'bug-reports', title: '⚠️ Hatalar & Sorun Bildir', icon: 'alert-triangle', color: 'rose', visible: true, isSystem: true, badge: '' },
+                { id: 'school-documents', title: '📄 Okul Çıktıları ve Dosya Arşivi', icon: 'file-text', color: 'blue', visible: true, isSystem: true, badge: '' },
+                { id: 'settings', title: 'Ayarlar & Yedekleme', icon: 'settings', color: 'slate', visible: true, isSystem: true, badge: '' }
+            ];
+
+            let changed = false;
+            defaultSections.forEach((defSec, defIdx) => {
+                const existing = this.data.navSections.find(s => s.id === defSec.id);
+                if (!existing) {
+                    const nextSec = defaultSections.slice(defIdx + 1).find(ns => this.data.navSections.some(s => s.id === ns.id));
+                    if (nextSec) {
+                        const nextIdx = this.data.navSections.findIndex(s => s.id === nextSec.id);
+                        this.data.navSections.splice(nextIdx, 0, { ...defSec, visible: true, isSystem: true });
+                    } else {
+                        this.data.navSections.push({ ...defSec, visible: true, isSystem: true });
+                    }
+                    changed = true;
+                } else {
+                    if (existing.visible === false) {
+                        existing.visible = true;
+                        changed = true;
+                    }
+                    if (existing.id === 'account') {
+                        existing.title = '👤 Hesap Bilgilerim';
+                    }
+                    if (!existing.title) {
+                        existing.title = defSec.title;
+                        changed = true;
+                    }
+                    if (!existing.icon) {
+                        existing.icon = defSec.icon;
+                        changed = true;
+                    }
+                }
+            });
+
+            if (changed) {
+                const uid = this.currentUser ? this.currentUser.id : 'admin';
+                this.data.navSections = [...this.data.navSections];
+                window.StorageManager.saveData(this.data, uid);
+                this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+            }
         },
 
         // 👤 Hesap Bilgilerini Yükle
