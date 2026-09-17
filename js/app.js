@@ -3929,7 +3929,7 @@ else {
         },
 
         isSupabaseActive() {
-            return Boolean(window.CloudSyncManager && window.CloudSyncManager.isConfigured() && window.CloudSyncManager.supabaseClient);
+            return Boolean(window.CloudSyncManager && window.CloudSyncManager.isConfigured());
         },
 
         async triggerManualCloudSync(isSilent = false) {

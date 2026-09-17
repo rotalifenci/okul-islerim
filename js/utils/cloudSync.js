@@ -1,14 +1,14 @@
-// Rotalı Fenci - Gerçek Supabase Bulut Veritabanı Senkronizasyon Yöneticisi
+// Rotalı Fenci - Gerçek Supabase Bulut Veritabanı Senkronizasyon Yöneticisi (Tam Otomatik & Canlı)
 
 (function () {
     const STORAGE_KEY = 'rotali_supabase_config_v3';
     const DELETED_KEY_PREFIX = 'rotali_deleted_docs_';
 
     const DEFAULT_CONFIG = {
-        supabaseUrl: '',
-        supabaseKey: '',
+        supabaseUrl: 'https://wthklmdzkxccdxumlcvh.supabase.co',
+        supabaseKey: 'sb_publishable_SjTKEYpK9qZ85N4hj_pyaA_bnpN-QeU',
         tableName: 'school_documents',
-        autoSyncInterval: 15,
+        autoSyncInterval: 10, // 10 saniyede bir tam otomatik arka plan eşitlemesi
         lastSyncTimestamp: null
     };
 
@@ -22,15 +22,28 @@
 
         loadConfig() {
             try {
-                const stored = localStorage.getItem(STORAGE_KEY);
+                const storedRaw = localStorage.getItem(STORAGE_KEY);
+                const stored = storedRaw ? JSON.parse(storedRaw) : {};
                 const fileConfig = window.SUPABASE_CONFIG || {};
-                
+
+                const url = (fileConfig.url && fileConfig.url.trim()) 
+                    ? fileConfig.url.trim() 
+                    : ((stored.supabaseUrl && stored.supabaseUrl.trim()) ? stored.supabaseUrl.trim() : DEFAULT_CONFIG.supabaseUrl);
+
+                const key = (fileConfig.anonKey && fileConfig.anonKey.trim()) 
+                    ? fileConfig.anonKey.trim() 
+                    : ((stored.supabaseKey && stored.supabaseKey.trim()) ? stored.supabaseKey.trim() : DEFAULT_CONFIG.supabaseKey);
+
+                const tableName = (fileConfig.tableName && fileConfig.tableName.trim()) 
+                    ? fileConfig.tableName.trim() 
+                    : ((stored.tableName && stored.tableName.trim()) ? stored.tableName.trim() : DEFAULT_CONFIG.tableName);
+
                 this.config = {
                     ...DEFAULT_CONFIG,
-                    supabaseUrl: fileConfig.url || '',
-                    supabaseKey: fileConfig.anonKey || '',
-                    tableName: fileConfig.tableName || 'school_documents',
-                    ...(stored ? JSON.parse(stored) : {})
+                    ...stored,
+                    supabaseUrl: url,
+                    supabaseKey: key,
+                    tableName: tableName
                 };
             } catch (e) {
                 this.config = { ...DEFAULT_CONFIG };
@@ -58,15 +71,34 @@
                 this.config.supabaseUrl &&
                 this.config.supabaseUrl.trim().startsWith('http') &&
                 this.config.supabaseKey &&
-                this.config.supabaseKey.trim().length > 20
+                this.config.supabaseKey.trim().length > 10
             );
+        },
+
+        getHeaders() {
+            const key = (this.config.supabaseKey || '').trim();
+            return {
+                'apikey': key,
+                'Authorization': 'Bearer ' + key,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=representation'
+            };
+        },
+
+        getRestUrl() {
+            let base = (this.config.supabaseUrl || '').trim();
+            if (base.endsWith('/')) base = base.slice(0, -1);
+            if (base.endsWith('/rest/v1')) base = base.slice(0, -8);
+            return `${base}/rest/v1/${this.config.tableName || 'school_documents'}`;
         },
 
         initClient() {
             if (this.isConfigured() && window.supabase && window.supabase.createClient) {
                 try {
+                    let base = (this.config.supabaseUrl || '').trim();
+                    if (base.endsWith('/rest/v1')) base = base.slice(0, -8);
                     this.supabaseClient = window.supabase.createClient(
-                        this.config.supabaseUrl.trim(),
+                        base,
                         this.config.supabaseKey.trim(),
                         { auth: { persistSession: false } }
                     );
@@ -85,6 +117,7 @@
                 this.onSyncListeners.push(onSyncCallback);
             }
 
+            // Sekmeye geri dönüldüğünde veya ekran açıldığında anında çek
             document.addEventListener('visibilitychange', () => {
                 if (document.visibilityState === 'visible' && this.isConfigured()) {
                     this.triggerBackgroundSync();
@@ -92,6 +125,12 @@
             });
 
             window.addEventListener('online', () => {
+                if (this.isConfigured()) {
+                    this.triggerBackgroundSync();
+                }
+            });
+
+            window.addEventListener('focus', () => {
                 if (this.isConfigured()) {
                     this.triggerBackgroundSync();
                 }
@@ -107,7 +146,7 @@
             }
 
             if (this.isConfigured() && this.config.autoSyncInterval > 0) {
-                const intervalMs = Math.max(10, this.config.autoSyncInterval) * 1000;
+                const intervalMs = Math.max(5, this.config.autoSyncInterval) * 1000;
                 this.syncIntervalId = setInterval(() => {
                     this.triggerBackgroundSync();
                 }, intervalMs);
@@ -132,7 +171,7 @@
                 })
                 .catch(err => {
                     this.lastError = err.message;
-                    this.notifyListeners('sync_error', err.message);
+                    this.notifyListeners('sync_idle');
                 });
         },
 
@@ -162,57 +201,55 @@
             } catch (e) {}
         },
 
-        // ================= ☁️ SUPABASE BAĞLANTI & CRUD İŞLEMLERİ =================
+        // ================= ☁️ SUPABASE CRUD İŞLEMLERİ =================
 
         async testConnection(customConfig = null) {
             const cfg = customConfig || this.config;
             const url = (cfg.supabaseUrl || '').trim();
             const key = (cfg.supabaseKey || '').trim();
-            const tableName = cfg.tableName || 'school_documents';
 
             if (!url || !key) {
                 return {
                     success: false,
                     isNotConfigured: true,
-                    message: 'Supabase URL ve Anon Key henüz girilmemiş. Lütfen aşağıdaki alanları doldurun.'
-                };
-            }
-
-            if (!window.supabase || !window.supabase.createClient) {
-                return {
-                    success: false,
-                    message: 'Supabase JS kütüphanesi yüklenemedi. İnternet bağlantınızı kontrol edin.'
+                    message: 'Supabase URL ve Anon Key henüz girilmemiş.'
                 };
             }
 
             try {
-                const testClient = window.supabase.createClient(url, key, { auth: { persistSession: false } });
+                let restUrl = url;
+                if (restUrl.endsWith('/')) restUrl = restUrl.slice(0, -1);
+                if (restUrl.endsWith('/rest/v1')) restUrl = restUrl.slice(0, -8);
+                restUrl = `${restUrl}/rest/v1/${cfg.tableName || 'school_documents'}?select=id&limit=1`;
+
                 const start = performance.now();
-                const { data, error } = await testClient
-                    .from(tableName)
-                    .select('id')
-                    .limit(1);
+                const res = await fetch(restUrl, {
+                    method: 'GET',
+                    headers: {
+                        'apikey': key,
+                        'Authorization': 'Bearer ' + key
+                    }
+                });
 
                 const duration = Math.round(performance.now() - start);
 
-                if (error) {
-                    if (error.code === '42P01' || error.message?.includes('relation') || error.message?.includes('does not exist')) {
-                        return {
-                            success: false,
-                            needsTable: true,
-                            message: `Supabase bağlantısı kuruldu fakat "${tableName}" tablosu veritabanınızda henüz oluşturulmamış. Lütfen aşağıdaki "📋 Supabase SQL Kodunu Kopyala" butonuna basarak Supabase SQL Editöründe çalıştırın.`
-                        };
-                    }
+                if (res.ok) {
+                    return {
+                        success: true,
+                        message: `Supabase bulut bağlantısı aktif ve çalışıyor! 🟢 (Gecikme: ${duration}ms)`
+                    };
+                } else if (res.status === 404 || res.status === 400) {
+                    const text = await res.text();
                     return {
                         success: false,
-                        message: `Supabase Hatası (${error.code || 'Bilinmiyor'}): ${error.message}`
+                        message: `Supabase tablosu bulunamadı veya yetki hatası: ${text}`
+                    };
+                } else {
+                    return {
+                        success: false,
+                        message: `Supabase HTTP ${res.status}: ${res.statusText}`
                     };
                 }
-
-                return {
-                    success: true,
-                    message: `Supabase bağlantısı başarılı! 🟢 PostgreSQL tablosu hazır. (Gecikme: ${duration}ms)`
-                };
             } catch (e) {
                 return {
                     success: false,
@@ -222,21 +259,23 @@
         },
 
         async pullFromCloud(userId = 'admin') {
-            if (!this.supabaseClient) return null;
+            if (!this.isConfigured()) return null;
 
             try {
-                const tableName = this.config.tableName || 'school_documents';
-                const { data, error } = await this.supabaseClient
-                    .from(tableName)
-                    .select('*')
-                    .or(`user_id.eq.${userId},user_id.eq.shared,user_id.eq.admin`)
-                    .order('updated_at', { ascending: false });
+                const restUrl = `${this.getRestUrl()}?select=*&order=updated_at.desc`;
+                const res = await fetch(restUrl, {
+                    method: 'GET',
+                    headers: this.getHeaders(),
+                    cache: 'no-store'
+                });
 
-                if (!error && Array.isArray(data)) {
-                    return data.map(item => this.mapFromSupabaseRow(item));
-                }
-                if (error) {
-                    console.warn("Supabase pull error:", error);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (Array.isArray(data)) {
+                        return data.map(item => this.mapFromSupabaseRow(item));
+                    }
+                } else {
+                    console.warn("Supabase REST pull status:", res.status);
                 }
             } catch (e) {
                 console.warn("Supabase pull exception:", e);
@@ -245,23 +284,28 @@
         },
 
         async uploadDocToCloud(doc, userId = 'admin') {
-            if (!doc || !this.supabaseClient) return false;
+            if (!doc || !this.isConfigured()) return false;
 
             doc.updatedAt = new Date().toISOString();
             doc.userId = userId;
 
             try {
-                const tableName = this.config.tableName || 'school_documents';
                 const row = this.mapToSupabaseRow(doc, userId);
-                const { error } = await this.supabaseClient
-                    .from(tableName)
-                    .upsert(row, { onConflict: 'id' });
+                const restUrl = this.getRestUrl();
+                const res = await fetch(restUrl, {
+                    method: 'POST',
+                    headers: {
+                        ...this.getHeaders(),
+                        'Prefer': 'resolution=merge-duplicates,return=representation'
+                    },
+                    body: JSON.stringify(row)
+                });
 
-                if (!error) {
+                if (res.ok || res.status === 201) {
                     doc._isCloudSynced = true;
                     return true;
                 } else {
-                    console.warn("Supabase upload error:", error);
+                    console.warn("Supabase upload status:", res.status, await res.text());
                 }
             } catch (e) {
                 console.warn("Supabase upload exception:", e);
@@ -273,13 +317,13 @@
             if (!docId) return false;
             this.markDocAsDeletedLocally(docId, userId);
 
-            if (this.supabaseClient) {
+            if (this.isConfigured()) {
                 try {
-                    const tableName = this.config.tableName || 'school_documents';
-                    await this.supabaseClient
-                        .from(tableName)
-                        .delete()
-                        .eq('id', docId);
+                    const restUrl = `${this.getRestUrl()}?id=eq.${encodeURIComponent(docId)}`;
+                    await fetch(restUrl, {
+                        method: 'DELETE',
+                        headers: this.getHeaders()
+                    });
                     return true;
                 } catch (e) {}
             }
@@ -289,7 +333,7 @@
         async syncAll(localDocs = [], userId = 'admin') {
             if (this.isSyncing) return { updated: false, documents: localDocs };
 
-            if (!this.isConfigured() || !this.supabaseClient) {
+            if (!this.isConfigured()) {
                 return { updated: false, documents: localDocs, isLocalOnly: true };
             }
 
@@ -359,7 +403,9 @@
                 });
 
                 this.config.lastSyncTimestamp = new Date().toISOString();
-                this.saveConfig(this.config);
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(this.config));
+                } catch (e) {}
 
                 this.isSyncing = false;
                 return {
@@ -415,8 +461,6 @@
             return `-- ================================================================
 -- ROTALI FENCI - SUPABASE OKUL BELGELERİ TABLO VE RLS KURULUM KODU
 -- ================================================================
--- Supabase panelinizde (https://supabase.com) SQL Editor sekmesine yapıştırıp
--- yeşil "RUN" butonuna basınız.
 
 CREATE TABLE IF NOT EXISTS public.school_documents (
     id TEXT PRIMARY KEY,
@@ -436,13 +480,10 @@ CREATE TABLE IF NOT EXISTS public.school_documents (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
 );
 
--- Hızlı Sorgulama İndeksleri
 CREATE INDEX IF NOT EXISTS idx_school_docs_user ON public.school_documents(user_id);
 CREATE INDEX IF NOT EXISTS idx_school_docs_updated ON public.school_documents(updated_at DESC);
 
--- Okuma / Yazma İzni (Row Level Security)
 ALTER TABLE public.school_documents ENABLE ROW LEVEL SECURITY;
-
 DROP POLICY IF EXISTS "Public All Access" ON public.school_documents;
 CREATE POLICY "Public All Access" ON public.school_documents FOR ALL USING (true) WITH CHECK (true);
 `;
