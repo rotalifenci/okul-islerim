@@ -112,8 +112,8 @@ document.addEventListener('alpine:init', () => {
 
         // 📚 Ödevler & Ödev Planlama Durumu (Sınıf Seviyeleri, Takvim, Zaman Aralığı)
         selectedAssignmentGrade: 'Hepsi',
-        assignmentStartDate: '2026-09-01',
-        assignmentEndDate: '2026-10-31',
+        assignmentStartDate: '',
+        assignmentEndDate: '',
         assignmentSearchQuery: '',
         isNewAssignmentModalOpen: false,
         editingAssignmentId: null,
@@ -1241,12 +1241,18 @@ document.addEventListener('alpine:init', () => {
         },
 
         // ================= 📚 ÖDEVLER (ASSIGNMENTS & AJANDA) YÖNETİMİ =================
+        updateTargetClassesForGrade() {
+            const g = Number(this.newAssignment.grade) || 5;
+            const matching = (this.data.classes || []).filter(c => Number(c.grade) === g).map(c => c.id || c.name);
+            this.newAssignment.targetClasses = matching.length ? matching : (g === 5 ? ['5A', '5D'] : (g === 6 ? ['6G'] : (g === 7 ? ['7A', '7B'] : ['8A'])));
+        },
+
         openNewAssignmentModal(item = null) {
             if (item) {
                 this.editingAssignmentId = item.id;
                 this.newAssignment = {
                     grade: Number(item.grade) || 5,
-                    targetClasses: item.targetClasses ? [...item.targetClasses] : ['5A'],
+                    targetClasses: item.targetClasses ? [...item.targetClasses] : (item.grade === 5 ? ['5A', '5D'] : (item.grade === 6 ? ['6G'] : ['7A'])),
                     title: item.title || '',
                     description: item.description || '',
                     assignedDate: item.assignedDate || new Date().toISOString().slice(0, 10),
@@ -1256,7 +1262,7 @@ document.addEventListener('alpine:init', () => {
                 };
             } else {
                 this.editingAssignmentId = null;
-                const defaultGrade = this.selectedAssignmentGrade !== 'Hepsi' ? Number(this.selectedAssignmentGrade) : 5;
+                const defaultGrade = (this.selectedAssignmentGrade && this.selectedAssignmentGrade !== 'Hepsi') ? Number(this.selectedAssignmentGrade) : 5;
                 const defaultClasses = defaultGrade === 5 ? ['5A', '5D'] : (defaultGrade === 6 ? ['6G'] : (defaultGrade === 7 ? ['7A', '7B'] : ['8A']));
                 this.newAssignment = {
                     grade: defaultGrade,
@@ -1268,6 +1274,7 @@ document.addEventListener('alpine:init', () => {
                     status: 'Aktif',
                     unit: ''
                 };
+                this.updateTargetClassesForGrade();
             }
             this.isNewAssignmentModalOpen = true;
             this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
@@ -1285,27 +1292,38 @@ document.addEventListener('alpine:init', () => {
 
             if (!this.data.assignments) this.data.assignments = [];
 
+            const uid = this.currentUser ? this.currentUser.id : 'admin';
+            const gradeNum = Number(this.newAssignment.grade) || 5;
+            let targetClasses = this.newAssignment.targetClasses;
+            if (!targetClasses || !Array.isArray(targetClasses) || !targetClasses.length) {
+                const matching = (this.data.classes || []).filter(c => Number(c.grade) === gradeNum).map(c => c.id || c.name);
+                targetClasses = matching.length ? matching : [`${gradeNum}A`];
+            }
+
             if (this.editingAssignmentId) {
                 const idx = this.data.assignments.findIndex(a => a.id === this.editingAssignmentId);
                 if (idx !== -1) {
                     this.data.assignments[idx] = {
                         ...this.data.assignments[idx],
                         ...this.newAssignment,
-                        grade: Number(this.newAssignment.grade)
+                        grade: gradeNum,
+                        targetClasses: targetClasses
                     };
                     this.showToast("Ödev başarıyla güncellendi! 📝");
                 }
             } else {
-                const newId = 'hw_' + Date.now();
+                const newId = 'hw_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
                 this.data.assignments.unshift({
                     id: newId,
                     ...this.newAssignment,
-                    grade: Number(this.newAssignment.grade)
+                    grade: gradeNum,
+                    targetClasses: targetClasses
                 });
                 this.showToast("Yeni ödev takvime eklendi! 📚");
             }
 
-            window.StorageManager.saveData(this.data);
+            this.data.assignments = [...this.data.assignments];
+            window.StorageManager.saveData(this.data, uid);
             this.isNewAssignmentModalOpen = false;
             this.editingAssignmentId = null;
             this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
@@ -1313,9 +1331,12 @@ document.addEventListener('alpine:init', () => {
 
         deleteAssignment(id) {
             if (confirm("Bu ödev kaydını silmek istediğinize emin misiniz?")) {
+                const uid = this.currentUser ? this.currentUser.id : 'admin';
                 this.data.assignments = (this.data.assignments || []).filter(a => a.id !== id);
-                window.StorageManager.saveData(this.data);
+                this.data.assignments = [...this.data.assignments];
+                window.StorageManager.saveData(this.data, uid);
                 this.showToast("Ödev silindi.");
+                this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
             }
         },
 
@@ -1337,10 +1358,12 @@ document.addEventListener('alpine:init', () => {
                     grades: {}
                 };
                 this.data.homeworkDays.push(session);
-                window.StorageManager.saveData(this.data);
+                const uid = this.currentUser ? this.currentUser.id : 'admin';
+                window.StorageManager.saveData(this.data, uid);
             } else if (!session.title) {
                 session.title = this.currentHomeworkTitle;
-                window.StorageManager.saveData(this.data);
+                const uid = this.currentUser ? this.currentUser.id : 'admin';
+                window.StorageManager.saveData(this.data, uid);
             }
 
             this.setTab('students');
@@ -1351,21 +1374,41 @@ document.addEventListener('alpine:init', () => {
             let list = this.data.assignments || [];
             if (!Array.isArray(list)) return [];
 
-            // Sınıf seviyesi filtresi
-            if (this.selectedAssignmentGrade && this.selectedAssignmentGrade !== 'Hepsi') {
+            // 1. Sınıf / Şube Filtresi:
+            if (this.selectedAssignmentClass && this.selectedAssignmentClass !== 'Hepsi') {
+                const targetCls = this.selectedAssignmentClass.replace('/', '').toUpperCase();
+                list = list.filter(a => {
+                    if (a.targetClasses && Array.isArray(a.targetClasses)) {
+                        if (a.targetClasses.some(tc => (tc || '').replace('/', '').toUpperCase() === targetCls)) {
+                            return true;
+                        }
+                    }
+                    const matchGrade = targetCls.match(/^(\d+)/);
+                    if (matchGrade && Number(a.grade) === Number(matchGrade[1])) {
+                        return true;
+                    }
+                    return false;
+                });
+            } else if (this.selectedAssignmentGrade && this.selectedAssignmentGrade !== 'Hepsi') {
                 const g = Number(this.selectedAssignmentGrade);
                 list = list.filter(a => Number(a.grade) === g);
             }
 
-            // Zaman aralığı filtresi
+            // 2. Zaman Aralığı Filtresi:
             if (this.assignmentStartDate) {
-                list = list.filter(a => (a.dueDate || a.assignedDate) >= this.assignmentStartDate);
+                list = list.filter(a => {
+                    const d = a.dueDate || a.assignedDate;
+                    return !d || d >= this.assignmentStartDate;
+                });
             }
             if (this.assignmentEndDate) {
-                list = list.filter(a => (a.dueDate || a.assignedDate) <= this.assignmentEndDate);
+                list = list.filter(a => {
+                    const d = a.dueDate || a.assignedDate;
+                    return !d || d <= this.assignmentEndDate;
+                });
             }
 
-            // Arama filtresi
+            // 3. Arama Filtresi:
             if (this.assignmentSearchQuery && this.assignmentSearchQuery.trim()) {
                 const q = this.assignmentSearchQuery.trim().toLowerCase();
                 list = list.filter(a => 
@@ -1375,8 +1418,8 @@ document.addEventListener('alpine:init', () => {
                 );
             }
 
-            // Tarihe göre gün be gün sıralama (En yakın teslim tarihi en üstte)
-            return list.sort((a, b) => (a.dueDate || '').localeCompare(b.dueDate || ''));
+            // 4. Sıralama (En yakın teslim tarihi en üstte):
+            return list.sort((a, b) => (a.dueDate || a.assignedDate || '').localeCompare(b.dueDate || b.assignedDate || ''));
         },
 
         getAssignmentDateGroups() {

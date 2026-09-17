@@ -1737,35 +1737,13 @@
                                 🌟 Tüm Sınıflar
                             </button>
 
-                            <!-- 5/A -->
-                            <button @click="selectedAssignmentClass = '5A'" :class="selectedAssignmentClass === '5A' ? 'bg-red-600 text-white font-black shadow-md border-2 border-red-700 ring-2 ring-red-300' : 'bg-white text-black font-black hover:bg-blue-50 border border-slate-300 shadow-sm'" class="px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-blue-500"></span>
-                                <span>5/A Sınıfı</span>
-                            </button>
-
-                            <!-- 5/D -->
-                            <button @click="selectedAssignmentClass = '5D'" :class="selectedAssignmentClass === '5D' ? 'bg-red-600 text-white font-black shadow-md border-2 border-red-700 ring-2 ring-red-300' : 'bg-white text-black font-black hover:bg-blue-50 border border-slate-300 shadow-sm'" class="px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-blue-500"></span>
-                                <span>5/D Sınıfı</span>
-                            </button>
-
-                            <!-- 6/G -->
-                            <button @click="selectedAssignmentClass = '6G'" :class="selectedAssignmentClass === '6G' ? 'bg-red-600 text-white font-black shadow-md border-2 border-red-700 ring-2 ring-red-300' : 'bg-white text-black font-black hover:bg-emerald-50 border border-slate-300 shadow-sm'" class="px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                                <span>6/G Sınıfı</span>
-                            </button>
-
-                            <!-- 7/A -->
-                            <button @click="selectedAssignmentClass = '7A'" :class="selectedAssignmentClass === '7A' ? 'bg-red-600 text-white font-black shadow-md border-2 border-red-700 ring-2 ring-red-300' : 'bg-white text-black font-black hover:bg-purple-50 border border-slate-300 shadow-sm'" class="px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-purple-500"></span>
-                                <span>7/A Sınıfı</span>
-                            </button>
-
-                            <!-- 7/B -->
-                            <button @click="selectedAssignmentClass = '7B'" :class="selectedAssignmentClass === '7B' ? 'bg-red-600 text-white font-black shadow-md border-2 border-red-700 ring-2 ring-red-300' : 'bg-white text-black font-black hover:bg-purple-50 border border-slate-300 shadow-sm'" class="px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-purple-500"></span>
-                                <span>7/B Sınıfı</span>
-                            </button>
+                            <!-- Dinamik / Varsayılan Sınıf Butonları -->
+                            <template x-for="cls in (data.classes || [])" :key="cls.id">
+                                <button @click="selectedAssignmentClass = cls.id; selectedAssignmentGrade = 'Hepsi'" :class="selectedAssignmentClass === cls.id ? 'bg-red-600 text-white font-black shadow-md border-2 border-red-700 ring-2 ring-red-300' : 'bg-white text-black font-black hover:bg-slate-100 border border-slate-300 shadow-sm'" class="px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-1.5">
+                                    <span class="w-2 h-2 rounded-full" :class="Number(cls.grade) === 5 ? 'bg-blue-500' : (Number(cls.grade) === 6 ? 'bg-emerald-500' : (Number(cls.grade) === 7 ? 'bg-purple-500' : 'bg-amber-500'))"></span>
+                                    <span x-text="cls.name + ' Sınıfı'"></span>
+                                </button>
+                            </template>
                         </div>
 
                         <!-- Arama Kutusu -->
@@ -1788,16 +1766,16 @@
                         </div>
 
                         <div class="sm:col-span-6 flex flex-wrap items-end gap-2 pt-4 sm:pt-0">
-                            <button @click="assignmentStartDate = ''; assignmentEndDate = ''" class="px-3 py-2 rounded-xl bg-white hover:bg-slate-200 text-slate-800 font-black text-xs border border-slate-300 shadow-sm transition">
+                            <button @click="assignmentStartDate = ''; assignmentEndDate = ''" :class="!assignmentStartDate && !assignmentEndDate ? 'bg-red-600 text-white font-black border-red-700 shadow-md' : 'bg-white hover:bg-slate-200 text-slate-800 font-black border-slate-300 shadow-sm'" class="px-3 py-2 rounded-xl text-xs border transition">
                                 🔄 Tüm Tarihler
                             </button>
-                            <button @click="assignmentStartDate = '2026-09-07'; assignmentEndDate = '2026-09-13'" class="px-3 py-2 rounded-xl bg-white hover:bg-red-50 text-red-700 font-black text-xs border border-red-300 shadow-sm transition">
+                            <button @click="assignmentStartDate = '2026-09-07'; assignmentEndDate = '2026-09-13'" :class="assignmentStartDate === '2026-09-07' && assignmentEndDate === '2026-09-13' ? 'bg-red-600 text-white font-black border-red-700 shadow-md' : 'bg-white hover:bg-red-50 text-red-700 font-black border-red-300 shadow-sm'" class="px-3 py-2 rounded-xl text-xs border transition">
                                 📌 Bu Hafta
                             </button>
-                            <button @click="assignmentStartDate = '2026-09-14'; assignmentEndDate = '2026-09-20'" class="px-3 py-2 rounded-xl bg-white hover:bg-red-50 text-red-700 font-black text-xs border border-red-300 shadow-sm transition">
+                            <button @click="assignmentStartDate = '2026-09-14'; assignmentEndDate = '2026-09-20'" :class="assignmentStartDate === '2026-09-14' && assignmentEndDate === '2026-09-20' ? 'bg-red-600 text-white font-black border-red-700 shadow-md' : 'bg-white hover:bg-red-50 text-red-700 font-black border-red-300 shadow-sm'" class="px-3 py-2 rounded-xl text-xs border transition">
                                 📌 Gelecek Hafta
                             </button>
-                            <button @click="assignmentStartDate = '2026-09-01'; assignmentEndDate = '2026-09-30'" class="px-3 py-2 rounded-xl bg-white hover:bg-red-50 text-red-700 font-black text-xs border border-red-300 shadow-sm transition">
+                            <button @click="assignmentStartDate = '2026-09-01'; assignmentEndDate = '2026-09-30'" :class="assignmentStartDate === '2026-09-01' && assignmentEndDate === '2026-09-30' ? 'bg-red-600 text-white font-black border-red-700 shadow-md' : 'bg-white hover:bg-red-50 text-red-700 font-black border-red-300 shadow-sm'" class="px-3 py-2 rounded-xl text-xs border transition">
                                 📌 Bu Ay (Eylül)
                             </button>
                         </div>
@@ -3301,7 +3279,7 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="text-xs font-black text-black block mb-1">Sınıf Seviyesi:</label>
-                        <select x-model="newAssignment.grade" class="w-full px-3.5 py-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-black text-black shadow-sm focus:outline-none focus:border-red-500 cursor-pointer">
+                        <select x-model="newAssignment.grade" @change="updateTargetClassesForGrade()" class="w-full px-3.5 py-2.5 bg-white border-2 border-slate-300 rounded-xl text-xs font-black text-black shadow-sm focus:outline-none focus:border-red-500 cursor-pointer">
                             <option value="5">5. Sınıf</option>
                             <option value="6">6. Sınıf</option>
                             <option value="7">7. Sınıf</option>
