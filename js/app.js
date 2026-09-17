@@ -221,6 +221,22 @@ document.addEventListener('alpine:init', () => {
             type: 'DRIVE',
             notes: ''
         },
+        // ☁️ Bulut Senkronizasyon Durumu (Supabase & Cloud Sync)
+        cloudSyncStatus: 'idle', // 'idle', 'syncing', 'synced', 'error'
+        lastCloudSyncTime: '',
+        isCloudSettingsModalOpen: false,
+        isTestingCloud: false,
+        isManualSyncing: false,
+        cloudConfig: {
+            enabled: true,
+            provider: 'supabase',
+            supabaseUrl: '',
+            supabaseKey: '',
+            tableName: 'school_documents',
+            workspaceKey: 'rotali-fenci-okul-islerim',
+            autoSyncInterval: 15
+        },
+        cloudTestResult: { tested: false, success: false, message: '' },
         // Güvenlik & 4 Kullanıcılı Giriş Sistemi (1 Yönetici + 3 Öğretmen)
         users: window.AuthUsers || [],
         currentUser: null,
@@ -348,6 +364,7 @@ document.addEventListener('alpine:init', () => {
                 this.isAuthenticated = false;
             }
             this.initBugReports();
+            this.initCloudSync();
 
             // Menü başlıklarını garantiye al
             if (this.data && this.data.navSections && Array.isArray(this.data.navSections)) {
@@ -729,6 +746,11 @@ document.addEventListener('alpine:init', () => {
             // Ders Programı sekmesi açıldığında o anki günü otomatik algıla ve seç
             if (tab === 'calendar-tasks') {
                 this.selectedScheduleDay = this.getCurrentDayName();
+            }
+
+            // Okul Çıktıları sekmesi açıldığında buluttaki son belgeleri arka planda anlık çek
+            if (tab === 'school-documents') {
+                this.triggerManualCloudSync(true);
             }
 
             if (tab === 'account' || tab === 'settings') {
@@ -3559,14 +3581,24 @@ else {
                 extension: this.newDocLinkForm.type || 'DRIVE',
                 size: 'Bulut Bağlantısı ☁️',
                 uploadDate: new Date().toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
-                notes: (this.newDocLinkForm.notes || '').trim()
+                notes: (this.newDocLinkForm.notes || '').trim(),
+                _isCloudSynced: false
             };
 
             this.data.schoolDocuments.unshift(newDoc);
             const uid = this.currentUser ? this.currentUser.id : 'admin';
             window.StorageManager.saveData(this.data, uid);
+
+            // Anında Buluta Gönder
+            if (window.CloudSyncManager) {
+                window.CloudSyncManager.uploadDocToCloud(newDoc, uid).then(() => {
+                    this.formatLastCloudSyncTime();
+                    this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+                });
+            }
+
             this.isAddDocLinkModalOpen = false;
-            this.showToast('Google Drive / Bulut bağlantısı arşive eklendi! ☁️ ✨');
+            this.showToast('Google Drive / Bulut bağlantısı eklendi ve eşitlendi! ☁️ ✨');
             this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
         },
 
@@ -3597,6 +3629,7 @@ else {
             
             let uploadedCount = 0;
             const total = files.length;
+            const newlyAdded = [];
             
             Array.from(files).forEach(file => {
                 // Tarayıcı hafızasını korumak için 3MB üzeri dosyalarda uyarı ver
@@ -3617,17 +3650,32 @@ else {
                         isCloudLink: false,
                         category: this.docUploadCategory || 'Genel Evrak',
                         uploadDate: new Date().toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
-                        dataUrl: e.target.result
+                        dataUrl: e.target.result,
+                        _isCloudSynced: false
                     };
                     
                     this.data.schoolDocuments.unshift(newDoc);
+                    newlyAdded.push(newDoc);
                     uploadedCount++;
                     
                     if (uploadedCount === total) {
                         this.isDocUploading = false;
                         const uid = this.currentUser ? this.currentUser.id : 'admin';
                         window.StorageManager.saveData(this.data, uid);
-                        this.showToast(`${total} adet dosya başarıyla arşivlendi! 📄 ✨`);
+
+                        // Anında Buluta Gönder ve Eşitle
+                        if (window.CloudSyncManager) {
+                            window.CloudSyncManager.syncAll(this.data.schoolDocuments, uid).then((res) => {
+                                if (res && res.documents) {
+                                    this.data.schoolDocuments = res.documents;
+                                    window.StorageManager.saveData(this.data, uid);
+                                }
+                                this.formatLastCloudSyncTime();
+                                this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+                            });
+                        }
+
+                        this.showToast(`${total} adet dosya arşivlendi ve buluta eşitlendi! 📄 ☁️ ✨`);
                         this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
                     }
                 };
@@ -3831,8 +3879,172 @@ else {
             this.data.schoolDocuments = this.data.schoolDocuments.filter(d => d.id !== docId);
             const uid = this.currentUser ? this.currentUser.id : 'admin';
             window.StorageManager.saveData(this.data, uid);
+
+            // Buluttan da Sil
+            if (window.CloudSyncManager) {
+                window.CloudSyncManager.deleteDocFromCloud(docId, uid);
+            }
+
             this.showToast('Belge arşivden silindi. 🗑️');
             this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+
+        // ================= ☁️ BULUT & SUPABASE SENKRONİZASYON METODLARI =================
+        initCloudSync() {
+            if (!window.CloudSyncManager) return;
+            this.cloudConfig = window.CloudSyncManager.loadConfig();
+            this.formatLastCloudSyncTime();
+
+            window.CloudSyncManager.init((event, data) => {
+                if (event === 'sync_start') {
+                    this.cloudSyncStatus = 'syncing';
+                } else if (event === 'sync_complete') {
+                    this.cloudSyncStatus = 'synced';
+                    this.formatLastCloudSyncTime();
+                    if (Array.isArray(data)) {
+                        this.data.schoolDocuments = data;
+                        const uid = this.currentUser ? this.currentUser.id : 'admin';
+                        window.StorageManager.saveData(this.data, uid);
+                        this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+                    }
+                } else if (event === 'sync_idle') {
+                    this.cloudSyncStatus = 'idle';
+                    this.formatLastCloudSyncTime();
+                } else if (event === 'sync_error') {
+                    this.cloudSyncStatus = 'error';
+                }
+            });
+
+            // Başlangıçta 1 saniye sonra arka planda buluttan son verileri çek
+            setTimeout(() => {
+                this.triggerManualCloudSync(true);
+            }, 1000);
+        },
+
+        formatLastCloudSyncTime() {
+            if (window.CloudSyncManager && window.CloudSyncManager.config && window.CloudSyncManager.config.lastSyncTimestamp) {
+                const d = new Date(window.CloudSyncManager.config.lastSyncTimestamp);
+                this.lastCloudSyncTime = d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            }
+        },
+
+        async triggerManualCloudSync(isSilent = false) {
+            if (!window.CloudSyncManager) return;
+            this.isManualSyncing = true;
+            this.cloudSyncStatus = 'syncing';
+            const uid = this.currentUser ? this.currentUser.id : 'admin';
+
+            try {
+                const result = await window.CloudSyncManager.syncAll(this.data.schoolDocuments || [], uid);
+                if (result && result.documents) {
+                    this.data.schoolDocuments = result.documents;
+                    window.StorageManager.saveData(this.data, uid);
+                }
+                this.cloudSyncStatus = 'synced';
+                this.formatLastCloudSyncTime();
+                if (!isSilent) {
+                    this.showToast('Bulut senkronizasyonu tamamlandı! ☁️ 🟢');
+                }
+            } catch (err) {
+                this.cloudSyncStatus = 'error';
+                if (!isSilent) {
+                    this.showToast('Senkronizasyon hatası: ' + (err.message || 'Buluta ulaşılamadı'));
+                }
+            } finally {
+                this.isManualSyncing = false;
+                this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+            }
+        },
+
+        openCloudSettingsModal() {
+            if (window.CloudSyncManager) {
+                this.cloudConfig = window.CloudSyncManager.loadConfig();
+            }
+            this.cloudTestResult = { tested: false, success: false, message: '' };
+            this.isCloudSettingsModalOpen = true;
+            this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+        },
+
+        saveCloudSettings() {
+            if (window.CloudSyncManager) {
+                window.CloudSyncManager.saveConfig(this.cloudConfig);
+            }
+            this.showToast('Bulut ayarları kaydedildi! ☁️ ✨');
+            this.triggerManualCloudSync(false);
+            this.isCloudSettingsModalOpen = false;
+        },
+
+        async testCloudConnection() {
+            if (!window.CloudSyncManager) return;
+            this.isTestingCloud = true;
+            this.cloudTestResult = { tested: false, success: false, message: '' };
+
+            try {
+                const res = await window.CloudSyncManager.testConnection(this.cloudConfig);
+                this.cloudTestResult = {
+                    tested: true,
+                    success: res.success,
+                    message: res.message
+                };
+            } catch (e) {
+                this.cloudTestResult = {
+                    tested: true,
+                    success: false,
+                    message: 'Hata: ' + e.message
+                };
+            } finally {
+                this.isTestingCloud = false;
+                this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+            }
+        },
+
+        copySupabaseSQL() {
+            if (!window.CloudSyncManager) return;
+            const sql = window.CloudSyncManager.getSQLSchema();
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(sql).then(() => {
+                    this.showToast('Supabase SQL kodu panoya kopyalandı! 📋');
+                }).catch(() => {
+                    prompt('Supabase SQL Kodları:', sql);
+                });
+            } else {
+                prompt('Supabase SQL Kodları:', sql);
+            }
+        },
+
+        async pullAllFromCloudAction() {
+            const uid = this.currentUser ? this.currentUser.id : 'admin';
+            if (!window.CloudSyncManager) return;
+            this.showToast('Buluttaki belgeler indiriliyor...');
+            try {
+                const docs = await window.CloudSyncManager.pullFromCloud(uid);
+                if (docs && Array.isArray(docs)) {
+                    this.data.schoolDocuments = docs;
+                    window.StorageManager.saveData(this.data, uid);
+                    this.showToast(`Buluttan ${docs.length} adet belge yüklendi! ☁️ ✨`);
+                    this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+                } else {
+                    this.showToast('Bulutta henüz kayıtlı belge bulunamadı.');
+                }
+            } catch (e) {
+                alert('Buluttan çekme hatası: ' + e.message);
+            }
+        },
+
+        async pushAllToCloudAction() {
+            const uid = this.currentUser ? this.currentUser.id : 'admin';
+            if (!window.CloudSyncManager) return;
+            this.showToast('Belgeler buluta yükleniyor...');
+            try {
+                const docs = this.data.schoolDocuments || [];
+                await window.CloudSyncManager.pushAllToRelay(docs, uid);
+                for (const d of docs) {
+                    await window.CloudSyncManager.uploadDocToCloud(d, uid);
+                }
+                this.showToast(`${docs.length} adet belge buluta başarıyla yüklendi! ☁️ ✨`);
+            } catch (e) {
+                alert('Buluta yükleme hatası: ' + e.message);
+            }
         },
 
         exportBackup() {
